@@ -1,0 +1,31 @@
+# dependencies
+node_modules/
+
+# Next.js build output
+.next/
+out/
+next-env.d.ts
+
+# env (keep .env.example committed)
+.env
+.env*.local
+
+# tests
+coverage/
+
+# TypeScript
+*.tsbuildinfo
+
+# logs
+npm-debug.log*
+*.log
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+# Claude Code local settings
+.claude/settings.local.json

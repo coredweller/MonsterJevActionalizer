@@ -1,0 +1,71 @@
+{
+  "CharacterName": "Zarielith, the Infernal Contract Keeper",
+  "Level": 10,
+  "Race": "Archfiend",
+  "Class": "Infernal Enforcer",
+  "Alignment": "Lawful Evil",
+  "HP": "165 (22d8 + 66)",
+  "AC": 18,
+  "Speed": "40 ft., fly 60 ft.",
+  "AbilityScores": {
+    "Strength": { "Score": 18, "Modifier": "+4" },
+    "Dexterity": { "Score": 16, "Modifier": "+3" },
+    "Constitution": { "Score": 17, "Modifier": "+3" },
+    "Intelligence": { "Score": 14, "Modifier": "+2" },
+    "Wisdom": { "Score": 16, "Modifier": "+3" },
+    "Charisma": { "Score": 20, "Modifier": "+5" }
+  },
+  "SavingThrows": {
+    "Constitution": "+8",
+    "Charisma": "+10"
+  },
+  "Skills": {
+    "Deception": "+10",
+    "Intimidation": "+10",
+    "Persuasion": "+10"
+  },
+  "DamageResistances": "",
+  "DamageImmunities": "",
+  "ConditionImmunities": "",
+  "Senses": "Darkvision 120 ft., Passive Perception 13",
+  "Languages": "Infernal, Common, Abyssal, telepathy 120 ft.",
+  "ChallengeRating": "10",
+  "ProficiencyBonus": "+4",
+  "SpecialTraits": {
+    "Magic Resistance": "Zarielith has advantage on saving throws against spells and other magical effects.",
+    "Soul Binding Scepter": "Any creature within 30 ft. that has broken an infernal pact becomes restrained and must succeed on a DC 18 Charisma saving throw or have their soul bound to Zarielith's scepter, unable to leave the Nine Hells without her permission.",
+    "Aura of Despair": "Creatures within 10 ft. of Zarielith must make a DC 18 Wisdom saving throw at the start of each of their turns or be frightened until the start of their next turn."
+  },
+  "Actions": {
+    "Multiattack": "Zarielith makes two Scepter of Binding attacks.",
+    "Scepter of Binding": "Melee Weapon Attack: +10 to hit, reach 5 ft., one target. Hit: 21 (3d10 + 5) bludgeoning damage plus 10 (3d6) necrotic damage. If the target is frightened, it takes an additional 10 necrotic damage.",
+    "Hellish Rebuke (Recharge 5-6)": "Zarielith can force a creature within 60 ft. that has attacked her to make a DC 18 Dexterity saving throw, taking 28 (8d6) fire damage on a failed save, or half as much on a successful one."
+  },
+  "BonusActions": {
+  },
+  "Reactions": {
+  },
+  "LegendaryTraits": {
+  },
+  "LegendaryActions": {
+    "Legendary Action Uses": "3",
+    "Options": {
+      "Detect": "Zarielith makes a Wisdom (Perception) check.",
+      "Attack": "Zarielith makes one attack with her Scepter of Binding.",
+      "Infernal Presence (Costs 2 Actions)": "All creatures within 30 ft. of Zarielith must succeed on a DC 18 Charisma saving throw or become frightened of her for 1 minute. A creature can repeat the saving throw at the end of each of its turns, ending the effect on itself on a success."
+    }
+  },
+  "MythicTrait": {
+    "Name": "",
+    "Description": ""
+  },
+  "LairActions": {
+  },
+  "RegionalEffects": [],
+  "Equipment": {
+    "Armor": "Infernal Plate Armor",
+    "Weapons": "Cursed Scepter of Binding",
+    "Other": "Ring of Soul Chains (stores bound souls, granting advantage on Charisma checks for each bound soul)"
+  },
+  "Notes": "Zarielith is a relentless enforcer of infernal pacts, ensuring that no contract made with devils is broken without consequence. Her cursed scepter binds the souls of any who betray their pacts, adding them to her infernal army in the Nine Hells."
+}

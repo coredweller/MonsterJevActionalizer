@@ -1,0 +1,61 @@
+{
+  "CharacterName": "",
+  "Level": 0,
+  "Race": "",
+  "Class": "",
+  "Alignment": "",
+  "HP": "",
+  "AC": 0,
+  "Speed": "",
+  "AbilityScores": {
+    "Strength": { "Score": 0, "Modifier": "+0" },
+    "Dexterity": { "Score": 0, "Modifier": "+0" },
+    "Constitution": { "Score": 0, "Modifier": "+0" },
+    "Intelligence": { "Score": 0, "Modifier": "+0" },
+    "Wisdom": { "Score": 0, "Modifier": "+0" },
+    "Charisma": { "Score": 0, "Modifier": "+0" }
+  },
+  "SavingThrows": {
+  },
+  "Skills": {
+  },
+  "DamageResistances": "",
+  "DamageImmunities": "",
+  "ConditionImmunities": "",
+  "Senses": "",
+  "Languages": "",
+  "ChallengeRating": "",
+  "ProficiencyBonus": "",
+  "SpecialTraits": {
+  },
+  "Actions": {
+  },
+  "BonusActions": {
+  },
+  "Reactions": {
+  },
+  "LegendaryTraits": {
+    "Legendary Resistance (3/Day)": ""
+  },
+  "LegendaryActions": {
+    "Legendary Action Uses": "3",
+    "Options": {
+      "Option1": "",
+      "Option2": "",
+      "Option3": ""
+    }
+  },
+  "MythicTrait": {
+    "Name": "",
+    "Description": ""
+  },
+  "LairActions": {
+  },
+  "RegionalEffects": [],
+  "Equipment": {
+    "Armor": "",
+    "Weapons": "",
+    "Other": ""
+  },
+  "Notes": ""
+}

@@ -1,0 +1,45 @@
+{
+  "CharacterName": "Vasira Flameheart",
+  "Level": 6,
+  "Race": "Tiefling",
+  "Class": "Enforcer",
+  "Alignment": "Lawful Evil",
+  "HP": "112 (15d8 + 30)",
+  "AC": 16,
+  "Speed": "30 ft.",
+  "AbilityScores": {
+    "Strength": { "Score": 18, "Modifier": "+4" },
+    "Dexterity": { "Score": 14, "Modifier": "+2" },
+    "Constitution": { "Score": 15, "Modifier": "+2" },
+    "Intelligence": { "Score": 12, "Modifier": "+1" },
+    "Wisdom": { "Score": 11, "Modifier": "+0" },
+    "Charisma": { "Score": 16, "Modifier": "+3" }
+  },
+  "SavingThrows": {
+    "Strength": "+7",
+    "Charisma": "+6"
+  },
+  "Skills": {
+    "Intimidation": "+6",
+    "Perception": "+3",
+    "Athletics": "+7"
+  },
+  "Senses": "Darkvision 60 ft., Passive Perception 13",
+  "Languages": "Common, Infernal",
+  "SpecialTraits": {
+    "Hellfire Weapons": "Vasira’s melee attacks are infused with infernal flames. When she hits with a melee attack, she deals an extra 5 (1d10) fire damage.",
+    "Fiendish Resilience": "Vasira has resistance to fire damage.",
+    "Aura of Dread": "Creatures within 10 ft. of Vasira must make a DC 13 Wisdom saving throw or become frightened until the end of their next turn. A creature that succeeds on this saving throw is immune to this effect for 24 hours."
+  },
+  "Actions": {
+    "Multiattack": "Vasira makes two attacks with her Hellfire Longsword.",
+    "Hellfire Longsword": "Melee Weapon Attack: +7 to hit, reach 5 ft., one target. Hit: 11 (1d10 + 4) slashing damage plus 5 (1d10) fire damage.",
+    "Infernal Rebuke (Recharge 5-6)": "As a reaction, when Vasira is hit by a melee attack, the attacker takes 13 (3d8) fire damage unless they succeed on a DC 14 Dexterity saving throw."
+  },
+  "Equipment": {
+    "Armor": "Studded Leather Armor",
+    "Weapons": "Hellfire Longsword",
+    "Other": "Amulet of Infernal Chains (grants +2 to Charisma saving throws)"
+  },
+  "Notes": "Vasira Flameheart is a feared enforcer for infernal pacts, using her hellfire-infused weapons to carry out the will of her infernal masters. With an aura that inspires dread and resilience to fire, she is especially dangerous in close combat, often intimidating foes before striking with fiery attacks."
+}

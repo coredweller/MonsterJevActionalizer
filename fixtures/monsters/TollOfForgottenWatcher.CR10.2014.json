@@ -1,0 +1,46 @@
+{
+  "CharacterName": "Toll of the Forgotten Watcher",
+  "Level": 10,
+  "Race": "Apparition",
+  "Class": "Oathkeeper Spirit",
+  "Alignment": "Lawful Neutral",
+  "HP": "168 (16d10 + 80)",
+  "AC": 18,
+  "Speed": "0 ft., fly 40 ft. (hover)",
+  "AbilityScores": {
+    "Strength": { "Score": 6, "Modifier": "-2" },
+    "Dexterity": { "Score": 16, "Modifier": "+3" },
+    "Constitution": { "Score": 20, "Modifier": "+5" },
+    "Intelligence": { "Score": 17, "Modifier": "+3" },
+    "Wisdom": { "Score": 18, "Modifier": "+4" },
+    "Charisma": { "Score": 21, "Modifier": "+5" }
+  },
+  "SavingThrows": {
+    "Wisdom": "+9",
+    "Charisma": "+10",
+    "Constitution": "+10"
+  },
+  "Skills": {
+    "Insight": "+9",
+    "Religion": "+8",
+    "Perception": "+9"
+  },
+  "Senses": "Truesight 120 ft., Passive Perception 19",
+  "Languages": "All languages known in life, telepathy 120 ft.",
+  "SpecialTraits": {
+    "Ethereal Passage": "The Toll exists partially in the Ethereal Plane and can move through objects and creatures as if they were difficult terrain.",
+    "Oathbound Memory": "The Toll has perfect recall of every vow ever sworn within a 100-mile radius. Breaking one within this zone may summon it.",
+    "Soul Forfeit (1/day)": "If a creature fails three saving throws against the Toll’s Judgment, it is marked. If the Toll is destroyed, that creature's soul is drawn into the Ethereal and lost unless restored by Wish."
+  },
+  "Actions": {
+    "Multiattack": "The Toll makes two attacks: one with Judgment and one with Echo of Vows.",
+    "Judgment": "Melee Spell Attack: +10 to hit, reach 5 ft., one target. Hit: 27 (6d6 + 5) necrotic damage, and the target must succeed on a DC 17 Wisdom saving throw or be frightened for 1 minute.",
+    "Echo of Vows": "Ranged Spell Attack: +10 to hit, range 60 ft., one target. Hit: 21 (4d8 + 3) psychic damage. If the target has broken an oath or contract in their past, they must succeed on a DC 17 Charisma saving throw or be paralyzed until the end of their next turn."
+  },
+  "Equipment": {
+    "Armor": "",
+    "Weapons": "",
+    "Other": ""
+  },
+  "Notes": "The Toll of the Forgotten Watcher manifests when ancient promises are broken, appearing in silent judgment. Often mistaken for a vengeful spirit, it exists instead to weigh the merit of intent, memory, and honor. Those who swear falsely, even by accident, may hear its bell ring just before it descends from the void."
+}
