@@ -36,20 +36,28 @@ Next.js (App Router), TypeScript, npm, Tailwind and hand-rolled components. The 
 ```
 app/
   page.tsx                  – layout: tracker sidebar | monster + tracker | situation form | recommendation
+  useTrackers.ts            – the only localStorage access (try/catch, empty default)
   api/decide/route.ts       – server: build request → call Jev → interpret → Recommendation
 lib/jev/
-  types.ts                  – copy of prototype/src/types.ts lines 10–76 (wire types, MAX_CHOICE_OPTIONS, OPTION_NONE)
+  types.ts                  – copy of prototype/src/types.ts lines 10–76 (wire types, MAX_CHOICE_OPTIONS, OPTION_NONE);
+                              response types inferred from zod
   client.ts                 – port of prototype/server.ts proxy(): Bearer auth, 30s timeout, one retry on 408/429/5xx/529 (as api.py)
 lib/monster/
   schema.ts                 – zod schemas copied from DandDTemplateParserTypeScript/src/routes/monsters.ts (Modifier optional)
+  types.ts                  – zod schemas + inferred types for extracted abilities and the reviewed monster
   normalize.ts              – template-drift detection + auto-fixes → { fixed, changes[], errors[] } (pure, shared with the script)
   extract.ts                – text extraction, 2014 + 2024 wording (see "Reading the statblock")
   spells.ts                 – SRD spell table lookup
   options.ts                – legal candidates for this turn
 lib/encounter/
-  state.ts                  – Tracker, EncounterState, PartyRoster, TurnLog + reducers
-  storage.ts                – localStorage persistence for trackers (all reads/writes wrapped in try/catch)
+  types.ts                  – zod schemas + inferred types for Tracker, EncounterState, Situation, TurnLog…
+  state.ts                  – reducers: create, duplicate, startTurn, apply, recordResult, manual edits
+  storage.ts                – pure serialize/parse of saved trackers (zod-validated, empty default on bad data);
+                              the localStorage calls themselves live in app/useTrackers.ts, wrapped in try/catch
+  reminders.ts              – reminder cards: legendary actions left, reactions, lair actions
 lib/decide/
+  constants.ts              – confidence and consistency thresholds as named constants
+  clusters.ts               – groups players from "clustered with"
   questions.ts              – builds the question set (noul()/choice() helpers, as in prototype/src/questions.ts)
   interpret.ts              – probabilities → Recommendation, consistency rules, confidence buckets
   explain.ts                – template explanation text
@@ -57,11 +65,14 @@ data/
   srd-spells.json           – SRD spells: level, casting time, range, area, save/attack, damage/effect, concentration
 scripts/
   check-monsters.ts         – `npm run check:monsters [--fix]`: runs normalize.ts over fixtures/monsters/*.json
+  build-srd-spells.ts       – generates data/srd-spells.json from the SRD 5.1 (CC BY 4.0)
+  record-jev.ts             – `npm run record:jev`: records one live Jev response per scenario into fixtures/jev/
 components/                 – TrackerSidebar, MonsterLoader, FixScreen, ReviewScreen, EncounterTracker, PartyRoster,
                               SituationForm, PlayerRow, RecommendationCard, ReminderCards, TurnLog
 fixtures/
   monsters/                 – real monster JSONs supplied by the DM
-  jev/                      – recorded Jev responses for interpret tests
+  jev/                      – recorded Jev responses for interpret tests; scenarios.ts defines the recorded scenarios;
+                              derived/ holds edited copies (with `derivedFrom`) that exercise each consistency rule
 ```
 
 ## Monster input
@@ -139,7 +150,9 @@ A tracker belongs to one monster. It holds:
 - the turn log
 - its settings
 
-**Duplicate** creates a copy ("Goblin 2") with the same statblock and roster and fresh state.
+**Duplicate** creates a copy ("Goblin 2") with the same statblock, roster and settings, and fresh state, situation and log.
+
+**Delete** removes a tracker, after the DM confirms.
 
 **Encounter state:**
 - current and max HP
@@ -181,7 +194,9 @@ Each zone has a default distance, used only when no exact distance is given: eng
 
 ## Legal options (`options.ts`, deterministic)
 - **Hard blocks (Q11):**
-  - If the monster is incapacitated, stunned, paralyzed, petrified or unconscious, it gets no action and no bonus action. The recommendation says so.
+  - If the monster is incapacitated, stunned, paralyzed, petrified or unconscious, it gets no action and no bonus action. The recommendation says so, and Jev isn't called that turn.
+    - Stunned, paralyzed, petrified or unconscious: movement is "hold" only.
+    - Incapacitated alone: the monster can still move, so the DM picks the movement by hand.
   - If its speed is 0 (grappled or restrained), it gets no movement intents except "hold".
   - All other conditions go to Jev as context only.
 - **Actions:** the monster's actions (including Multiattack), limited to what's still available: recharge abilities must be charged, X/day abilities must have uses left, and slot spells need a slot at or above their level. At-will and X/day spells come from the Spellcasting entry. Dash, Dodge, Disengage, Hide and Help are always offered.
@@ -285,7 +300,7 @@ Copy these from `F:\Projects\AI\ClaudeCore\.claude\` into this repo's `.claude/`
    - a caster that's concentrating, casting a leveled spell (check the concentration warning and the slot level)
 
    In each, check that the recommendations make sense, that an override followed by Apply updates the tracker, and that the log feeds the next turn.
-3. **Cost and speed:** log token usage and latency from each response, and confirm there's exactly one Jev request per turn.
+3. **Cost and speed:** log token usage and latency from each response, and confirm there's exactly one Jev request per recommended turn, and none when the monster is hard-blocked.
 
 ## Follow-ups
 - Load monsters from the DandDTemplateParser database. This needs a `GET /monsters/:id/json` endpoint added there.

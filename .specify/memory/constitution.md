@@ -1,5 +1,15 @@
 <!--
-Sync Impact Report
+Sync Impact Report (1.0.1, 2026-10-03)
+- Version change: 1.0.0 → 1.0.1 (PATCH: clarifications, no principle redefined)
+- Principle I: "exactly one batched Jev request" → "at most one; none when the monster is hard-blocked"
+  (a turn where code has already ruled out every action has nothing for Jev to pick).
+- Principle V: recorded fixtures may include derived copies (a recorded response with probabilities
+  edited and a `derivedFrom` note) so every consistency rule can be exercised without live calls.
+- Templates: no changes needed (plan/spec/tasks templates do not restate these rules).
+- Propagated to: CLAUDE.md (Gotchas), docs/PLAN.md (Legal options, Verification),
+  specs/001-monster-turn-advisor (spec, plan, contracts, tasks).
+
+Sync Impact Report (1.0.0)
 - Version change: (unratified template) → 1.0.0
 - Principles defined (all new, replacing template placeholders):
   I. Code Decides Legality, Jev Only Picks
@@ -34,7 +44,8 @@ questions. Therefore:
   hard-blocking conditions, range) before asking Jev anything.
 - Jev MUST only be asked to choose among options code has already produced. Jev output MUST
   never introduce an option, target or value that code did not offer.
-- Each turn MUST make exactly one batched Jev request.
+- Each turn MUST make at most one batched Jev request, and none when the monster is hard-blocked
+  (no legal action or bonus action). Never more than one question set per turn.
 - Explanations MUST be templates filled with Jev's probabilities, not generated prose.
 - No second LLM is added in v1. Adding one requires a constitution amendment.
 
@@ -85,7 +96,8 @@ fixes keep the DM in control of their own content.
   `fetch` and `localStorage`, so it can be unit-tested directly.
 - Each such module MUST ship with Vitest tests covering the cases listed in the plan's
   Verification section. Interpretation tests MUST use recorded Jev responses from `fixtures/jev/`,
-  not live calls.
+  not live calls. A derived fixture (a copy of a recorded response with probabilities edited and a
+  `derivedFrom` field naming its source) counts as recorded.
 - Every file in `fixtures/monsters/` MUST pass strict zod validation with zero normalizer changes.
   Normalizing an already-valid monster MUST produce zero changes.
 - A bug fix in core logic MUST add a test that would have caught it.
@@ -148,4 +160,4 @@ is the only real secret.
 - **Compliance:** every plan's Constitution Check and every code review MUST verify compliance.
   Unjustified complexity is grounds to reject a change.
 
-**Version**: 1.0.0 | **Ratified**: 2026-09-30 | **Last Amended**: 2026-09-30
+**Version**: 1.0.1 | **Ratified**: 2026-09-30 | **Last Amended**: 2026-10-03

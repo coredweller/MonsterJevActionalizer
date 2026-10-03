@@ -19,7 +19,7 @@ npm run check:monsters [-- --fix]         # fixtures must report zero changes
 
 - **Jev is not an LLM chat model.** It only answers typed `choice`/`noul`/`score` questions. Never
   ask it to generate text or invent options. Code builds the legal options, Jev picks, and each
-  turn makes exactly one batched request.
+  turn makes at most one batched request (none when the monster is hard-blocked).
 - Read Jev's `probabilities` distribution, not its `choice` field, which isn't always the argmax.
 - `TYPESAFE_API_KEY` is read only in `app/api/decide/route.ts` and `lib/jev/`, never in client code.
 - The monster normalizer must never invent mechanics (actions, resistances, Legendary Resistance).
@@ -27,7 +27,8 @@ npm run check:monsters [-- --fix]         # fixtures must report zero changes
 - General monsters have no `BonusActions` field. Their bonus actions are in trait text.
 - Keep `lib/monster`, `lib/encounter` and `lib/decide` free of React, `fetch` and `localStorage`.
   Wrap every `localStorage` access in try/catch.
-- Interpret tests use recorded responses in `fixtures/jev/`, never live Jev calls.
+- Interpret tests use recorded responses in `fixtures/jev/` (or derived copies with a `derivedFrom`
+  field), never live Jev calls.
 - Fixture names follow `<Name>.CR<n>.<edition>.json`. The normalizer reads CR from the name.
 - Don't build anything PLAN.md marks out of scope without updating the plan first.
 

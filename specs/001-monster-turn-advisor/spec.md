@@ -72,8 +72,9 @@ and logged the turn.
 **Acceptance Scenarios**:
 
 1. **Given** a monster that is incapacitated, stunned, paralyzed, petrified or unconscious, **When**
-   a recommendation is requested, **Then** no Action or Bonus Action is offered and the
-   recommendation says why.
+   a recommendation is requested, **Then** no Action or Bonus Action is offered, the
+   recommendation says why, and the decision service is not called. Movement is "hold" when stunned,
+   paralyzed, petrified or unconscious; when only incapacitated, the DM picks the movement by hand.
 2. **Given** a monster whose speed is 0 (grappled or restrained), **When** options are built,
    **Then** the only movement intent offered is "hold".
 3. **Given** a recharge ability that is spent, an X/day ability with no uses left, or a leveled spell
@@ -94,8 +95,8 @@ and logged the turn.
     carries the battlefield description forward to the next turn.
 11. **Given** the decision service fails or is unreachable, **When** a recommendation is requested,
     **Then** the error is shown, the legal options remain available, and the DM can pick by hand and apply.
-12. **Given** a turn, **When** a recommendation is requested, **Then** exactly one request is made to
-    the decision service.
+12. **Given** a turn where the monster can act, **When** a recommendation is requested, **Then** exactly
+    one request is made to the decision service (none when the monster is hard-blocked).
 
 ---
 
@@ -130,8 +131,9 @@ previous turn with its result.
 
 ### User Story 4 - Manage multiple monsters with trackers (Priority: P2)
 
-The sidebar lists trackers, one per monster. The DM can switch between them and duplicate a tracker
-(e.g., "Goblin 2") to get the same statblock and party roster with fresh encounter state.
+The sidebar lists trackers, one per monster. The DM can switch between them, duplicate a tracker
+(e.g., "Goblin 2") to get the same statblock, party roster and settings with fresh encounter state,
+situation and log, and delete a tracker after confirming.
 
 **Why this priority**: Fights usually have several monsters; Duplicate makes five goblins quick.
 
@@ -141,8 +143,11 @@ statblock and roster, fresh state, and a distinct name.
 **Acceptance Scenarios**:
 
 1. **Given** a tracker with spent slots and damage, **When** the DM duplicates it, **Then** the copy has
-   the same statblock and roster, full resources and HP, round 1, and an empty log.
+   the same statblock, roster and settings, full resources and HP, round 1, a blank situation and an
+   empty log.
 2. **Given** several trackers, **When** the DM switches between them, **Then** each shows its own state.
+3. **Given** a tracker, **When** the DM deletes it and confirms, **Then** it is removed from the sidebar
+   and from saved data; cancelling the confirmation keeps it.
 
 ---
 
@@ -221,7 +226,8 @@ suggestion is "mindless" and the reminder cards list the legendary/lair options 
 **Trackers and encounter state**
 
 - **FR-013**: System MUST support one monster per tracker, list trackers in a sidebar, and allow
-  switching and duplicating (same statblock and roster, fresh state, distinct name).
+  switching, duplicating (same statblock, roster and settings; fresh state, situation and log;
+  distinct name) and deleting with confirmation.
 - **FR-014**: System MUST track per tracker: current/max HP, slots per level, X/day uses, recharge
   availability, legendary actions left, Legendary Resistance uses, conditions, concentration (and on
   what), and round number.
@@ -248,10 +254,13 @@ suggestion is "mindless" and the reminder cards list the legendary/lair options 
   Disengage, Hide, Help), Bonus Actions (incl. trait-granted and bonus-action spells, plus none),
   and movement intents (hold, close in, reach another target, retreat, take cover, fly up if it can fly).
 - **FR-022**: System MUST apply hard blocks: no Action/Bonus Action when incapacitated, stunned,
-  paralyzed, petrified or unconscious; only "hold" when speed is 0. Other conditions are context only.
+  paralyzed, petrified or unconscious (the decision service is not called); movement "hold" only when
+  stunned, paralyzed, petrified or unconscious, or when speed is 0; when only incapacitated, the DM
+  picks movement by hand. Other conditions are context only.
 - **FR-023**: System MUST compute, for each option, whether a target is in range now or after moving,
   flag out-of-range options, and still offer them.
-- **FR-024**: System MUST make exactly one batched request to the decision service per turn, asking it
+- **FR-024**: System MUST make at most one batched request to the decision service per turn (exactly
+  one when the monster can act, none when it is hard-blocked), asking it
   only to choose among code-computed options (tactic, movement before/after, action, bonus action,
   targets, clusters, slot levels, multiattack fallback, retreat, resource spending).
 - **FR-025**: System MUST interpret full probability distributions (not only the reported choice) and
@@ -312,7 +321,8 @@ suggestion is "mindless" and the reminder cards list the legendary/lair options 
   only a few situation fields changed since the last turn.
 - **SC-002**: 100% of recommended options are legal for the monster's current state (resources,
   conditions, hard blocks); no recommendation includes an option the app did not compute.
-- **SC-003**: Exactly one decision-service request is made per recommended turn.
+- **SC-003**: Exactly one decision-service request is made per recommended turn, and none for a turn
+  where the monster is hard-blocked.
 - **SC-004**: Every bundled fixture monster validates with zero normalization changes, and every known
   drift case is fixed and then validates.
 - **SC-005**: In each of the four plan scenarios (lone melee player; spread party with clustered
