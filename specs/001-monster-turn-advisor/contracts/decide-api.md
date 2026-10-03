@@ -44,6 +44,9 @@ bodies are validated with zod schemas shared between client and server.
 { ok: false, error: { kind: "invalid-request"|"config"|"upstream"|"timeout", message: string } }
 ```
 
+Status mapping comes from the `JevError` that `callJev` throws (data-model.md): `config` → 500,
+`upstream` → 502, `timeout` → 504. The route itself never reads `TYPESAFE_API_KEY`; the client checks it.
+
 The client treats any `ok: false` (or network failure) as "decide by hand": it shows `error.message` and
 keeps its own locally computed `LegalOptions` for manual pick and Apply.
 

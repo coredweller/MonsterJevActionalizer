@@ -102,5 +102,11 @@ History sent to Jev = `log.slice(-3)`.
 - **Recommendation**: `{ moveBefore, action: { key, targetIds?, clusterId?, slotLevel? }, bonusAction: { key, targetIds? },
   moveAfter, tactic, confidence: "high"|"medium"|"dmsCall", probabilities: {...per question}, runnersUp:
   { question, key, p }[], warnings: string[], explanation: string, adjustments: string[] /*consistency rules applied*/ }`.
+  When the monster is hard-blocked, the recommendation is `{ blocked: Blocked, moveBefore: "hold" | null,
+  moveAfter: "hold" | null }` with no action, bonus action, tactic or probabilities (`null` movement = DM picks;
+  see contracts/decide-api.md).
+- **JevError** [`lib/jev/client.ts`]: `{ kind: "config" | "upstream" | "timeout", message, status? }`, thrown by
+  `callJev`. `config` = missing `TYPESAFE_API_KEY` (checked before any fetch); `upstream` = non-2xx after the retry,
+  or a response that fails zod; `timeout` = the 30 s abort fired on the final attempt. Messages never include the key.
 - Thresholds as named constants: `CONFIDENCE_HIGH = 0.85`, `CONFIDENCE_MEDIUM = 0.60`, `RETREAT_THRESHOLD = 0.60`,
   `SPEND_RESOURCE_LOW = 0.40` (assumed; the plan says "low").

@@ -1,0 +1,72 @@
+{
+  "CharacterName": "Briarthorn Hag",
+  "Level": 7,
+  "Race": "Fey",
+  "Class": "Hag",
+  "Alignment": "Neutral Evil",
+  "HP": "105 (14d8 + 42)",
+  "AC": 16,
+  "Speed": "30 ft., climb 30 ft.",
+  "AbilityScores": {
+    "Strength": { "Score": 14, "Modifier": "+2" },
+    "Dexterity": { "Score": 18, "Modifier": "+4" },
+    "Constitution": { "Score": 16, "Modifier": "+3" },
+    "Intelligence": { "Score": 13, "Modifier": "+1" },
+    "Wisdom": { "Score": 18, "Modifier": "+4" },
+    "Charisma": { "Score": 15, "Modifier": "+2" }
+  },
+  "SavingThrows": {
+    "Dexterity": "+7",
+    "Wisdom": "+7"
+  },
+  "Skills": {
+    "Perception": "+7",
+    "Stealth": "+7"
+  },
+  "DamageResistances": "",
+  "DamageImmunities": "Poison",
+  "ConditionImmunities": "Poisoned",
+  "Senses": "Darkvision 60 ft.; Passive Perception 17",
+  "Languages": "Common, Elvish, Sylvan",
+  "ChallengeRating": "7",
+  "ProficiencyBonus": "+3",
+  "SpecialTraits": {
+    "Thorn Warden": "Difficult terrain made of plants doesn't cost the hag extra movement."
+  },
+  "Actions": {
+    "Multiattack": "The hag makes two Thorn Lash attacks. It can replace one attack with a use of Spellcasting.",
+    "Thorn Lash": "Melee Attack Roll: +7, reach 10 ft. Hit: 11 (2d6 + 4) Piercing damage plus 7 (2d6) Poison damage.",
+    "Thorn Dart": "Ranged Attack Roll: +7, range 60/240 ft. Hit: 9 (2d4 + 4) Piercing damage.",
+    "Bramble Burst (Recharge 5–6)": "Dexterity Saving Throw: DC 15, each creature in a 30-foot Cone. Failure: 27 (6d8) Piercing damage, and the target has the Restrained condition until the start of the hag's next turn. Success: Half damage only.",
+    "Spellcasting": "The hag casts one of the following spells, requiring no Material components and using Wisdom as the spellcasting ability (spell save DC 15, +7 to hit with spell attacks):\nAt Will: Dancing Lights, Mage Hand, Minor Illusion\n1/Day Each: Entangle, Hold Person, Plant Growth, Thornward Hex"
+  },
+  "BonusActions": {
+    "Misty Step (2/Day)": "The hag casts Misty Step, using the same spellcasting ability as Spellcasting."
+  },
+  "Reactions": {
+    "Bramble Shield": "Trigger: The hag is hit by an attack roll. Response: The hag adds 3 to its AC against that attack, possibly causing it to miss."
+  },
+  "LegendaryTraits": {
+    "Legendary Resistance (3/Day, or 4/Day in Lair)": "If the hag fails a saving throw, it can choose to succeed instead."
+  },
+  "LegendaryActions": {
+    "Legendary Action Uses": "3",
+    "Options": {
+      "Lash": "The hag makes one Thorn Lash attack.",
+      "Grasping Roots": "Strength Saving Throw: DC 15, one creature the hag can see within 60 feet. Failure: The target has the Restrained condition until the end of its next turn. Failure or Success: The hag can't take this action again until the start of its next turn."
+    }
+  },
+  "MythicTrait": {
+    "Name": "",
+    "Description": ""
+  },
+  "LairActions": {
+  },
+  "RegionalEffects": [],
+  "Equipment": {
+    "Armor": "",
+    "Weapons": "",
+    "Other": ""
+  },
+  "Notes": "Authored test fixture in 2024 statblock wording (not from a published book). Built to exercise: 'Melee/Ranged Attack Roll: +N' attacks; 'Dexterity Saving Throw: DC N ... Failure/Success' saves; a Cone area; 'Recharge 5–6' with an en dash; Spellcasting as an action with At Will and 1/Day Each lists and no slots; an X/Day bonus-action spell (Misty Step); a Trigger/Response reaction; 2024 Legendary Resistance wording; and one spell not in the SRD table (Thornward Hex), which must be marked unknown."
+}

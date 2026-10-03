@@ -138,7 +138,8 @@ situation and log, and delete a tracker after confirming.
 **Why this priority**: Fights usually have several monsters; Duplicate makes five goblins quick.
 
 **Independent Test**: Duplicate a tracker with spent resources and confirm the copy has the same
-statblock and roster, fresh state, and a distinct name.
+statblock, roster and settings, fresh state, a blank situation, an empty log and a distinct name.
+Delete a tracker after confirming and confirm it is gone; cancel a delete and confirm it stays.
 
 **Acceptance Scenarios**:
 
@@ -325,9 +326,11 @@ suggestion is "mindless" and the reminder cards list the legendary/lair options 
   where the monster is hard-blocked.
 - **SC-004**: Every bundled fixture monster validates with zero normalization changes, and every known
   drift case is fixed and then validates.
-- **SC-005**: In each of the four plan scenarios (lone melee player; spread party with clustered
-  players; low-HP cowardly monster with escape route; concentrating caster), the recommendation
-  matches the expected behaviour (sensible pick; cluster pick; retreat; concentration warning and slot level).
+- **SC-005**: In each of the five plan scenarios (lone melee player; spread party with clustered
+  players; low-HP cowardly monster with escape route; concentrating caster; a caster with leveled
+  spells as both action and bonus action), the recommendation matches the expected behaviour
+  (sensible pick; cluster pick; retreat; concentration warning and slot level; at most one leveled
+  spell, with an attack-dependent bonus action only after an attack).
 - **SC-006**: When the decision service is unavailable, the DM can still complete and apply a turn
   manually 100% of the time.
 - **SC-007**: After any override and apply, the tracker's resources and log reflect what the DM chose
@@ -337,6 +340,8 @@ suggestion is "mindless" and the reminder cards list the legendary/lair options 
 ## Assumptions
 
 - Single user (the DM) on their own laptop; no accounts, sharing or multi-device sync.
+- Test fixtures are mostly DM-supplied monsters; two are authored for coverage (a 2014 cleric with
+  leveled bonus-action spells and an attack-dependent bonus attack, and a 2024-wording legendary hag).
 - Monster files follow the DandDTemplateParser templates; drift beyond the known cases surfaces as
   validation errors for the DM to fix by hand.
 - The DM supplies the decision-service API key locally; the service (TypeSafe Jev) only answers typed

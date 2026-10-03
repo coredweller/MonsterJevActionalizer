@@ -97,7 +97,7 @@ records the ones the plan left open or that depend on the local environment.
 - **Decision**: Vitest with node environment for `lib/**`, plus one route test for `app/api/decide/route.ts`
   with `callJev` mocked (counts requests: one when the monster can act, none when hard-blocked).
   Recorded Jev answers live in `fixtures/jev/<scenario>.json`, captured once by `scripts/record-jev.ts`
-  (`tsx --env-file=.env.local`, Node ≥ 20.6). Rules that the four scenarios don't trigger naturally are
+  (`tsx --env-file=.env.local`, Node ≥ 20.6). Rules that the five scenarios don't trigger naturally are
   covered by `fixtures/jev/derived/<rule>.json`: copies of a recorded response with probabilities edited
   and a `derivedFrom` field (constitution v1.0.1, Principle V). No component tests in v1; UI is covered
   by the plan's manual scenarios.
@@ -105,5 +105,13 @@ records the ones the plan left open or that depend on the local environment.
   script keeps recording code out of the production route.
 - **Consequence**: derived fixtures need a recorded response to copy, so the interpret tests wait for one
   recording run with the DM's key.
+
+## R13. Running TypeScript scripts
+
+- **Decision**: `tsx` as a dev dependency, used by `check:monsters`, `build:spells` and `record:jev`.
+- **Rationale**: These three scripts import the same pure TypeScript modules as the app. `tsx` runs them
+  directly with no build step or extra tsconfig, and it passes Node flags like `--env-file`.
+- **Alternatives**: compiling the scripts with `tsc` first (an extra build output to manage); `ts-node`
+  (slower, with ESM friction).
 
 ## No outstanding NEEDS CLARIFICATION.

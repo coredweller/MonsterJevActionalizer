@@ -95,7 +95,7 @@ named constants (Principle II).
 3. `extract.ts` + `spells.ts` + SRD table + tests against fixtures. US2 depends on these.
 4. `lib/encounter/state.ts` + `storage.ts` + tests (US3/US4).
 5. `options.ts` + tests (hard blocks, resources, range, fly).
-6. `lib/jev` client; `questions.ts`; record `fixtures/jev/` for the four scenarios (needs the key in
+6. `lib/jev` client; `questions.ts`; record `fixtures/jev/` for the five scenarios (needs the key in
    `.env.local`); derive one edited fixture per consistency rule; `interpret.ts` + `explain.ts` + tests.
 7. `app/api/decide/route.ts`.
 8. UI: loader → fix → review → tracker → situation → recommendation/apply → log → reminders; tablet pass.

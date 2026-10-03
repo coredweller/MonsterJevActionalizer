@@ -70,7 +70,8 @@ scripts/
 components/                 – TrackerSidebar, MonsterLoader, FixScreen, ReviewScreen, EncounterTracker, PartyRoster,
                               SituationForm, PlayerRow, RecommendationCard, ReminderCards, TurnLog
 fixtures/
-  monsters/                 – real monster JSONs supplied by the DM
+  monsters/                 – real monster JSONs supplied by the DM, plus two authored test monsters
+                              (AshenWarpriest 2014, BriarthornHag 2024; see fixtures/monsters/README.md)
   jev/                      – recorded Jev responses for interpret tests; scenarios.ts defines the recorded scenarios;
                               derived/ holds edited copies (with `derivedFrom`) that exercise each consistency rule
 ```
@@ -287,7 +288,7 @@ Copy these from `F:\Projects\AI\ClaudeCore\.claude\` into this repo's `.claude/`
 
 ## Verification
 1. **Unit tests (Vitest):**
-   - `extract.ts`: 2014 and 2024 wording, and trait-granted bonus actions, against the monsters in `fixtures/monsters/` (supplied by the DM).
+   - `extract.ts`: 2014 and 2024 wording, and trait-granted bonus actions, against the monsters in `fixtures/monsters/` (supplied by the DM, plus the authored AshenWarpriest and the 2024-wording BriarthornHag).
    - `options.ts`: recharge spent, slots used up, incapacitated, speed 0, range from zones, fly speed.
    - `interpret.ts`: the consistency rules, using recorded responses in `fixtures/jev/`.
    - `state.ts`: Apply spends what was chosen, Duplicate resets state, the log keeps the last 3 turns, and recharge rolls work.
@@ -298,6 +299,7 @@ Copy these from `F:\Projects\AI\ClaudeCore\.claude\` into this repo's `.claude/`
    - a spread-out party with a downed caster and two clustered players (expect a cluster pick for an area effect)
    - the monster at low HP with a cowardly morale and an escape route (expect a retreat)
    - a caster that's concentrating, casting a leveled spell (check the concentration warning and the slot level)
+   - the Ashen Warpriest with leveled spells available as both its action and its bonus action (expect at most one leveled spell, and the War Priest bonus attack only when the action is an attack)
 
    In each, check that the recommendations make sense, that an override followed by Apply updates the tracker, and that the log feeds the next turn.
 3. **Cost and speed:** log token usage and latency from each response, and confirm there's exactly one Jev request per recommended turn, and none when the monster is hard-blocked.
