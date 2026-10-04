@@ -1,0 +1,371 @@
+{
+  "derivedFrom": "lone-melee.json",
+  "purpose": "Jev's choice (Multiattack) is not the argmax of its probabilities (Mandibles): interpret must read the distribution.",
+  "request": {
+    "state": {
+      "monster": {
+        "name": "Tunnel Wasp",
+        "kind": "general",
+        "hp": {
+          "current": 50,
+          "max": 50
+        },
+        "ac": 14,
+        "speed": {
+          "walk": 40,
+          "climb": 30,
+          "burrow": 20
+        },
+        "abilities": [
+          {
+            "id": "act_multiattack",
+            "name": "Multiattack",
+            "category": "action",
+            "summary": "1× Mandibles + 1× Sting (at will)"
+          },
+          {
+            "id": "act_mandibles",
+            "name": "Mandibles",
+            "category": "action",
+            "summary": "melee +6 to hit, reach 5 ft.; 12 (2d6 + 3) slashing (at will)"
+          },
+          {
+            "id": "act_sting",
+            "name": "Sting",
+            "category": "action",
+            "summary": "melee +6 to hit, reach 5 ft.; DC 12 Constitution save; 9 (1d10 + 3) piercing (at will)"
+          },
+          {
+            "id": "trt_burrow_ambusher",
+            "name": "Burrow Ambusher",
+            "category": "passive",
+            "summary": "If the Tunnel Wasp moves at least 10 feet straight toward a creature immediately after … (at will)"
+          },
+          {
+            "id": "trt_hive_alert",
+            "name": "Hive Alert",
+            "category": "passive",
+            "summary": "range 60 ft. (at will)"
+          },
+          {
+            "id": "trt_chitinous_plating",
+            "name": "Chitinous Plating",
+            "category": "passive",
+            "summary": "When the Tunnel Wasp takes slashing or piercing damage, it reduces the damage taken by … (at will)"
+          }
+        ],
+        "rawUnparsed": [
+          "Burrow Ambusher: If the Tunnel Wasp moves at least 10 feet straight toward a creature immediately after emerging from underground, it has advantage on its first attack roll against that target.",
+          "Chitinous Plating: When the Tunnel Wasp takes slashing or piercing damage, it reduces the damage taken by 3 (to a minimum of 1)."
+        ]
+      },
+      "encounter": {
+        "hp": 50,
+        "hpMax": 50,
+        "slots": {},
+        "perDay": {},
+        "recharge": {},
+        "legendaryActionsLeft": 0,
+        "legendaryResistanceLeft": 0,
+        "conditions": [],
+        "concentration": null,
+        "round": 1
+      },
+      "temperament": "mindless",
+      "morale": {
+        "value": 50,
+        "words": "steady"
+      },
+      "situation": {
+        "players": [
+          {
+            "key": "player__0",
+            "label": "player 0: Brakka (melee, Fighter, AC 18)",
+            "zone": "engaged",
+            "distanceFt": 5,
+            "apparentHp": "healthy",
+            "conditions": [],
+            "cover": "none",
+            "hitMonsterLastRound": false,
+            "clusteredWith": []
+          }
+        ],
+        "allies": {
+          "present": false,
+          "count": 0
+        },
+        "terrain": {
+          "difficult": false,
+          "chokepoint": false,
+          "escapeRoute": false,
+          "flyingPossible": false
+        },
+        "notes": ""
+      },
+      "options": {
+        "actions": [
+          {
+            "key": "act_multiattack",
+            "summary": "Multiattack: 1× Mandibles + 1× Sting",
+            "usesResource": false,
+            "concentration": false,
+            "singleTarget": true,
+            "area": false,
+            "range": {
+              "ft": 5,
+              "inRangeNow": [
+                "player__0"
+              ],
+              "inRangeAfterMove": [
+                "player__0"
+              ]
+            }
+          },
+          {
+            "key": "act_mandibles",
+            "summary": "Mandibles: melee +6 to hit, reach 5 ft.; 12 (2d6 + 3) slashing",
+            "usesResource": false,
+            "concentration": false,
+            "singleTarget": true,
+            "area": false,
+            "range": {
+              "ft": 5,
+              "inRangeNow": [
+                "player__0"
+              ],
+              "inRangeAfterMove": [
+                "player__0"
+              ]
+            }
+          },
+          {
+            "key": "act_sting",
+            "summary": "Sting: melee +6 to hit, reach 5 ft.; DC 12 Constitution save; 9 (1d10 + 3) piercing",
+            "usesResource": false,
+            "concentration": false,
+            "singleTarget": true,
+            "area": false,
+            "range": {
+              "ft": 5,
+              "inRangeNow": [
+                "player__0"
+              ],
+              "inRangeAfterMove": [
+                "player__0"
+              ]
+            }
+          },
+          {
+            "key": "dash",
+            "summary": "Dash: extra movement equal to its speed this turn",
+            "usesResource": false,
+            "concentration": false,
+            "singleTarget": false,
+            "area": false,
+            "range": "no target"
+          },
+          {
+            "key": "dodge",
+            "summary": "Dodge: attacks against it have disadvantage and it has advantage on Dexterity saves until its next turn",
+            "usesResource": false,
+            "concentration": false,
+            "singleTarget": false,
+            "area": false,
+            "range": "no target"
+          },
+          {
+            "key": "disengage",
+            "summary": "Disengage: its movement doesn't provoke opportunity attacks this turn",
+            "usesResource": false,
+            "concentration": false,
+            "singleTarget": false,
+            "area": false,
+            "range": "no target"
+          },
+          {
+            "key": "hide",
+            "summary": "Hide: makes a Dexterity (Stealth) check to hide",
+            "usesResource": false,
+            "concentration": false,
+            "singleTarget": false,
+            "area": false,
+            "range": "no target"
+          },
+          {
+            "key": "help",
+            "summary": "Help: gives an ally advantage on its next ability check or attack roll",
+            "usesResource": false,
+            "concentration": false,
+            "singleTarget": false,
+            "area": false,
+            "range": "no target"
+          }
+        ],
+        "bonusActions": [
+          {
+            "key": "none",
+            "summary": "None: take no bonus action",
+            "usesResource": false,
+            "concentration": false,
+            "singleTarget": false,
+            "area": false,
+            "range": "no target"
+          }
+        ],
+        "movements": [
+          "hold",
+          "closeIn",
+          "reachOther",
+          "retreat",
+          "takeCover"
+        ]
+      },
+      "clusters": [
+        {
+          "id": "cluster__0",
+          "players": [
+            "player__0"
+          ],
+          "size": 1
+        }
+      ],
+      "history": []
+    },
+    "questions": {
+      "tactic": {
+        "type": "choice",
+        "instructions": "What is the monster's overall plan this turn, given its temperament, morale and the situation?",
+        "criteria": {
+          "aggressive": "Deal as much damage as it can this turn",
+          "focus_weakest": "Finish off or pressure the most wounded or vulnerable player",
+          "focus_threat": "Go after the player who is the biggest threat to it",
+          "control": "Disable, hinder or split up the party rather than deal damage",
+          "defensive": "Protect itself: reposition, buff or avoid damage",
+          "flee": "Get away from the fight"
+        }
+      },
+      "move_before": {
+        "type": "choice",
+        "instructions": "Before its action, how does the monster move?",
+        "criteria": {
+          "hold": "Stay where it is",
+          "closeIn": "Move toward its target",
+          "reachOther": "Move to reach a different target",
+          "retreat": "Move away from the party",
+          "takeCover": "Move behind cover"
+        }
+      },
+      "action": {
+        "type": "choice",
+        "instructions": "Which action does the monster take this turn? Range flags assume the targets in the state.",
+        "criteria": {
+          "act_multiattack": "Multiattack: 1× Mandibles + 1× Sting [in range now]",
+          "act_mandibles": "Mandibles: melee +6 to hit, reach 5 ft.; 12 (2d6 + 3) slashing [in range now]",
+          "act_sting": "Sting: melee +6 to hit, reach 5 ft.; DC 12 Constitution save; 9 (1d10 + 3) piercing [in range now]",
+          "dash": "Dash: extra movement equal to its speed this turn",
+          "dodge": "Dodge: attacks against it have disadvantage and it has advantage on Dexterity saves until its next turn",
+          "disengage": "Disengage: its movement doesn't provoke opportunity attacks this turn",
+          "hide": "Hide: makes a Dexterity (Stealth) check to hide",
+          "help": "Help: gives an ally advantage on its next ability check or attack roll"
+        }
+      },
+      "move_after": {
+        "type": "choice",
+        "instructions": "After its action, how does the monster move?",
+        "criteria": {
+          "hold": "Stay where it is",
+          "closeIn": "Move toward its target",
+          "reachOther": "Move to reach a different target",
+          "retreat": "Move away from the party",
+          "takeCover": "Move behind cover"
+        }
+      },
+      "multiattack_fallback": {
+        "type": "noul",
+        "instructions": "If it uses Multiattack and its first target drops partway through, should it switch its remaining attacks to another adjacent target?",
+        "criteria": {
+          "true": "Yes: keep attacking whoever else is in reach.",
+          "false": "No: stop, or save the remaining attacks' movement for something else."
+        }
+      },
+      "should_retreat": {
+        "type": "noul",
+        "instructions": "Given its HP, morale, temperament and the situation, should the monster break off from this fight now?",
+        "criteria": {
+          "true": "Yes: it should get away this turn.",
+          "false": "No: it should keep fighting."
+        }
+      }
+    },
+    "model": "jev-latest"
+  },
+  "response": {
+    "model": "jev-1.13.0",
+    "answers": {
+      "tactic": {
+        "type": "choice",
+        "choice": "aggressive",
+        "probabilities": {
+          "focus_weakest": 0,
+          "control": 0,
+          "focus_threat": 0.03,
+          "flee": 0,
+          "defensive": 0,
+          "aggressive": 0.97
+        },
+        "confidence": 0.96
+      },
+      "move_before": {
+        "type": "choice",
+        "choice": "hold",
+        "probabilities": {
+          "closeIn": 0.35,
+          "reachOther": 0,
+          "takeCover": 0,
+          "hold": 0.65,
+          "retreat": 0
+        },
+        "confidence": 0.55
+      },
+      "action": {
+        "type": "choice",
+        "choice": "act_multiattack",
+        "probabilities": {
+          "disengage": 0,
+          "help": 0,
+          "dodge": 0.04,
+          "dash": 0,
+          "act_sting": 0,
+          "act_mandibles": 0.55,
+          "hide": 0,
+          "act_multiattack": 0.41
+        },
+        "confidence": 0.95
+      },
+      "move_after": {
+        "type": "choice",
+        "choice": "hold",
+        "probabilities": {
+          "takeCover": 0,
+          "reachOther": 0,
+          "closeIn": 0.16,
+          "hold": 0.84,
+          "retreat": 0
+        },
+        "confidence": 0.8
+      },
+      "multiattack_fallback": {
+        "type": "noul",
+        "noul": 0.53
+      },
+      "should_retreat": {
+        "type": "noul",
+        "noul": 0.15
+      }
+    },
+    "usage": {
+      "input_tokens": 2828,
+      "output_tokens": 311
+    }
+  }
+}

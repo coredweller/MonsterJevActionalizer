@@ -15,6 +15,20 @@ npx vitest run -t "<test name>"           # single test
 npm run check:monsters [-- --fix]         # fixtures must report zero changes
 ```
 
+## Test-first (always)
+
+Applies to every change in `lib/`: tasks, bug fixes, and helpers you add along the way.
+
+1. Write or extend the Vitest test before touching the implementation.
+2. Run just that test (`npx vitest run <file>`) and confirm it fails on the missing
+   behaviour, not on a typo.
+3. Only then write the code, until it passes.
+4. In your report, name the tests you saw fail first. If you skipped the failing run
+   for anything, say so.
+
+Don't write the test and the implementation in the same step. If extra code turns out
+to be needed mid-task, stop and write its test first.
+
 ## Gotchas
 
 - **Jev is not an LLM chat model.** It only answers typed `choice`/`noul`/`score` questions. Never

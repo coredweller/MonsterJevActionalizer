@@ -1,0 +1,305 @@
+/**
+ * interpret.ts against recorded Jev responses (fixtures/jev/<scenario>.json) and derived copies
+ * (fixtures/jev/derived/<rule>.json). Never a live call (constitution Principle V). Each scenario's
+ * tracker and situation are rebuilt by fixtures/jev/scenarios.ts, so the candidate table matches the
+ * recorded request.
+ */
+import { describe, expect, it } from "vitest";
+import { z } from "zod";
+import { buildScenario, isScenarioName } from "@/fixtures/jev/scenarios";
+import { CONFIDENCE_HIGH, CONFIDENCE_MEDIUM, RETREAT_THRESHOLD, SPEND_RESOURCE_LOW } from "@/lib/decide/constants";
+import { blockedRecommendation, confidenceFor, interpret, isLeveledSpell } from "@/lib/decide/interpret";
+import { buildJevRequest } from "@/lib/decide/questions";
+import { type AdjustmentRule, type Recommendation, RecommendationSchema } from "@/lib/decide/types";
+import { createTracker } from "@/lib/encounter/state";
+import { SystemOneResponseSchema } from "@/lib/jev/types";
+import { buildLegalOptions, type LegalOptions, type Option } from "@/lib/monster/options";
+import { loadJevFixture } from "../helpers/fixtures";
+import { extractedReviewed, playerTurn, situationWith } from "../helpers/reviewed";
+
+const FixtureSchema = z.object({ derivedFrom: z.string().optional(), request: z.unknown(), response: z.unknown() });
+
+/** Interprets a recorded or derived fixture against its rebuilt scenario. */
+function run(fixture: string) {
+  const parsed = FixtureSchema.parse(loadJevFixture(fixture));
+  const name = parsed.derivedFrom ? parsed.derivedFrom.replace(/\.json$/, "") : fixture;
+  if (!isScenarioName(name)) throw new Error(`${fixture}: no scenario "${name}"`);
+  const { tracker, situation } = buildScenario(name);
+  const options = buildLegalOptions(tracker.reviewed, tracker.state, situation);
+  const { candidates } = buildJevRequest(tracker, situation, options);
+  const response = SystemOneResponseSchema.parse(parsed.response);
+  const rec = interpret(response, options, candidates, tracker, situation);
+  return { rec, options, tracker, situation, response };
+}
+
+const rules = (rec: Recommendation): AdjustmentRule[] => rec.adjustments.map((a) => a.rule);
+const ruleDetails = (rec: Recommendation, rule: AdjustmentRule) => rec.adjustments.filter((a) => a.rule === rule).map((a) => a.detail);
+const CONSISTENCY_RULES: AdjustmentRule[] = ["retreat", "spend-resource-low", "out-of-range", "one-leveled-spell", "attack-dependent-bonus", "concentration"];
+
+function optionByKey(list: readonly Option[], key: string): Option {
+  const found = list.find((o) => o.key === key);
+  if (!found) throw new Error(`No option "${key}"`);
+  return found;
+}
+
+const RECORDED = ["lone-melee", "spread-party", "low-hp-retreat", "concentrating-caster", "warpriest-dual-spells"];
+const DERIVED = [
+  "choice-not-argmax",
+  "attack-dependent-bonus",
+  "two-leveled-spells",
+  "out-of-range-no-close",
+  "retreat-high",
+  "concentration-swap",
+  "spend-resource-low",
+  "confidence-buckets",
+  "non-candidate-action",
+  "unknown-answer-keys",
+  "tie-break-choice",
+].map((r) => `derived/${r}`);
+
+describe("interpret: every fixture", () => {
+  it.each([...RECORDED, ...DERIVED].map((f) => [f] as const))("%s: a valid Recommendation whose keys all come from the legal options", (fixture) => {
+    const { rec, options, situation, tracker } = run(fixture);
+    expect(RecommendationSchema.parse(rec)).toEqual(rec);
+    const action = optionByKey(options.actions, rec.action.key);
+    const bonus = optionByKey(options.bonusActions, rec.bonusAction.key);
+    expect(options.movements).toContain(rec.moveBefore);
+    expect(options.movements).toContain(rec.moveAfter);
+    const playerIds = situation.players.map((p) => p.playerId);
+    for (const id of [...(rec.action.targetIds ?? []), ...(rec.bonusAction.targetIds ?? [])]) expect(playerIds).toContain(id);
+    for (const [pick, option] of [
+      [rec.action, action],
+      [rec.bonusAction, bonus],
+    ] as const) {
+      if (pick.slotLevel !== undefined) expect(option.leveledSpell?.availableLevels).toContain(pick.slotLevel);
+      else expect(option.leveledSpell).toBeUndefined();
+    }
+    // The cross-question rules hold on every final pick.
+    expect(isLeveledSpell(action, tracker.reviewed.abilities) && isLeveledSpell(bonus, tracker.reviewed.abilities)).toBe(false);
+    expect(rec.explanation.length).toBeGreaterThan(0);
+  });
+});
+
+describe("interpret: recorded responses", () => {
+  it("lone-melee: the clear pick stands with no consistency rule applied", () => {
+    const { rec } = run("lone-melee");
+    expect(rec.action).toEqual({ key: "act_multiattack", targetIds: ["brakka"], targetBy: { by: "only" } });
+    expect(rec.bonusAction).toEqual({ key: "none" });
+    expect([rec.moveBefore, rec.moveAfter]).toEqual(["hold", "hold"]);
+    expect(rec.tactic).toBe("aggressive");
+    expect(rec.confidence).toBe("high");
+    expect(rec.nouls).toEqual({ multiattack_fallback: 0.53, should_retreat: 0.15 });
+    expect(rec.adjustments).toEqual([]);
+    expect(rec.warnings).toEqual([]);
+  });
+
+  it("warpriest-dual-spells: Multiattack, Jev's target, no bonus action, medium confidence", () => {
+    const { rec } = run("warpriest-dual-spells");
+    expect(rec.action).toEqual({ key: "act_multiattack", targetIds: ["sefa"], targetBy: { by: "jev", question: "target__0", p: 0.41 } });
+    expect(rec.bonusAction.key).toBe("none");
+    expect(rec.confidence).toBe("medium");
+    expect(rules(rec).filter((r) => CONSISTENCY_RULES.includes(r))).toEqual([]);
+  });
+
+  it("spread-party: an area action gets Jev's cluster pick, and its members become the targets", () => {
+    const { rec } = run("spread-party");
+    expect(rec.action).toEqual({
+      key: "act_discordant_strike",
+      clusterId: "cluster_1",
+      clusterBy: { by: "jev", question: "cluster__0", p: 0.98 },
+      targetIds: ["kell", "iso"],
+    });
+    expect(rec.bonusAction).toEqual({ key: "bon_unsettling_words", targetIds: ["wren"], targetBy: { by: "jev", question: "target__1", p: 0.66 } });
+    expect(rec.moveBefore).toBe("closeIn");
+    expect(rec.confidence).toBe("dmsCall");
+  });
+
+  it("low-hp-retreat: should_retreat 0.82 ≥ RETREAT_THRESHOLD → Disengage (beats Dash on probability), hold then retreat", () => {
+    const { rec, response } = run("low-hp-retreat");
+    const retreat = response.answers.should_retreat;
+    expect(retreat?.type === "noul" && retreat.noul).toBeGreaterThanOrEqual(RETREAT_THRESHOLD);
+    expect(rec.action).toEqual({ key: "disengage" });
+    expect([rec.moveBefore, rec.moveAfter]).toEqual(["hold", "retreat"]);
+    expect(rules(rec)).toContain("retreat");
+    expect(rec.runnersUp).toContainEqual({ question: "action", key: "act_multiattack", p: 0.67 });
+  });
+
+  it("concentrating-caster: a true tie at 0.35 is broken toward Jev's choice and recorded", () => {
+    const { rec } = run("concentrating-caster");
+    expect(rec.action.key).toBe("act_discordant_strike");
+    expect(rules(rec)).toContain("tie-break");
+    expect(ruleDetails(rec, "tie-break").join(" ")).toMatch(/action/);
+    expect(rec.action.clusterId).toBe("cluster_1");
+    expect(rec.action.targetIds).toEqual(["lio", "sefa"]);
+    // Discordant Strike isn't a concentration spell, so the held Suggestion is safe.
+    expect(rec.warnings).toEqual([]);
+    expect(rec.confidence).toBe("dmsCall");
+  });
+});
+
+describe("interpret: consistency rules (derived fixtures)", () => {
+  it("reads probabilities, not choice: Jev's choice Multiattack (0.41) loses to Mandibles (0.55)", () => {
+    const { rec, response } = run("derived/choice-not-argmax");
+    const action = response.answers.action;
+    expect(action?.type === "choice" && action.choice).toBe("act_multiattack");
+    expect(rec.action.key).toBe("act_mandibles");
+    expect(rules(rec)).toContain("choice-not-argmax");
+    expect(rec.confidence).toBe("dmsCall");
+  });
+
+  it("drops an attack-dependent bonus action (War Priest) when the action (Sacred Flame) isn't an attack", () => {
+    const { rec } = run("derived/attack-dependent-bonus");
+    expect(rec.action.key).toBe("spell_sacred_flame");
+    expect(rec.bonusAction).toEqual({ key: "none" });
+    expect(rules(rec)).toContain("attack-dependent-bonus");
+    expect(ruleDetails(rec, "attack-dependent-bonus").join(" ")).toMatch(/War Priest/);
+  });
+
+  it("one leveled spell per turn: the lower-probability Guiding Bolt (0.55 < 0.70) is replaced by its best non-leveled alternative", () => {
+    const { rec } = run("derived/two-leveled-spells");
+    expect(rec.action).toEqual({ key: "act_multiattack", targetIds: ["sefa"], targetBy: { by: "jev", question: "target__0", p: 0.41 } });
+    // Spiritual Weapon had no slot or target question: code picks the lowest slot and the lowest apparent HP in range.
+    expect(rec.bonusAction).toEqual({
+      key: "spell_spiritual_weapon",
+      slotLevel: 2,
+      slotLevelBy: { by: "code" },
+      targetIds: ["brakka"],
+      targetBy: { by: "code" },
+    });
+    expect(rules(rec)).toContain("one-leveled-spell");
+    expect(ruleDetails(rec, "one-leveled-spell").join(" ")).toMatch(/Guiding Bolt/);
+  });
+
+  it("an out-of-range action with a non-closing move_before → the next-best option in range (skipping out-of-range Multiattack)", () => {
+    const { rec } = run("derived/out-of-range-no-close");
+    expect(rec.moveBefore).toBe("hold");
+    expect(rec.action).toEqual({ key: "spell_vicious_mockery", targetIds: ["wren"], targetBy: { by: "jev", question: "target__0", p: 0.73 } });
+    expect(rules(rec)).toContain("out-of-range");
+    expect(ruleDetails(rec, "out-of-range").join(" ")).toMatch(/Maestro's Blade/);
+  });
+
+  it("should_retreat ≥ RETREAT_THRESHOLD prefers Disengage or Dash with retreat movement over a 0.96 Multiattack", () => {
+    const { rec } = run("derived/retreat-high");
+    expect(rec.action).toEqual({ key: "disengage" });
+    expect([rec.moveBefore, rec.moveAfter]).toEqual(["hold", "retreat"]);
+    expect(rules(rec)).toContain("retreat");
+    expect(rec.confidence).toBe("dmsCall");
+  });
+
+  it("concentrating, then a new concentration spell: the pick (Fear) stands with a warning naming the dropped spell", () => {
+    const { rec } = run("derived/concentration-swap");
+    expect(rec.action).toEqual({
+      key: "spell_fear",
+      clusterId: "cluster_1",
+      clusterBy: { by: "jev", question: "cluster__2", p: 0.91 },
+      targetIds: ["lio", "sefa"],
+      slotLevel: 3,
+      slotLevelBy: { by: "jev", question: "slot_level__3", p: 1 },
+    });
+    expect(rec.warnings).toEqual(["Casting Fear ends concentration on Suggestion."]);
+    expect(rules(rec)).toContain("concentration");
+    expect(rec.confidence).toBe("medium");
+  });
+
+  it("low spend_resource boosts the best no-resource option: Multiattack (closing in) replaces Discordant Strike's recharge", () => {
+    const { rec, response } = run("derived/spend-resource-low");
+    const spend = response.answers.spend_resource;
+    expect(spend?.type === "noul" && spend.noul).toBeLessThan(SPEND_RESOURCE_LOW);
+    expect(rec.moveBefore).toBe("closeIn");
+    // Not a target candidate: lowest apparent HP among players it reaches after closing in (Kell and Iso, both healthy) → Kell.
+    expect(rec.action).toEqual({ key: "act_multiattack", targetIds: ["kell"], targetBy: { by: "code" } });
+    expect(rec.bonusAction.key).toBe("bon_unsettling_words");
+    expect(rules(rec)).toContain("spend-resource-low");
+  });
+
+  it("confidence buckets: exactly CONFIDENCE_HIGH is high", () => {
+    expect(run("derived/confidence-buckets").rec.confidence).toBe("high");
+  });
+
+  it.each([
+    [CONFIDENCE_HIGH, "high"],
+    [0.8499, "medium"],
+    [CONFIDENCE_MEDIUM, "medium"],
+    [0.5999, "dmsCall"],
+    [0, "dmsCall"],
+    [null, "dmsCall"],
+  ] as const)("confidenceFor(%s) → %s", (p, bucket) => {
+    expect(confidenceFor(p)).toBe(bucket);
+  });
+
+  it("a non-candidate action gets the code-picked target (lowest apparent HP in range) marked as a code pick", () => {
+    const { rec } = run("derived/non-candidate-action");
+    expect(rec.action).toEqual({
+      key: "spell_charm_person",
+      targetIds: ["sefa"],
+      targetBy: { by: "code" },
+      slotLevel: 1,
+      slotLevelBy: { by: "jev", question: "slot_level__1", p: 0.99 },
+    });
+    expect(rules(rec)).toContain("code-pick");
+    expect(rec.warnings).toEqual([]);
+  });
+
+  it("unknown answer keys are ignored: an unasked action, flyUp, an unasked target question and an unknown question", () => {
+    const { rec } = run("derived/unknown-answer-keys");
+    expect(rec.action).toEqual({ key: "act_multiattack", targetIds: ["brakka"], targetBy: { by: "only" } });
+    expect(rec.moveBefore).toBe("hold");
+    expect(rec.probabilities.action).not.toHaveProperty("act_fireball");
+    expect(rec.probabilities.move_before).not.toHaveProperty("flyUp");
+    expect(rec.probabilities).not.toHaveProperty("target__0");
+    expect(rec.nouls).not.toHaveProperty("surprise_question");
+    expect(rules(rec)).not.toContain("choice-not-argmax");
+    const ignored = ruleDetails(rec, "unknown-keys").join(" ");
+    for (const key of ["act_fireball", "flyUp", "target__0", "surprise_question"]) expect(ignored).toContain(key);
+  });
+
+  it("tie-break: prefers Jev's choice when it is tied at the max, otherwise the first tied key in legal order", () => {
+    const { rec } = run("derived/tie-break-choice");
+    expect(rec.action.key).toBe("spell_suggestion");
+    // move_after: hold and reachOther tie at 0.48; Jev's choice (closeIn) isn't tied, and hold comes first.
+    expect(rec.moveAfter).toBe("hold");
+    expect(ruleDetails(rec, "tie-break")).toHaveLength(2);
+    // Recasting the spell it holds still ends that concentration.
+    expect(rec.warnings).toEqual(["Casting Suggestion ends concentration on Suggestion."]);
+  });
+});
+
+describe("isLeveledSpell", () => {
+  it("covers slot spells and innate leveled spells, but not cantrips or non-spells", () => {
+    const hag = extractedReviewed("BriarthornHag");
+    const situation = situationWith([playerTurn({ playerId: "p1" })]);
+    const options: LegalOptions = buildLegalOptions(hag, createTracker(hag, "t", "2026-10-03T00:00:00.000Z").state, situation);
+    const leveled = (key: string) => isLeveledSpell(optionByKey([...options.actions, ...options.bonusActions], key), hag.abilities);
+    expect(leveled("spell_hold_person")).toBe(true); // innate 1/day, level 2, no slot
+    expect(leveled("spell_entangle")).toBe(true);
+    expect(leveled("spell_mage_hand")).toBe(false); // cantrip
+    expect(leveled("act_multiattack")).toBe(false);
+    expect(leveled("dash")).toBe(false);
+    // Known gap: the extractor gives "Misty Step (2/Day)" no spellLevel, so it can't be detected.
+    expect(leveled("bon_misty_step")).toBe(false);
+  });
+
+  it("covers a slot spell from its leveledSpell", () => {
+    const { options, tracker } = run("warpriest-dual-spells");
+    expect(isLeveledSpell(optionByKey(options.bonusActions, "spell_spiritual_weapon"), tracker.reviewed.abilities)).toBe(true);
+    expect(isLeveledSpell(optionByKey(options.actions, "spell_sacred_flame"), tracker.reviewed.abilities)).toBe(false);
+  });
+});
+
+describe("blockedRecommendation", () => {
+  it("holds still when code decides movement", () => {
+    expect(blockedRecommendation({ reason: "Stunned", movementBy: "code" })).toEqual({
+      blocked: { reason: "Stunned", movementBy: "code" },
+      moveBefore: "hold",
+      moveAfter: "hold",
+    });
+  });
+
+  it("leaves movement to the DM (null) when only incapacitated", () => {
+    expect(blockedRecommendation({ reason: "Incapacitated", movementBy: "dm" })).toEqual({
+      blocked: { reason: "Incapacitated", movementBy: "dm" },
+      moveBefore: null,
+      moveAfter: null,
+    });
+  });
+});

@@ -2,7 +2,18 @@
  * Encounter reducers. All pure: ids, timestamps and randomness are parameters.
  */
 import type { ReviewedMonster } from "../monster/types";
-import type { EncounterState, Settings, Situation, Temperament, Tracker } from "./types";
+import type {
+  ApplyChoice,
+  ChosenOption,
+  EncounterState,
+  Player,
+  PlayerTurn,
+  Settings,
+  Situation,
+  Temperament,
+  Tracker,
+  TurnLogEntry,
+} from "./types";
 
 export function suggestTemperament(int: number): Temperament {
   if (int <= 3) return "mindless";
@@ -20,6 +31,53 @@ export function blankSituation(): Situation {
     terrain: { difficult: false, chokepoint: false, escapeRoute: false, flyingPossible: false },
     notes: "",
   };
+}
+
+/** The row a newly added player starts with: near, healthy, in the open, not clustered. */
+export function defaultPlayerTurn(playerId: string): PlayerTurn {
+  return { playerId, zone: "near", apparentHp: "healthy", conditions: [], cover: "none", hitMonsterLastRound: false, clusteredWith: [] };
+}
+
+/** Each player's cluster links with self links, unknown ids and duplicates dropped, then mirrored so every link goes both ways. */
+function symmetricLinks(players: readonly PlayerTurn[]): Map<string, Set<string>> {
+  const linked = new Map(players.map((p) => [p.playerId, new Set<string>()]));
+  for (const p of players) {
+    for (const other of p.clusteredWith) {
+      if (other === p.playerId || !linked.has(other)) continue;
+      linked.get(p.playerId)?.add(other);
+      linked.get(other)?.add(p.playerId);
+    }
+  }
+  return linked;
+}
+
+/** Writes the links back in situation order, so the lists are stable whichever way a link was added. */
+function withLinks(players: readonly PlayerTurn[], linked: Map<string, Set<string>>): PlayerTurn[] {
+  return players.map((p) => ({ ...p, clusteredWith: players.filter((o) => linked.get(p.playerId)?.has(o.playerId)).map((o) => o.playerId) }));
+}
+
+/**
+ * The situation with one row per roster player, in roster order: carried-over rows are kept,
+ * new players get `defaultPlayerTurn`, removed players' rows are dropped. "Clustered with" means
+ * standing together, so it is kept symmetric and only names players on the roster.
+ */
+export function syncSituation(situation: Situation, roster: readonly Player[]): Situation {
+  const byId = new Map(situation.players.map((p) => [p.playerId, p]));
+  const players = roster.map((r) => byId.get(r.id) ?? defaultPlayerTurn(r.id));
+  return { ...situation, players: withLinks(players, symmetricLinks(players)) };
+}
+
+/**
+ * Replaces one player's row. Its `clusteredWith` is authoritative for that player's links: each
+ * listed player gains the link back and each unlisted one loses it. Links between other players
+ * are untouched. Throws for a player not in the situation (sync with the roster first).
+ */
+export function updatePlayerTurn(situation: Situation, turn: PlayerTurn): Situation {
+  const id = turn.playerId;
+  if (!situation.players.some((p) => p.playerId === id)) throw new Error(`updatePlayerTurn: player "${id}" is not in the situation`);
+  const players = situation.players.map((p) => (p.playerId === id ? turn : p));
+  const linked = symmetricLinks(players.map((p) => (p.playerId === id ? p : { ...p, clusteredWith: p.clusteredWith.filter((o) => o !== id) })));
+  return { ...situation, players: withLinks(players, linked) };
 }
 
 export function legendaryActionMax(reviewed: ReviewedMonster): number {
@@ -91,4 +149,83 @@ export function createTracker(reviewed: ReviewedMonster, id: string, now: string
     settings: defaultSettings(reviewed),
     createdAt: now,
   };
+}
+
+/**
+ * State after using one chosen action or bonus action: spends its slot (at the level the DM
+ * chose), daily use or recharge, never below 0, and sets concentration for a concentration spell
+ * (replacing any current one). Throws when the choice doesn't fit the monster, since spending
+ * the wrong resource silently would corrupt the tracker.
+ */
+function spend(state: EncounterState, reviewed: ReviewedMonster, chosen: ChosenOption | null): EncounterState {
+  if (chosen === null) return state;
+  if (chosen.abilityId === null) {
+    if (chosen.slotLevel !== undefined) throw new Error(`apply: slot level given for basic action "${chosen.name}"`);
+    return state;
+  }
+  const ability = reviewed.abilities.find((a) => a.id === chosen.abilityId);
+  if (!ability) throw new Error(`apply: the monster has no ability "${chosen.abilityId}"`);
+  const { uses } = ability;
+  if (uses.kind !== "slot" && chosen.slotLevel !== undefined) {
+    throw new Error(`apply: slot level given for "${ability.name}", which doesn't use spell slots`);
+  }
+
+  const next: EncounterState = { ...state };
+  switch (uses.kind) {
+    case "at-will":
+      break;
+    case "per-day": {
+      const left = state.perDay[ability.id];
+      if (left === undefined) throw new Error(`apply: no daily-use counter for "${ability.name}"`);
+      next.perDay = { ...state.perDay, [ability.id]: Math.max(0, left - 1) };
+      break;
+    }
+    case "recharge":
+      next.recharge = { ...state.recharge, [ability.id]: "spent" };
+      break;
+    case "slot": {
+      const level = chosen.slotLevel;
+      if (level === undefined || level < uses.level) {
+        throw new Error(`apply: "${ability.name}" needs a slot level of ${uses.level} or higher`);
+      }
+      const left = state.slots[String(level)];
+      if (left === undefined) throw new Error(`apply: the monster has no level ${level} spell slots`);
+      next.slots = { ...state.slots, [String(level)]: Math.max(0, left - 1) };
+      break;
+    }
+    default: {
+      const unreachable: never = uses;
+      return unreachable;
+    }
+  }
+  if (ability.concentration) next.concentration = { abilityId: ability.id, name: ability.name };
+  return next;
+}
+
+/**
+ * Applies what the DM actually chose (never the recommendation): spends resources, updates
+ * concentration, pushes a turn-log entry for the current round and carries the situation forward.
+ * HP and the round are untouched: damage is a manual edit and the round advances in `startTurn`.
+ */
+export function apply(tracker: Tracker, choice: ApplyChoice): Tracker {
+  const { action, bonusAction } = choice;
+  const state = spend(spend(tracker.state, tracker.reviewed, action), tracker.reviewed, bonusAction);
+
+  const entry: TurnLogEntry = {
+    round: tracker.state.round,
+    moveBefore: choice.moveBefore,
+    actionId: action?.key ?? null,
+    actionName: action?.name ?? "None",
+    targetIds: action?.targetIds ?? [],
+    bonusActionId: bonusAction?.key ?? null,
+    bonusActionName: bonusAction?.name ?? "None",
+    bonusTargetIds: bonusAction?.targetIds ?? [],
+    moveAfter: choice.moveAfter,
+    recommended: choice.recommended,
+  };
+  if (action?.clusterId !== undefined) entry.clusterId = action.clusterId;
+  if (action?.slotLevel !== undefined) entry.slotLevel = action.slotLevel;
+  if (bonusAction?.slotLevel !== undefined) entry.bonusSlotLevel = bonusAction.slotLevel;
+
+  return { ...tracker, state, situation: choice.situation, log: [...tracker.log, entry] };
 }

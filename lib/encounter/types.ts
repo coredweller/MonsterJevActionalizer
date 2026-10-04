@@ -99,6 +99,8 @@ export type Movement = z.infer<typeof MovementSchema>;
 export const TurnResultSchema = z.enum(["hit", "miss", "downed", "effect"]);
 export type TurnResult = z.infer<typeof TurnResultSchema>;
 
+export const SlotLevelSchema = z.number().int().min(1).max(9);
+
 export const TurnLogEntrySchema = z.object({
   round: z.number().int().min(1),
   moveBefore: MovementSchema,
@@ -107,17 +109,51 @@ export const TurnLogEntrySchema = z.object({
   actionName: z.string(),
   targetIds: z.array(z.string()),
   clusterId: z.string().optional(),
-  slotLevel: z.number().int().min(1).max(9).optional(),
+  /** Slot spent by the action. */
+  slotLevel: SlotLevelSchema.optional(),
   /** Option key of the bonus action, or null for none. */
   bonusActionId: z.string().nullable(),
   bonusActionName: z.string(),
   bonusTargetIds: z.array(z.string()).default([]),
+  /** Slot spent by the bonus action (a leveled bonus-action spell). */
+  bonusSlotLevel: SlotLevelSchema.optional(),
   moveAfter: MovementSchema,
   result: TurnResultSchema.optional(),
   note: z.string().optional(),
   recommended: z.boolean(),
 });
 export type TurnLogEntry = z.infer<typeof TurnLogEntrySchema>;
+
+/** One action or bonus action the DM chose on the recommendation card. */
+export const ChosenOptionSchema = z.object({
+  /** Option key from the legal options; logged as `actionId` / `bonusActionId`. */
+  key: z.string().min(1),
+  name: z.string(),
+  /** The ability behind the option, or null for a basic action (Dash, Dodge, Disengage, Hide, Help). */
+  abilityId: z.string().nullable(),
+  targetIds: z.array(z.string()),
+  /** The slot actually spent. Required for a slot spell, at or above its level; absent otherwise. */
+  slotLevel: SlotLevelSchema.optional(),
+});
+export type ChosenOption = z.infer<typeof ChosenOptionSchema>;
+
+export const ChosenActionSchema = ChosenOptionSchema.extend({ clusterId: z.string().optional() });
+export type ChosenAction = z.infer<typeof ChosenActionSchema>;
+
+/** What the DM actually chose for the turn: the input to `apply` (data-model.md reducers). */
+export const ApplyChoiceSchema = z.object({
+  moveBefore: MovementSchema,
+  /** null when the monster takes no action (e.g. incapacitated). */
+  action: ChosenActionSchema.nullable(),
+  /** null for no bonus action. */
+  bonusAction: ChosenOptionSchema.nullable(),
+  moveAfter: MovementSchema,
+  /** The situation this turn was decided on, carried forward to the next turn. */
+  situation: SituationSchema,
+  /** True when the DM applied the recommendation unchanged. */
+  recommended: z.boolean(),
+});
+export type ApplyChoice = z.infer<typeof ApplyChoiceSchema>;
 
 export const TrackerSchema = z.object({
   id: z.string().min(1),

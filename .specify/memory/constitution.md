@@ -1,4 +1,13 @@
 <!--
+Sync Impact Report (1.1.0, 2026-10-03)
+- Version change: 1.0.1 → 1.1.0 (MINOR: materially expanded guidance in Principle V)
+- Principle V: tests for core logic are now written first and seen to fail before the
+  implementation, for every change to lib/monster, lib/encounter and lib/decide (tasks,
+  bug fixes and helpers added along the way). Reports name the tests seen failing first.
+- Propagated to: CLAUDE.md ("Test-first (always)").
+- Templates: ⚠ pending. .specify/templates/tasks-template.md still says tests are required
+  for lib/ logic; update its test note to "written first and seen to fail" when next touched.
+
 Sync Impact Report (1.0.1, 2026-10-03)
 - Version change: 1.0.0 → 1.0.1 (PATCH: clarifications, no principle redefined)
 - Principle I: "exactly one batched Jev request" → "at most one; none when the monster is hard-blocked"
@@ -95,7 +104,12 @@ fixes keep the DM in control of their own content.
 - Decision logic (`lib/monster`, `lib/encounter`, `lib/decide`) MUST be pure and free of React,
   `fetch` and `localStorage`, so it can be unit-tested directly.
 - Each such module MUST ship with Vitest tests covering the cases listed in the plan's
-  Verification section. Interpretation tests MUST use recorded Jev responses from `fixtures/jev/`,
+  Verification section.
+- Tests MUST be written first: for every change to these modules (planned tasks, bug fixes,
+  and helpers added along the way), the test is written or extended and run, and seen to
+  fail on the missing behaviour, before the implementation is written. Reports MUST name the
+  tests seen failing first and state any change where that step was skipped.
+- Interpretation tests MUST use recorded Jev responses from `fixtures/jev/`,
   not live calls. A derived fixture (a copy of a recorded response with probabilities edited and a
   `derivedFrom` field naming its source) counts as recorded.
 - Every file in `fixtures/monsters/` MUST pass strict zod validation with zero normalizer changes.
@@ -160,4 +174,4 @@ is the only real secret.
 - **Compliance:** every plan's Constitution Check and every code review MUST verify compliance.
   Unjustified complexity is grounds to reject a change.
 
-**Version**: 1.0.1 | **Ratified**: 2026-09-30 | **Last Amended**: 2026-10-03
+**Version**: 1.1.0 | **Ratified**: 2026-09-30 | **Last Amended**: 2026-10-03

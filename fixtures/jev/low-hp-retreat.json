@@ -1,0 +1,429 @@
+{
+  "request": {
+    "state": {
+      "monster": {
+        "name": "Vasira Flameheart",
+        "kind": "general",
+        "hp": {
+          "current": 14,
+          "max": 112
+        },
+        "ac": 16,
+        "speed": {
+          "walk": 30
+        },
+        "abilities": [
+          {
+            "id": "act_multiattack",
+            "name": "Multiattack",
+            "category": "action",
+            "summary": "2× Hellfire Longsword (at will)"
+          },
+          {
+            "id": "act_hellfire_longsword",
+            "name": "Hellfire Longsword",
+            "category": "action",
+            "summary": "melee +7 to hit, reach 5 ft.; 11 (1d10 + 4) slashing + 5 (1d10) fire (at will)"
+          },
+          {
+            "id": "act_infernal_rebuke",
+            "name": "Infernal Rebuke",
+            "category": "reaction",
+            "summary": "DC 14 Dexterity save; 13 (3d8) fire; recharge 5–6 (recharge 5–6)"
+          },
+          {
+            "id": "trt_hellfire_weapons",
+            "name": "Hellfire Weapons",
+            "category": "passive",
+            "summary": "5 (1d10) fire (at will)"
+          },
+          {
+            "id": "trt_fiendish_resilience",
+            "name": "Fiendish Resilience",
+            "category": "passive",
+            "summary": "Vasira has resistance to fire damage. (at will)"
+          },
+          {
+            "id": "trt_aura_of_dread",
+            "name": "Aura of Dread",
+            "category": "passive",
+            "summary": "DC 13 Wisdom save; range 10 ft. (at will)"
+          }
+        ],
+        "rawUnparsed": [
+          "Fiendish Resilience: Vasira has resistance to fire damage."
+        ]
+      },
+      "encounter": {
+        "hp": 14,
+        "hpMax": 112,
+        "slots": {},
+        "perDay": {},
+        "recharge": {
+          "act_infernal_rebuke": "available"
+        },
+        "legendaryActionsLeft": 0,
+        "legendaryResistanceLeft": 0,
+        "conditions": [],
+        "concentration": null,
+        "round": 1
+      },
+      "temperament": "cunning",
+      "morale": {
+        "value": 10,
+        "words": "cowardly"
+      },
+      "situation": {
+        "players": [
+          {
+            "key": "player__0",
+            "label": "player 0: Brakka (melee, Fighter, AC 18)",
+            "zone": "engaged",
+            "distanceFt": 5,
+            "apparentHp": "healthy",
+            "conditions": [],
+            "cover": "none",
+            "hitMonsterLastRound": true,
+            "clusteredWith": []
+          },
+          {
+            "key": "player__1",
+            "label": "player 1: Sefa (melee, Rogue, AC 15)",
+            "zone": "engaged",
+            "distanceFt": 5,
+            "apparentHp": "healthy",
+            "conditions": [],
+            "cover": "none",
+            "hitMonsterLastRound": true,
+            "clusteredWith": []
+          },
+          {
+            "key": "player__2",
+            "label": "player 2: Lio (caster, Sorcerer, AC 13)",
+            "zone": "near",
+            "distanceFt": 30,
+            "apparentHp": "healthy",
+            "conditions": [],
+            "cover": "none",
+            "hitMonsterLastRound": false,
+            "clusteredWith": []
+          }
+        ],
+        "allies": {
+          "present": false,
+          "count": 0
+        },
+        "terrain": {
+          "difficult": false,
+          "chokepoint": false,
+          "escapeRoute": true,
+          "flyingPossible": false
+        },
+        "notes": "A door behind the enforcer leads out to the street."
+      },
+      "options": {
+        "actions": [
+          {
+            "key": "act_multiattack",
+            "summary": "Multiattack: 2× Hellfire Longsword",
+            "usesResource": false,
+            "concentration": false,
+            "singleTarget": true,
+            "area": false,
+            "range": {
+              "ft": 5,
+              "inRangeNow": [
+                "player__0",
+                "player__1"
+              ],
+              "inRangeAfterMove": [
+                "player__0",
+                "player__1",
+                "player__2"
+              ]
+            }
+          },
+          {
+            "key": "act_hellfire_longsword",
+            "summary": "Hellfire Longsword: melee +7 to hit, reach 5 ft.; 11 (1d10 + 4) slashing + 5 (1d10) fire",
+            "usesResource": false,
+            "concentration": false,
+            "singleTarget": true,
+            "area": false,
+            "range": {
+              "ft": 5,
+              "inRangeNow": [
+                "player__0",
+                "player__1"
+              ],
+              "inRangeAfterMove": [
+                "player__0",
+                "player__1",
+                "player__2"
+              ]
+            }
+          },
+          {
+            "key": "dash",
+            "summary": "Dash: extra movement equal to its speed this turn",
+            "usesResource": false,
+            "concentration": false,
+            "singleTarget": false,
+            "area": false,
+            "range": "no target"
+          },
+          {
+            "key": "dodge",
+            "summary": "Dodge: attacks against it have disadvantage and it has advantage on Dexterity saves until its next turn",
+            "usesResource": false,
+            "concentration": false,
+            "singleTarget": false,
+            "area": false,
+            "range": "no target"
+          },
+          {
+            "key": "disengage",
+            "summary": "Disengage: its movement doesn't provoke opportunity attacks this turn",
+            "usesResource": false,
+            "concentration": false,
+            "singleTarget": false,
+            "area": false,
+            "range": "no target"
+          },
+          {
+            "key": "hide",
+            "summary": "Hide: makes a Dexterity (Stealth) check to hide",
+            "usesResource": false,
+            "concentration": false,
+            "singleTarget": false,
+            "area": false,
+            "range": "no target"
+          },
+          {
+            "key": "help",
+            "summary": "Help: gives an ally advantage on its next ability check or attack roll",
+            "usesResource": false,
+            "concentration": false,
+            "singleTarget": false,
+            "area": false,
+            "range": "no target"
+          }
+        ],
+        "bonusActions": [
+          {
+            "key": "none",
+            "summary": "None: take no bonus action",
+            "usesResource": false,
+            "concentration": false,
+            "singleTarget": false,
+            "area": false,
+            "range": "no target"
+          }
+        ],
+        "movements": [
+          "hold",
+          "closeIn",
+          "reachOther",
+          "retreat",
+          "takeCover"
+        ]
+      },
+      "clusters": [
+        {
+          "id": "cluster__0",
+          "players": [
+            "player__0"
+          ],
+          "size": 1
+        },
+        {
+          "id": "cluster__1",
+          "players": [
+            "player__1"
+          ],
+          "size": 1
+        },
+        {
+          "id": "cluster__2",
+          "players": [
+            "player__2"
+          ],
+          "size": 1
+        }
+      ],
+      "history": []
+    },
+    "questions": {
+      "tactic": {
+        "type": "choice",
+        "instructions": "What is the monster's overall plan this turn, given its temperament, morale and the situation?",
+        "criteria": {
+          "aggressive": "Deal as much damage as it can this turn",
+          "focus_weakest": "Finish off or pressure the most wounded or vulnerable player",
+          "focus_threat": "Go after the player who is the biggest threat to it",
+          "control": "Disable, hinder or split up the party rather than deal damage",
+          "defensive": "Protect itself: reposition, buff or avoid damage",
+          "flee": "Get away from the fight"
+        }
+      },
+      "move_before": {
+        "type": "choice",
+        "instructions": "Before its action, how does the monster move?",
+        "criteria": {
+          "hold": "Stay where it is",
+          "closeIn": "Move toward its target",
+          "reachOther": "Move to reach a different target",
+          "retreat": "Move away from the party",
+          "takeCover": "Move behind cover"
+        }
+      },
+      "action": {
+        "type": "choice",
+        "instructions": "Which action does the monster take this turn? Range flags assume the targets in the state.",
+        "criteria": {
+          "act_multiattack": "Multiattack: 2× Hellfire Longsword [in range now]",
+          "act_hellfire_longsword": "Hellfire Longsword: melee +7 to hit, reach 5 ft.; 11 (1d10 + 4) slashing + 5 (1d10) fire [in range now]",
+          "dash": "Dash: extra movement equal to its speed this turn",
+          "dodge": "Dodge: attacks against it have disadvantage and it has advantage on Dexterity saves until its next turn",
+          "disengage": "Disengage: its movement doesn't provoke opportunity attacks this turn",
+          "hide": "Hide: makes a Dexterity (Stealth) check to hide",
+          "help": "Help: gives an ally advantage on its next ability check or attack roll"
+        }
+      },
+      "move_after": {
+        "type": "choice",
+        "instructions": "After its action, how does the monster move?",
+        "criteria": {
+          "hold": "Stay where it is",
+          "closeIn": "Move toward its target",
+          "reachOther": "Move to reach a different target",
+          "retreat": "Move away from the party",
+          "takeCover": "Move behind cover"
+        }
+      },
+      "target__0": {
+        "type": "choice",
+        "instructions": "Who should \"Multiattack\" target?",
+        "criteria": {
+          "player__0": "player 0: Brakka (melee, Fighter, AC 18); healthy; 5 ft. away; cover: none; hit the monster last round",
+          "player__1": "player 1: Sefa (melee, Rogue, AC 15); healthy; 5 ft. away; cover: none; hit the monster last round",
+          "player__2": "player 2: Lio (caster, Sorcerer, AC 13); healthy; 30 ft. away; cover: none"
+        }
+      },
+      "target__1": {
+        "type": "choice",
+        "instructions": "Who should \"Hellfire Longsword\" target?",
+        "criteria": {
+          "player__0": "player 0: Brakka (melee, Fighter, AC 18); healthy; 5 ft. away; cover: none; hit the monster last round",
+          "player__1": "player 1: Sefa (melee, Rogue, AC 15); healthy; 5 ft. away; cover: none; hit the monster last round",
+          "player__2": "player 2: Lio (caster, Sorcerer, AC 13); healthy; 30 ft. away; cover: none"
+        }
+      },
+      "multiattack_fallback": {
+        "type": "noul",
+        "instructions": "If it uses Multiattack and its first target drops partway through, should it switch its remaining attacks to another adjacent target?",
+        "criteria": {
+          "true": "Yes: keep attacking whoever else is in reach.",
+          "false": "No: stop, or save the remaining attacks' movement for something else."
+        }
+      },
+      "should_retreat": {
+        "type": "noul",
+        "instructions": "Given its HP, morale, temperament and the situation, should the monster break off from this fight now?",
+        "criteria": {
+          "true": "Yes: it should get away this turn.",
+          "false": "No: it should keep fighting."
+        }
+      }
+    },
+    "model": "jev-latest"
+  },
+  "response": {
+    "model": "jev-1.13.0",
+    "answers": {
+      "action": {
+        "type": "choice",
+        "choice": "act_multiattack",
+        "probabilities": {
+          "help": 0,
+          "act_hellfire_longsword": 0.03,
+          "act_multiattack": 0.67,
+          "disengage": 0.23,
+          "dash": 0.01,
+          "hide": 0.01,
+          "dodge": 0.05
+        },
+        "confidence": 0.6
+      },
+      "move_after": {
+        "type": "choice",
+        "choice": "retreat",
+        "probabilities": {
+          "closeIn": 0.04,
+          "reachOther": 0.29,
+          "retreat": 0.35,
+          "takeCover": 0.01,
+          "hold": 0.31
+        },
+        "confidence": 0.19
+      },
+      "target__0": {
+        "type": "choice",
+        "choice": "player__1",
+        "probabilities": {
+          "player__1": 0.5700000000000001,
+          "player__2": 0.22,
+          "player__0": 0.21
+        },
+        "confidence": 0.34
+      },
+      "target__1": {
+        "type": "choice",
+        "choice": "player__1",
+        "probabilities": {
+          "player__1": 0.66,
+          "player__2": 0.17,
+          "player__0": 0.17
+        },
+        "confidence": 0.5
+      },
+      "multiattack_fallback": {
+        "type": "noul",
+        "noul": 0.76
+      },
+      "should_retreat": {
+        "type": "noul",
+        "noul": 0.82
+      },
+      "tactic": {
+        "type": "choice",
+        "choice": "flee",
+        "probabilities": {
+          "aggressive": 0.04,
+          "focus_threat": 0.05,
+          "focus_weakest": 0.04,
+          "flee": 0.71,
+          "control": 0.01,
+          "defensive": 0.15
+        },
+        "confidence": 0.65
+      },
+      "move_before": {
+        "type": "choice",
+        "choice": "hold",
+        "probabilities": {
+          "retreat": 0.19,
+          "takeCover": 0.01,
+          "closeIn": 0.12,
+          "reachOther": 0.22,
+          "hold": 0.45999999999999996
+        },
+        "confidence": 0.33
+      }
+    },
+    "usage": {
+      "input_tokens": 3262,
+      "output_tokens": 395
+    }
+  }
+}
