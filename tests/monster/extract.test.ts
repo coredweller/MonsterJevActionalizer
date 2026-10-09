@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  confirmReview,
   extractAbilities,
   parseArea,
   parseAttack,
@@ -8,10 +9,11 @@ import {
   parseSave,
   parseSpeed,
   parseUses,
+  spellsMissingLevel,
   type ReviewDraft,
 } from "@/lib/monster/extract";
 import { parseMonster } from "@/lib/monster/schema";
-import type { Ability } from "@/lib/monster/types";
+import { ReviewedMonsterSchema, SpellEntrySchema, type Ability } from "@/lib/monster/types";
 import { loadMonsterFixture, loadMonsterFixtures } from "../helpers/fixtures";
 
 function draft(name: string): ReviewDraft {
@@ -211,6 +213,19 @@ describe("2024 wording: BriarthornHag", () => {
     expect(byName(d, "Entangle").known).toBe(true);
   });
 
+  it("leaves an unknown at-will/X-day spell's level empty instead of guessing", () => {
+    expect(byName(d, "Thornward Hex").spellLevel).toBeUndefined();
+    expect(d.spellcasting?.spells.find((s) => s.name === "Thornward Hex")?.level).toBeUndefined();
+    expect(byName(d, "Entangle").spellLevel).toBe(1);
+    expect(byName(d, "Mage Hand").spellLevel).toBe(0);
+  });
+
+  it("lists the spells still missing a level, so the review screen can hold Confirm", () => {
+    expect(spellsMissingLevel(d)).toEqual(["Thornward Hex"]);
+    expect(spellsMissingLevel(draft("AshenWarpriest"))).toEqual([]);
+    expect(spellsMissingLevel(draft("TunnelWasp"))).toEqual([]);
+  });
+
   it("Lash points at the Thorn Lash attack it makes", () => {
     expect(byName(d, "Lash").multiattack).toEqual([{ abilityId: byName(d, "Thorn Lash").id, count: 1 }]);
   });
@@ -219,8 +234,42 @@ describe("2024 wording: BriarthornHag", () => {
     expect(byName(d, "Misty Step")).toMatchObject({ known: true, concentration: false, rangeFt: 0, parsed: "full" });
   });
 
+  it("Misty Step (2/Day) is the known level-2 spell despite its uses suffix", () => {
+    expect(byName(d, "Misty Step")).toMatchObject({
+      known: true,
+      spellLevel: 2,
+      category: "bonus",
+      uses: { kind: "per-day", max: 2 },
+    });
+  });
+
   it("Grasping Roots is a legendary save option", () => {
     expect(byName(d, "Grasping Roots")).toMatchObject({ category: "legendary", save: { ability: "Strength", dc: 15 }, rangeFt: 60 });
+  });
+});
+
+describe("SpellEntrySchema", () => {
+  const entry = { abilityId: "spell_thornward_hex", name: "Thornward Hex", uses: { kind: "per-day", max: 1 }, known: false };
+
+  it("accepts an unknown spell with no level yet", () => {
+    expect(SpellEntrySchema.safeParse(entry).success).toBe(true);
+  });
+
+  it("still parses a previously saved entry that has a level", () => {
+    expect(SpellEntrySchema.safeParse({ ...entry, level: 0 }).success).toBe(true);
+  });
+
+  it("still parses a ReviewedMonster saved before levels became optional", () => {
+    const reviewed = confirmReview(draft("BriarthornHag"), "2026-10-03T00:00:00.000Z");
+    const saved = {
+      ...reviewed,
+      abilities: reviewed.abilities.map((a) => (a.name === "Thornward Hex" ? { ...a, spellLevel: 0 } : a)),
+      spellcasting: reviewed.spellcasting && {
+        ...reviewed.spellcasting,
+        spells: reviewed.spellcasting.spells.map((s) => (s.name === "Thornward Hex" ? { ...s, level: 0 } : s)),
+      },
+    };
+    expect(ReviewedMonsterSchema.safeParse(JSON.parse(JSON.stringify(saved))).success).toBe(true);
   });
 });
 

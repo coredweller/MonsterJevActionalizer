@@ -29,6 +29,9 @@ Applies to every change in `lib/`: tasks, bug fixes, and helpers you add along t
 Don't write the test and the implementation in the same step. If extra code turns out
 to be needed mid-task, stop and write its test first.
 
+**Exempt: logging.** Don't write tests for log calls, log-line formats or `lib/log.ts`, first or
+otherwise. Tests may silence `console` output, but never assert on it.
+
 ## Gotchas
 
 - **Jev is not an LLM chat model.** It only answers typed `choice`/`noul`/`score` questions. Never

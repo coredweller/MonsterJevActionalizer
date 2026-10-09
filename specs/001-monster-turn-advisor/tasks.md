@@ -114,7 +114,7 @@ description: "Task list for Monster Turn Advisor (v1)"
 - [X] T033 [P] [US2] Write `tests/monster/options.test.ts`: incapacitated/stunned/paralyzed/petrified/unconscious → `blocked` with reason and no actions or bonus actions; stunned/paralyzed/petrified/unconscious → `blocked.movementBy: "code"` and movements `["hold"]`; incapacitated alone → `blocked.movementBy: "dm"` with the full movement list; speed 0 (grappled/restrained) → movements `["hold"]`; spent recharge, exhausted X/day, and a leveled spell with no slot ≥ its level are excluded; upcast `availableLevels` lists only levels with slots; basic actions Dash/Dodge/Disengage/Hide/Help always present; bonus actions include `BonusActions`, trait-granted, bonus-action spells and `none`; `flyUp` only with fly speed; range flags use the exact distance or `ZONE_DEFAULT_FT` and movement speed for `inRangeAfterMove`; out-of-range options still present; every list ≤ 255
 - [X] T034 [P] [US2] Write `tests/decide/clusters.test.ts`: union-find over `clusteredWith` gives connected groups plus singletons; downed players are still included and counted
 - [X] T035 [P] [US2] Write `tests/decide/questions.test.ts`: builds exactly the keys in contracts/jev-questions.md; every criterion key exists in the legal options; questions with < 2 keys are not asked; `target__<i>` for the top 4 single-target candidates and `cluster__<i>` for the top 3 area candidates ranked per research R5; `slot_level__<i>` only for leveled candidates; `multiattack_fallback` only when Multiattack is legal; `spend_resource` only when a limited option exists; state includes only the last 3 log entries; state includes the `rawUnparsed` text of abilities the extractor couldn't parse; a candidate table maps indexes back
-- [X] T036 [P] [US2] Write `tests/jev/client.test.ts` with an injected `fetch` stub: Bearer header set; 30 s timeout signal passed; one retry on 408/429/500/529 and none on 400; response validated with zod; throws `JevError` (data-model.md) with `kind: "config"` when `TYPESAFE_API_KEY` is missing (and `fetch` is never called), `kind: "upstream"` for a non-2xx after the retry or a zod-invalid body, and `kind: "timeout"` when the abort fires on the final attempt; the key never appears in thrown error messages
+- [X] T036 [P] [US2] Write `tests/jev/client.test.ts` with an injected `fetch` stub: Bearer header set; 20 s timeout signal passed; one retry on 408/429/500/529 and none on 400; response validated with zod; throws `JevError` (data-model.md) with `kind: "config"` when `TYPESAFE_API_KEY` is missing (and `fetch` is never called), `kind: "upstream"` for a non-2xx after the retry or a zod-invalid body, and `kind: "timeout"` when the abort fires on the final attempt; the key never appears in thrown error messages
 - [X] T037 [P] [US2] Write `tests/decide/explain.test.ts`: the explanation is a template naming the tactic, the target reason and rounded probabilities, with no text beyond the template
 - [X] T038 [P] [US2] Write `tests/encounter/state.apply.test.ts`: `apply(tracker, choice)` spends the slot level, per-day use or recharge the DM actually chose (not the recommendation); sets concentration on a concentration spell and replaces an existing one; pushes a `TurnLogEntry` with `recommended` true/false; keeps the situation for the next turn; HP and slots never go below 0
 - [X] T039 [P] [US2] Write `tests/api/decide.route.test.ts`: call the route's `POST` handler with `vi.mock("@/lib/jev/client")`; a monster that can act → `callJev` called exactly once and `200 { ok: true }`; a stunned monster → `callJev` not called, `meta.jevCalled: false`, movement `"hold"`; an incapacitated-only monster → not called, movement `null` (DM picks); invalid body → 400; the mock throwing `JevError` with `kind` `"config"` / `"upstream"` / `"timeout"` → 500 / 502 / 504 with matching `error.kind`; the response body never contains the key
@@ -122,11 +122,11 @@ description: "Task list for Monster Turn Advisor (v1)"
 ### Implementation for User Story 2
 
 - [X] T040 [P] [US2] Create `lib/jev/types.ts`: copy the **request** types from `prototype/src/types.ts` lines 10–76 (`ChoiceQuestion`, `NoulQuestion`, `ScoreQuestion`, `Question`, `SystemOneRequest`, `MAX_CHOICE_OPTIONS`, `OPTION_NONE`); define the **response** side (`ChoiceAnswer`, `NoulAnswer`, `ScoreAnswer`, `Answer`, `SystemOneResponse`) only as zod schemas with `z.infer` types; add a compile-time check (e.g. `const _check: PrototypeSystemOneResponse = {} as SystemOneResponse` using a type-only copy of the prototype interfaces in the same file) so drift from the prototype fails `npm run typecheck`
-- [X] T041 [US2] Implement `lib/jev/client.ts`: `callJev(req, { fetch = globalThis.fetch, env })` reading `TYPESAFE_API_KEY`, `TYPESAFE_BASE_URL` (default `https://api.typesafe.ai`) and `JEV_MODEL` (default `jev-latest`); `POST /v1/systemone`; Bearer auth; `AbortSignal.timeout(30_000)`; one retry on 408/429/5xx/529 honouring `Retry-After` up to 5 s; returns `{ response, latencyMs }`; exports and throws `JevError { kind: "config" | "upstream" | "timeout", message, status? }`, checking the key before any fetch; pass T036
+- [X] T041 [US2] Implement `lib/jev/client.ts`: `callJev(req, { fetch = globalThis.fetch, env })` reading `TYPESAFE_API_KEY`, `TYPESAFE_BASE_URL` (default `https://api.typesafe.ai`) and `JEV_MODEL` (default `jev-latest`); `POST /v1/systemone`; Bearer auth; `AbortSignal.timeout(20_000)`; one retry on 408/429/5xx/529 honouring `Retry-After` up to 5 s; returns `{ response, latencyMs }`; exports and throws `JevError { kind: "config" | "upstream" | "timeout", message, status? }`, checking the key before any fetch; pass T036
 - [X] T042 [US2] Implement `lib/monster/options.ts`: `buildLegalOptions(reviewed, state, situation)` → `LegalOptions` per data-model.md and docs/PLAN.md "Legal options"; one-line `summary` per option; pass T033
 - [X] T043 [P] [US2] Implement `lib/decide/constants.ts`: `CONFIDENCE_HIGH = 0.85`, `CONFIDENCE_MEDIUM = 0.60`, `RETREAT_THRESHOLD = 0.60`, `SPEND_RESOURCE_LOW = 0.40`, `TARGET_CANDIDATES = 4`, `CLUSTER_CANDIDATES = 3`, `HISTORY_TURNS = 3`
 - [X] T044 [US2] Implement `buildClusters(situation)` in `lib/decide/clusters.ts`; pass T034
-- [X] T045 [US2] Implement `lib/decide/questions.ts`: `buildJevRequest(tracker, situation, options)` → `{ request: SystemOneRequest, candidates }` with `choice()`/`noul()` helpers as in `prototype/src/questions.ts`; pass T035
+- [X] T045 [US2] Implement `lib/decide/questions.ts`: `buildJevRequest(tracker: DecideTracker, situation, options)` → `{ request: JevRequest (no `model`; the client fills it from `JEV_MODEL`), candidates }` with `choice()`/`noul()` helpers as in `prototype/src/questions.ts`; pass T035
 - [X] T046 [US2] Write `scripts/record-jev.ts` and `fixtures/jev/scenarios.ts` defining the five docs/PLAN.md scenarios: `lone-melee` (TunnelWasp); `spread-party` (MaestroDrazzuk, a downed caster and two clustered players); `low-hp-retreat` (TieflingEnforcer, low HP, cowardly morale, escape route); `concentrating-caster` (MaestroDrazzuk, already concentrating); `warpriest-dual-spells` (AshenWarpriest at full slots, two players engaged and one near, so Guiding Bolt/Hold Person/Spirit Guardians as actions and Spiritual Weapon/Shield of Faith as bonus actions are all legal, and War Priest is offered). For each, build options and questions and call `callJev` once, then write `fixtures/jev/<scenario>.json` = `{ request, response }`. **Needs the DM's `TYPESAFE_API_KEY` in `.env.local`. Run once with `npm run record:jev` (which passes `--env-file=.env.local`).** Depends on T028, T042–T045
 - [X] T047 [US2] Create derived fixtures in `fixtures/jev/derived/<rule>.json`, each a copy of a recorded `fixtures/jev/<scenario>.json` with only `response.answers[*].probabilities`/`choice`/`noul` edited and a top-level `"derivedFrom": "<scenario>.json"` plus a one-line `"purpose"`. The `request` is never edited; `unknown-answer-keys` is the one fixture that may also **add** an answer key or probability key the request didn't ask for. `two-leveled-spells` and `attack-dependent-bonus` derive from `warpriest-dual-spells.json`. One fixture per rule the recordings don't already trigger: `choice-not-argmax`, `attack-dependent-bonus`, `two-leveled-spells`, `out-of-range-no-close`, `retreat-high`, `concentration-swap`, `spend-resource-low`, `confidence-buckets`, `non-candidate-action`, `unknown-answer-keys`. Add a test in `tests/helpers/fixtures.test.ts` that every derived fixture's `request` is byte-identical to its source's. Depends on the recording task above
 - [X] T048 [US2] Write `tests/decide/interpret.test.ts` using recorded responses from `fixtures/jev/` and derived fixtures from `fixtures/jev/derived/`: reads `probabilities`, not `choice` (include a case where they disagree); drops an attack-dependent bonus action when the action isn't an attack; one leveled spell per turn (the lower-probability one is replaced by its best alternative); out-of-range action with non-closing `move_before` → next-best in-range option; `should_retreat ≥ RETREAT_THRESHOLD` → Disengage or Dash with retreat movement; concentrating plus a new concentration spell → pick stands with a warning naming the dropped spell; low `spend_resource` boosts the best no-resource option; confidence buckets at `CONFIDENCE_HIGH`/`CONFIDENCE_MEDIUM`; non-candidate action gets the code-picked target (lowest apparent HP in range) marked as a code pick; unknown answer keys are ignored
@@ -140,6 +140,71 @@ description: "Task list for Monster Turn Advisor (v1)"
 - [ ] T056 [US2] Build `components/RecommendationCard.tsx`: move before → action (target/cluster/slot) → bonus action → move after; confidence badge ("DM's call" below medium); explanation; warnings; collapsed runners-up with probabilities; a separate override control for **each** of: move before, action, action target(s), cluster (area actions), slot level (leveled spells), bonus action, bonus-action target(s), move after, each listing every legal option computed client-side with `buildLegalOptions` (Principle III); an Apply button that calls `apply` with the DM's final choices; a blocked state that shows the reason, fixes movement to "hold" when `movementBy: "code"`, and shows movement selects for the DM when `movementBy: "dm"`
 - [ ] T057 [US2] Wire the decide flow in `app/page.tsx`: POST `/api/decide` with `{ tracker, situation }`; on `ok: false` or a network error, show `error.message` and render RecommendationCard in manual mode from local options; on Apply, `upsert` the updated tracker; show `meta.latencyMs` and usage in a small debug footer
 - [ ] T058 [US2] Verify secret safety: `TYPESAFE_API_KEY` is referenced only in `lib/jev/client.ts` (plus `.env.example`, `.env.local` and docs); `lib/jev` is never imported from a `"use client"` file; after `npm run build`, grep `.next/static` for the key name and confirm no match
+
+### Review fixes (2026-10-08, before T056)
+
+From the Phase 4 review. Judgment calls on options and range rules are deferred to the end. Each lib change is test-first.
+
+- [X] F01 Update docs/PLAN.md, data-model.md, plan.md, research.md and this file: 20 s timeout, downed players by temperament, tie epsilon, bonus-action range rule, innate leveled spells, unknown spell levels, and the API shapes as built (Option, Recommendation, ApplyChoice, `bonusSlotLevel`, `JevRequest`). T047 also gained an 11th derived fixture, `tie-break-choice`
+- [X] F02 [US2] `lib/decide/questions.ts`: ability summaries in Jev's state no longer repeat the uses ("recharge 5–6 (recharge 5–6)")
+- [X] F03 [US1] Spell lookup ignores a trailing uses suffix: "Misty Step (2/Day)" is known, level 2 *(agent stopped before reporting; behaviour verified by hand 2026-10-08, test-first record not available)*
+- [X] F04 [US1] An unknown spell's level is left empty, never 0 (Thornward Hex); `SpellEntry.level` optional; ReviewScreen requires a level before Confirm *(agent stopped before reporting; behaviour verified by hand 2026-10-08, test-first record not available)*
+- [X] F05 [US1] `scripts/build-srd-spells.ts` captures save and area (Spirit Guardians); regenerate `data/srd-spells.json`; report other spells that gained data *(agent stopped before reporting; behaviour verified by hand 2026-10-08, test-first record not available)*
+- [X] F06 [US2] Downed players are left out of target choices and the code-picked target unless temperament is feral or genius
+- [X] F07 [US2] interpret: the out-of-range rule also covers the bonus action *(tested via the new `out-of-range-bonus` scenario and derived fixture)*
+- [X] F08 [US2] interpret: ties within `TIE_EPSILON = 1e-9`
+- [X] F09 [US2] interpret: innate spells of level ≥ 1 count for the one-leveled-spell rule
+- [X] F10 [US2] `lib/jev/client.ts`: `TIMEOUT_MS = 20_000`
+- [X] F11 Shared logger `lib/log.ts` (levels, `key=value` lines, never secrets); route `console.*` calls in `lib/jev/client.ts`, `app/api/decide/route.ts` and `components/SituationForm.tsx` through it
+- [X] F12 `"use client"` at the top of `components/ui.tsx`
+- [X] F13 `components/ReviewScreen.tsx`: replace `as` casts and `!` assertions with schema checks *(agent stopped before reporting; behaviour verified by hand 2026-10-08, test-first record not available)*
+- [X] F14 Re-record the 6 `fixtures/jev/` scenarios (`npm run record:jev`; `out-of-range-bonus` added for F07), re-derive the 14 derived fixtures, update tests that named recorded picks
+- [X] F15 Gates: `npm test`, `npm run typecheck`, `npm run check:monsters`
+- [X] F16 Logging exempted from tests (constitution 1.1.1, CLAUDE.md "Test-first"): removed `tests/log.test.ts` and the log-line assertions in `tests/jev/client.test.ts` and `tests/api/decide.route.test.ts`, including the check that the API key never reaches a log line. `lib/log.ts` still drops context keys named like secrets
+
+### Review fixes: open decisions (carry over to the next session)
+
+Each item states the **current behaviour**, the **recommendation** and what a change would touch. The DM decides; then the item is built test-first like the ones above.
+
+**Re-recording rule:** anything that changes the legal options, range lists or question text changes the Jev request. The guards in `tests/helpers/fixtures.test.ts` then fail for the affected scenarios, which must be re-recorded (`npm run record:jev`, live calls with the DM's key, so ask first) and their derived fixtures re-derived (same edits, request byte-identical to source).
+
+**Unanswered questions (decide before T056):**
+
+- [ ] F17 **Clusters with a downed member.** Current: the code-picked cluster (an area option with no `cluster__<i>` question) is ranked by how many members are in reach, so a downed player the monster may not target doesn't add to the count (`lib/decide/interpret.ts`). PLAN.md says downed players "still count toward clusters", and research R6 says the count is the whole cluster. **Recommendation: count the whole cluster**, since an area effect hits everyone in it. Code-pick only, so no re-record. No current scenario has a partly reachable cluster, so the test needs a derived fixture or a new scenario
+- [ ] F18 **DM override onto a downed player.** Current: none yet; T056 builds the override controls. `LegalOptions.targetableIds` lists the players the temperament allows. **Recommendation: list every player in the target override, and show a warning when the DM picks one outside `targetableIds`** (Principle III, the DM has final say). Folds into T056
+
+**Judgment calls the spec left open: recommend keeping as is (confirm or overrule):**
+
+- [ ] F19 Interpret fallbacks: with no usable Jev answer, the cluster catching the most players and the lowest available slot level are picked (`PickSource { by: "code" }`)
+- [ ] F20 A low `spend_resource` (< `SPEND_RESOURCE_LOW`) replaces a resource-spending pick outright with the best no-resource option, rather than "boosting" it by some amount
+- [ ] F21 "The Attack action" (War Priest and similar) means a weapon attack or Multiattack, not a spell attack (5e rules)
+- [ ] F22 The one-leveled-spell rule keeps the action on a tie; confidence comes from the final action's probability, after any replacement
+- [ ] F23 Target questions offer only players reachable this turn (`inRangeAfterMove`, or `targetableIds` for an unknown range). Candidate ranking (research R5) treats a no-target option as in range now and an unknown-range option as in range after moving
+- [ ] F24 Morale words sent to Jev: < 20 cowardly, < 40 wary, ≤ 60 steady, ≤ 80 bold, above that fanatical
+- [ ] F25 Legal-option defaults:
+  - Ranged attacks count their long range.
+  - Melee with no stated reach is 5 ft.
+  - Multiattack uses its longest component range.
+  - An area with no range or a range of self uses the area's size.
+  - After-move reach uses the fastest speed mode.
+  - A missing per-day or recharge entry counts as unavailable.
+  - A blocked turn has no `none` bonus.
+  - Clusters are a partition (each player in exactly one).
+- [ ] F26 `apply` never changes HP (damage is a manual edit, US3). A timeout is retried once; a network error (`TypeError`) is not
+- [ ] F27 Situation form:
+  - New players start in "near".
+  - Removing a player has no confirm step.
+  - Every edit saves to the tracker as you type.
+  - Ticking "allies present" sets the count to at least 1, and unticking sets it to 0.
+- [ ] F28 Runners-up are sorted by exact probability (the tie epsilon applies to picks only); `scripts/*.ts` print CLI output with `console`, not `lib/log.ts`
+
+**Judgment calls: recommend changing:**
+
+- [ ] F29 `flyUp` requires both a fly speed **and** `terrain.flyingPossible` (today only the fly speed gates it; a low ceiling should rule it out). `lib/monster/options.ts`. No current scenario monster flies, so the guards should stay green
+- [ ] F30 Offer `reachOther` only when there are at least 2 targetable players (today it's offered even with one). Changes `lone-melee`'s movement lists, so **re-record lone-melee** and re-derive its fixtures (`choice-not-argmax`, `retreat-high`, `confidence-buckets`, `unknown-answer-keys`)
+- [ ] F31 A player behind total cover can't be the target of a single-target option (5e rules): leave them out of those options' range lists. Today total cover changes nothing. Area options still count them
+- [ ] F32 Difficult terrain halves movement when working out `inRangeAfterMove` (today `terrain.difficult` is ignored)
+- [ ] F33 When a player's exact distance contradicts their zone (e.g. engaged at 40 ft.), the exact feet already win for range checks; add a visible hint on the PlayerRow so the DM can fix the zone
 
 **Checkpoint**: US1 + US2 are the full MVP loop. Load a monster, get a recommendation, override it, apply it.
 

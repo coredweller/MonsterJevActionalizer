@@ -49,43 +49,43 @@
             "id": "spell_guiding_bolt",
             "name": "Guiding Bolt",
             "category": "action",
-            "summary": "ranged +7 to hit, range 120 ft.; 14 (4d6) radiant; level 1 slot (level 1 slot)"
+            "summary": "ranged +7 to hit, range 120 ft.; 14 (4d6) radiant; level 1 slot"
           },
           {
             "id": "spell_healing_word",
             "name": "Healing Word",
             "category": "bonus",
-            "summary": "range 60 ft.; level 1 slot (level 1 slot)"
+            "summary": "range 60 ft.; level 1 slot"
           },
           {
             "id": "spell_shield_of_faith",
             "name": "Shield of Faith",
             "category": "bonus",
-            "summary": "range 60 ft.; concentration; level 1 slot (level 1 slot)"
+            "summary": "range 60 ft.; concentration; level 1 slot"
           },
           {
             "id": "spell_hold_person",
             "name": "Hold Person",
             "category": "action",
-            "summary": "DC 15 Wisdom save; range 60 ft.; concentration; level 2 slot (level 2 slot)"
+            "summary": "DC 15 Wisdom save; range 60 ft.; concentration; level 2 slot"
           },
           {
             "id": "spell_spiritual_weapon",
             "name": "Spiritual Weapon",
             "category": "bonus",
-            "summary": "melee +7 to hit, reach 60 ft.; level 2 slot (level 2 slot)"
+            "summary": "melee +7 to hit, reach 60 ft.; level 2 slot"
           },
           {
             "id": "spell_mass_healing_word",
             "name": "Mass Healing Word",
             "category": "bonus",
-            "summary": "range 60 ft.; level 3 slot (level 3 slot)"
+            "summary": "range 60 ft.; level 3 slot"
           },
           {
             "id": "spell_spirit_guardians",
             "name": "Spirit Guardians",
             "category": "action",
-            "summary": "self; concentration; level 3 slot (level 3 slot)"
+            "summary": "DC 15 Wisdom save; 15-ft. emanation; self; concentration; level 3 slot"
           },
           {
             "id": "trt_war_priest",
@@ -317,15 +317,26 @@
           },
           {
             "key": "spell_spirit_guardians",
-            "summary": "Spirit Guardians: self; concentration; level 3 slot",
+            "summary": "Spirit Guardians: DC 15 Wisdom save; 15-ft. emanation; self; concentration; level 3 slot",
             "usesResource": true,
             "concentration": true,
             "singleTarget": false,
-            "area": false,
+            "area": true,
             "slotLevels": [
               3
             ],
-            "range": "no target"
+            "range": {
+              "ft": 15,
+              "inRangeNow": [
+                "player__0",
+                "player__1"
+              ],
+              "inRangeAfterMove": [
+                "player__0",
+                "player__1",
+                "player__2"
+              ]
+            }
           },
           {
             "key": "dash",
@@ -546,7 +557,7 @@
           "spell_thaumaturgy": "Thaumaturgy: range 30 ft.",
           "spell_guiding_bolt": "Guiding Bolt: ranged +7 to hit, range 120 ft.; 14 (4d6) radiant; level 1 slot [in range now]",
           "spell_hold_person": "Hold Person: DC 15 Wisdom save; range 60 ft.; concentration; level 2 slot [in range now]",
-          "spell_spirit_guardians": "Spirit Guardians: self; concentration; level 3 slot",
+          "spell_spirit_guardians": "Spirit Guardians: DC 15 Wisdom save; 15-ft. emanation; self; concentration; level 3 slot [in range now]",
           "dash": "Dash: extra movement equal to its speed this turn",
           "dodge": "Dodge: attacks against it have disadvantage and it has advantage on Dexterity saves until its next turn",
           "disengage": "Disengage: its movement doesn't provoke opportunity attacks this turn",
@@ -614,6 +625,15 @@
           "player__2": "player 2: Lio (caster, Sorcerer, AC 13); healthy; 30 ft. away; cover: none"
         }
       },
+      "cluster__0": {
+        "type": "choice",
+        "instructions": "Which group of players should \"Spirit Guardians\" be aimed at?",
+        "criteria": {
+          "cluster__0": "player 0: Brakka (melee, Fighter, AC 18): catches 1",
+          "cluster__1": "player 1: Sefa (melee, Rogue, AC 15): catches 1",
+          "cluster__2": "player 2: Lio (caster, Sorcerer, AC 13): catches 1"
+        }
+      },
       "slot_level__0": {
         "type": "choice",
         "instructions": "If it casts \"Guiding Bolt\", which spell slot level should it use?",
@@ -674,80 +694,80 @@
         "type": "choice",
         "choice": "control",
         "probabilities": {
-          "flee": 0,
-          "aggressive": 0.27,
-          "focus_threat": 0.33,
-          "control": 0.35,
+          "aggressive": 0.19,
           "focus_weakest": 0.03,
-          "defensive": 0.02
+          "focus_threat": 0.29,
+          "control": 0.47000000000000003,
+          "defensive": 0.02,
+          "flee": 0
         },
-        "confidence": 0.22
+        "confidence": 0.36
       },
       "move_before": {
         "type": "choice",
         "choice": "hold",
         "probabilities": {
-          "reachOther": 0.34,
+          "hold": 0.38,
+          "closeIn": 0.26,
+          "reachOther": 0.33,
           "retreat": 0.02,
-          "takeCover": 0.01,
-          "closeIn": 0.24,
-          "hold": 0.39
+          "takeCover": 0.01
         },
-        "confidence": 0.24
+        "confidence": 0.22
       },
       "action": {
         "type": "choice",
         "choice": "spell_sacred_flame",
         "probabilities": {
-          "spell_sacred_flame": 0.63,
-          "act_light_crossbow": 0.01,
-          "spell_thaumaturgy": 0,
-          "hide": 0,
-          "disengage": 0.01,
-          "help": 0,
-          "spell_guiding_bolt": 0.09,
-          "spell_hold_person": 0.14,
-          "act_multiattack": 0.03,
-          "dodge": 0.01,
+          "act_multiattack": 0.04,
           "act_mace": 0.02,
-          "spell_spirit_guardians": 0.06,
-          "dash": 0
+          "act_light_crossbow": 0.01,
+          "spell_sacred_flame": 0.56,
+          "spell_thaumaturgy": 0,
+          "spell_guiding_bolt": 0.08,
+          "spell_hold_person": 0.13,
+          "spell_spirit_guardians": 0.13,
+          "dash": 0,
+          "dodge": 0.01,
+          "disengage": 0.01,
+          "hide": 0,
+          "help": 0
         },
-        "confidence": 0.58
+        "confidence": 0.52
       },
       "bonus_action": {
         "type": "choice",
         "choice": "trt_war_priest",
         "probabilities": {
-          "spell_shield_of_faith": 0.01,
-          "spell_mass_healing_word": 0,
-          "spell_spiritual_weapon": 0.03,
           "spell_healing_word": 0,
-          "trt_war_priest": 0.53,
-          "trt_ash_step": 0.02,
-          "none": 0.4
+          "spell_shield_of_faith": 0.02,
+          "spell_spiritual_weapon": 0.03,
+          "spell_mass_healing_word": 0,
+          "trt_war_priest": 0.59,
+          "trt_ash_step": 0.03,
+          "none": 0.33
         },
-        "confidence": 0.45
+        "confidence": 0.52
       },
       "move_after": {
         "type": "choice",
         "choice": "hold",
         "probabilities": {
-          "reachOther": 0.4,
-          "retreat": 0.03,
-          "takeCover": 0.01,
-          "closeIn": 0.11,
-          "hold": 0.45
+          "hold": 0.44,
+          "closeIn": 0.13,
+          "reachOther": 0.38,
+          "retreat": 0.04,
+          "takeCover": 0.01
         },
-        "confidence": 0.31
+        "confidence": 0.3
       },
       "target__0": {
         "type": "choice",
         "choice": "player__1",
         "probabilities": {
-          "player__2": 0.22,
+          "player__0": 0.35,
           "player__1": 0.41,
-          "player__0": 0.37
+          "player__2": 0.24
         },
         "confidence": 0.11
       },
@@ -755,39 +775,49 @@
         "type": "choice",
         "choice": "player__1",
         "probabilities": {
-          "player__2": 0.09,
-          "player__1": 0.58,
-          "player__0": 0.33
+          "player__0": 0.38,
+          "player__1": 0.52,
+          "player__2": 0.1
         },
-        "confidence": 0.36
+        "confidence": 0.28
       },
       "target__2": {
         "type": "choice",
         "choice": "player__1",
         "probabilities": {
-          "player__2": 0.04,
+          "player__0": 0.37,
           "player__1": 0.59,
-          "player__0": 0.37
+          "player__2": 0.04
         },
-        "confidence": 0.37
+        "confidence": 0.38
       },
       "target__3": {
         "type": "choice",
         "choice": "player__2",
         "probabilities": {
-          "player__2": 0.94,
+          "player__0": 0.03,
           "player__1": 0.03,
-          "player__0": 0.03
+          "player__2": 0.94
         },
-        "confidence": 0.92
+        "confidence": 0.91
+      },
+      "cluster__0": {
+        "type": "choice",
+        "choice": "cluster__0",
+        "probabilities": {
+          "cluster__0": 0.6,
+          "cluster__1": 0.14,
+          "cluster__2": 0.26
+        },
+        "confidence": 0.4
       },
       "slot_level__0": {
         "type": "choice",
         "choice": "level__1",
         "probabilities": {
-          "level__3": 0,
+          "level__1": 1,
           "level__2": 0,
-          "level__1": 1
+          "level__3": 0
         },
         "confidence": 1
       },
@@ -795,24 +825,24 @@
         "type": "choice",
         "choice": "level__2",
         "probabilities": {
-          "level__3": 0.01,
-          "level__2": 0.99
+          "level__2": 1,
+          "level__3": 0
         },
-        "confidence": 0.99
+        "confidence": 1
       },
       "slot_level__3": {
         "type": "choice",
         "choice": "level__1",
         "probabilities": {
-          "level__3": 0,
+          "level__1": 0.99,
           "level__2": 0,
-          "level__1": 1
+          "level__3": 0.01
         },
-        "confidence": 1
+        "confidence": 0.98
       },
       "multiattack_fallback": {
         "type": "noul",
-        "noul": 0.81
+        "noul": 0.79
       },
       "should_retreat": {
         "type": "noul",
@@ -820,12 +850,12 @@
       },
       "spend_resource": {
         "type": "noul",
-        "noul": 0.6
+        "noul": 0.61
       }
     },
     "usage": {
-      "input_tokens": 6223,
-      "output_tokens": 783
+      "input_tokens": 6415,
+      "output_tokens": 828
     }
   }
 }

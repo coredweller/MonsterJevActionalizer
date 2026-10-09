@@ -11,7 +11,7 @@ import type { RecommendationDraft } from "@/lib/decide/types";
 import { buildLegalOptions } from "@/lib/monster/options";
 
 const { tracker, situation } = buildScenario("concentrating-caster");
-const options = buildLegalOptions(tracker.reviewed, tracker.state, situation);
+const options = buildLegalOptions(tracker.reviewed, tracker.state, situation, tracker.settings.temperament);
 const roster = tracker.roster;
 
 const PROBABILITIES = {

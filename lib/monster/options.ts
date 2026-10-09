@@ -4,7 +4,7 @@
  * display, overrides and the manual fallback; the server recomputes them before asking Jev (R4).
  */
 import { z } from "zod";
-import { type Condition, type EncounterState, type Movement, MovementSchema, type Situation, ZONE_DEFAULT_FT } from "../encounter/types";
+import { type Condition, type EncounterState, type Movement, MovementSchema, type Situation, type Temperament, ZONE_DEFAULT_FT } from "../encounter/types";
 import { MAX_CHOICE_OPTIONS, OPTION_NONE } from "../jev/types";
 import { summarize } from "./describe";
 import type { Ability, Attack, ReviewedMonster } from "./types";
@@ -13,9 +13,9 @@ export const BasicActionSchema = z.enum(["dash", "dodge", "disengage", "hide", "
 export type BasicAction = z.infer<typeof BasicActionSchema>;
 
 /**
- * Whether players are in range. `ft` lists player ids within `ft` feet now, and within `ft` feet
- * after moving up to the monster's speed (a superset of `inRangeNow`). Out-of-range options are
- * still offered, with empty lists.
+ * Whether players are in range. `ft` lists the ids of targetable players (see `targetableIds`)
+ * within `ft` feet now, and within `ft` feet after moving up to the monster's speed (a superset of
+ * `inRangeNow`). Out-of-range options are still offered, with empty lists.
  */
 export const OptionRangeSchema = z.discriminatedUnion("kind", [
   /** Doesn't target a player: Dash, Dodge, healing, self buffs, `none`. */
@@ -71,6 +71,12 @@ export const LegalOptionsSchema = z.object({
   /** Always ends with `none` unless blocked. */
   bonusActions: z.array(OptionSchema).max(MAX_CHOICE_OPTIONS),
   movements: z.array(MovementSchema).max(MAX_CHOICE_OPTIONS),
+  /**
+   * Players the monster may target this turn, in situation order: everyone except downed players,
+   * unless it is feral or a genius. Range lists only contain these; an option of unknown range can
+   * reach any of them. Downed players still count toward clusters.
+   */
+  targetableIds: z.array(z.string()),
 });
 export type LegalOptions = z.infer<typeof LegalOptionsSchema>;
 
@@ -87,6 +93,13 @@ const BASIC: Record<BasicAction, { name: string; effect: string }> = {
   hide: { name: "Hide", effect: "makes a Dexterity (Stealth) check to hide" },
   help: { name: "Help", effect: "gives an ally advantage on its next ability check or attack roll" },
 };
+
+/** Only these temperaments go after downed players (PLAN.md "Legal options"). */
+const TARGETS_DOWNED: readonly Temperament[] = ["feral", "genius"];
+
+function targetablePlayers(situation: Situation, temperament: Temperament): Situation["players"] {
+  return TARGETS_DOWNED.includes(temperament) ? situation.players : situation.players.filter((p) => p.apparentHp !== "down");
+}
 
 const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 const isDefined = <T>(x: T | undefined): x is T => x !== undefined;
@@ -163,12 +176,12 @@ function reachOf(a: Ability, byId: ReadonlyMap<string, Ability>): Reach {
   return "unknown";
 }
 
-function rangeFlags(reach: Reach, situation: Situation, speed: number): OptionRange {
+function rangeFlags(reach: Reach, targetable: Situation["players"], speed: number): OptionRange {
   if (reach === "noTarget") return { kind: "noTarget" };
   if (reach === "unknown") return { kind: "unknown" };
   const inRangeNow: string[] = [];
   const inRangeAfterMove: string[] = [];
-  for (const p of situation.players) {
+  for (const p of targetable) {
     const distance = p.distanceFt ?? ZONE_DEFAULT_FT[p.zone];
     if (distance <= reach) inRangeNow.push(p.playerId);
     if (distance - speed <= reach) inRangeAfterMove.push(p.playerId);
@@ -183,7 +196,7 @@ function abilityOption(
   names: Record<string, string>,
   byId: ReadonlyMap<string, Ability>,
   state: EncounterState,
-  situation: Situation,
+  targetable: Situation["players"],
   speed: number,
 ): Option {
   const condition = a.dependsOnAttackAction ? "; only when it takes the Attack action" : "";
@@ -197,7 +210,7 @@ function abilityOption(
     concentration: a.concentration ?? false,
     singleTarget: a.singleTarget,
     area: a.area !== undefined,
-    range: rangeFlags(reachOf(a, byId), situation, speed),
+    range: rangeFlags(reachOf(a, byId), targetable, speed),
   };
   if (a.uses.kind === "slot") {
     option.leveledSpell = { baseLevel: a.uses.level, availableLevels: slotLevelsFrom(a.uses.level, state.slots) };
@@ -236,13 +249,15 @@ const NO_BONUS_ACTION: Option = {
 /**
  * Every action, bonus action and movement intent legal this turn, with range flags. Abilities keep
  * statblock order; each list is capped at MAX_CHOICE_OPTIONS, always keeping the basic actions and
- * `none`.
+ * `none`. The temperament decides whether downed players can be targeted (`targetableIds`).
  */
-export function buildLegalOptions(reviewed: ReviewedMonster, state: EncounterState, situation: Situation): LegalOptions {
+export function buildLegalOptions(reviewed: ReviewedMonster, state: EncounterState, situation: Situation, temperament: Temperament): LegalOptions {
   const blocked = hardBlock(state.conditions);
   const speed = movementSpeed(reviewed, state.conditions, blocked);
   const movements = legalMovements(speed, reviewed);
-  if (blocked) return { blocked, actions: [], bonusActions: [], movements };
+  const targetable = targetablePlayers(situation, temperament);
+  const targetableIds = targetable.map((p) => p.playerId);
+  if (blocked) return { blocked, actions: [], bonusActions: [], movements, targetableIds };
 
   const names: Record<string, string> = {};
   const byId = new Map<string, Ability>();
@@ -251,7 +266,7 @@ export function buildLegalOptions(reviewed: ReviewedMonster, state: EncounterSta
     byId.set(a.id, a);
   }
   const available = reviewed.abilities.filter((a) => isAvailable(a, state));
-  const toOption = (a: Ability) => abilityOption(a, names, byId, state, situation, speed);
+  const toOption = (a: Ability) => abilityOption(a, names, byId, state, targetable, speed);
 
   const basics = BasicActionSchema.options.map(basicOption);
   const actions = available
@@ -263,5 +278,5 @@ export function buildLegalOptions(reviewed: ReviewedMonster, state: EncounterSta
     .slice(0, MAX_CHOICE_OPTIONS - 1)
     .map(toOption);
 
-  return { actions: [...actions, ...basics], bonusActions: [...bonusActions, NO_BONUS_ACTION], movements };
+  return { actions: [...actions, ...basics], bonusActions: [...bonusActions, NO_BONUS_ACTION], movements, targetableIds };
 }

@@ -109,6 +109,7 @@
       "shape": "cube",
       "size": 200
     },
+    "save": "Wisdom",
     "concentration": false
   },
   {
@@ -305,6 +306,7 @@
       "shape": "sphere",
       "size": 5
     },
+    "save": "Dexterity",
     "damage": "3d10 lightning",
     "concentration": true
   },
@@ -707,6 +709,7 @@
     "level": 2,
     "castingTime": "action",
     "range": "Self",
+    "save": "Wisdom",
     "concentration": true
   },
   {
@@ -824,6 +827,7 @@
       "shape": "sphere",
       "size": 100
     },
+    "save": "Constitution",
     "concentration": true
   },
   {
@@ -1065,6 +1069,7 @@
     "level": 2,
     "castingTime": "action",
     "range": "60 feet",
+    "save": "Dexterity",
     "damage": "2d6 fire",
     "concentration": true
   },
@@ -1121,6 +1126,7 @@
       "shape": "cube",
       "size": 20
     },
+    "save": "Charisma",
     "concentration": false
   },
   {
@@ -1209,6 +1215,11 @@
     "level": 3,
     "castingTime": "other",
     "range": "Touch",
+    "area": {
+      "shape": "sphere",
+      "size": 20
+    },
+    "save": "Dexterity",
     "concentration": false
   },
   {
@@ -1414,6 +1425,7 @@
       "shape": "sphere",
       "size": 30
     },
+    "save": "Constitution",
     "concentration": true
   },
   {
@@ -1428,6 +1440,10 @@
     "level": 3,
     "castingTime": "action",
     "range": "120 feet",
+    "area": {
+      "shape": "cube",
+      "size": 30
+    },
     "save": "Wisdom",
     "concentration": true
   },
@@ -1520,6 +1536,7 @@
     "level": 6,
     "castingTime": "action",
     "range": "30 feet",
+    "save": "Wisdom",
     "concentration": true
   },
   {
@@ -1555,6 +1572,7 @@
     "level": 2,
     "castingTime": "action",
     "range": "60 feet",
+    "save": "Constitution",
     "concentration": true
   },
   {
@@ -1929,6 +1947,7 @@
     "level": 8,
     "castingTime": "action",
     "range": "60 feet",
+    "save": "Constitution",
     "concentration": false
   },
   {
@@ -1967,6 +1986,7 @@
       "shape": "line",
       "size": 90
     },
+    "save": "Constitution",
     "concentration": false
   },
   {
@@ -2143,6 +2163,7 @@
     "level": 1,
     "castingTime": "bonus",
     "range": "30 feet",
+    "save": "Wisdom",
     "concentration": false
   },
   {
@@ -2180,6 +2201,7 @@
     "level": 5,
     "castingTime": "action",
     "range": "30 feet",
+    "save": "Charisma",
     "concentration": false
   },
   {
@@ -2296,6 +2318,7 @@
       "shape": "cylinder",
       "size": 40
     },
+    "save": "Dexterity",
     "concentration": true
   },
   {
@@ -2365,6 +2388,11 @@
     "level": 3,
     "castingTime": "action",
     "range": "Self",
+    "area": {
+      "shape": "emanation",
+      "size": 15
+    },
+    "save": "Wisdom",
     "concentration": true
   },
   {
@@ -2458,6 +2486,7 @@
       "shape": "cube",
       "size": 10
     },
+    "save": "Constitution",
     "concentration": false
   },
   {
@@ -2564,6 +2593,7 @@
     "level": 9,
     "castingTime": "action",
     "range": "30 feet",
+    "save": "Wisdom",
     "concentration": true
   },
   {
@@ -2650,6 +2680,7 @@
     "level": 5,
     "castingTime": "action",
     "range": "120 feet",
+    "save": "Dexterity",
     "concentration": true
   },
   {
@@ -2695,6 +2726,7 @@
       "shape": "cube",
       "size": 20
     },
+    "save": "Dexterity",
     "concentration": true
   },
   {
@@ -2756,6 +2788,7 @@
       "shape": "sphere",
       "size": 15
     },
+    "save": "Charisma",
     "concentration": false
   }
 ]

@@ -69,7 +69,11 @@ export const AbilitySchema = z.object({
   singleTarget: z.boolean(),
   /** e.g. "when it takes the Attack action, it can … as a bonus action". */
   dependsOnAttackAction: z.boolean().optional(),
-  /** Set on spells: the spell's base level (0 for cantrips) and whether the SRD table knows it. */
+  /**
+   * Set on spells: the spell's base level (0 for cantrips) and whether the SRD table knows it.
+   * The level comes from the SRD table, the statblock's slot line or the DM; it is never guessed,
+   * so an unknown at-will/X-day spell has none until the DM enters it on the review screen.
+   */
   spellLevel: z.number().int().min(0).max(9).optional(),
   known: z.boolean().optional(),
   raw: z.string(),
@@ -93,7 +97,8 @@ export type SrdSpell = z.infer<typeof SrdSpellSchema>;
 export const SpellEntrySchema = z.object({
   abilityId: z.string(),
   name: z.string(),
-  level: z.number().int().min(0).max(9),
+  /** Empty for an unknown spell until the DM enters it; the review screen holds Confirm until then. */
+  level: z.number().int().min(0).max(9).optional(),
   uses: AbilityUsesSchema,
   known: z.boolean(),
   spell: SrdSpellSchema.optional(),

@@ -41,7 +41,8 @@ app/
 lib/jev/
   types.ts                  – copy of prototype/src/types.ts lines 10–76 (wire types, MAX_CHOICE_OPTIONS, OPTION_NONE);
                               response types inferred from zod
-  client.ts                 – port of prototype/server.ts proxy(): Bearer auth, 30s timeout, one retry on 408/429/5xx/529 (as api.py)
+  client.ts                 – port of prototype/server.ts proxy(): Bearer auth, 20s timeout per attempt, one retry on 408/429/5xx/529 or a timeout (as api.py);
+                              worst case ≈ 45 s, inside the 60 s turn budget (SC-001)
 lib/monster/
   schema.ts                 – zod schemas copied from DandDTemplateParserTypeScript/src/routes/monsters.ts (Modifier optional)
   types.ts                  – zod schemas + inferred types for extracted abilities and the reviewed monster
@@ -132,7 +133,7 @@ It also extracts:
 - `parseHp`, which takes the leading integer
 - `parseSpeed`, which builds a map of movement modes
 
-Spells are looked up by name in `data/srd-spells.json`. A spell that isn't in the table is marked **unknown**.
+Spells are looked up by name in `data/srd-spells.json`, ignoring a trailing uses suffix such as `(2/Day)`. A spell that isn't in the table is marked **unknown**, and its level is left empty, never guessed. The DM must enter it on the review screen before confirming.
 
 **Review screen, shown after loading.** Every extracted entry is listed with:
 - its category (action / bonus action / reaction / passive)
@@ -204,6 +205,7 @@ Each zone has a default distance, used only when no exact distance is given: eng
 - **Bonus actions:** `BonusActions` entries, trait-granted bonus actions and bonus-action spells, plus `none`.
 - **Movement intents:** hold / close in on the target / reach another target / retreat / take cover / fly up. Fly up is offered only if the monster has a fly speed.
 - **Range:** for each option, code works out whether some target is in range now, or in range after moving, from the zones and speed. Out-of-range options are flagged in the state but still offered.
+- **Downed players** (apparent HP "down"): only feral and tactical-genius monsters may target them. For mindless and cunning monsters, downed players are left out of every target choice, including the target code picks itself. They still count toward clusters.
 - **Limit:** options are capped at `MAX_CHOICE_OPTIONS` (255).
 
 ## Questions to Jev (one batched request per turn)
@@ -234,12 +236,13 @@ Questions use index keys (e.g. `target__3`), as in the prototype's `material__3`
 "Top candidates" means the 3–4 options most likely to be picked. Code chooses them before the request, based on range and availability, because Jev answers all questions in parallel.
 
 ## Interpretation (`interpret.ts`)
-Code reads the `probabilities` distributions, not just `choice`, because the prototype found that `choice` isn't always the highest-probability option.
+Code reads the `probabilities` distributions, not just `choice`, because the prototype found that `choice` isn't always the highest-probability option. Probabilities within 1e-9 of each other count as tied. A tie goes to Jev's `choice` if it is one of the tied keys, otherwise to the first in legal-option order.
 
 **Consistency rules:**
 - A bonus action that depends on the Attack action (e.g. an off-hand attack) is dropped if the chosen action isn't an attack.
 - **One leveled spell per turn.** If the action and the bonus action are both leveled spells, the one with the lower probability is replaced by its best alternative.
-- If the chosen action is out of range and `move_before` doesn't bring a target into reach, the app picks the next-best option that is in range.
+- If the chosen action or bonus action is out of range and `move_before` doesn't bring a target into reach, the app picks the next-best option that is in range.
+- **Innate spells** (at-will or X/day, no slot) count as leveled spells for the rule above when their level is 1 or higher, taken from the SRD table or the DM's review.
 - If `should_retreat` is high (≥ 0.60), Disengage or Dash is preferred, with retreat as the movement.
 - **Concentration:** if the monster is already concentrating and picks another concentration spell, the pick stands, with a warning saying which spell it drops.
 - If `spend_resource` is low, the best option that uses no resource gets a boost.

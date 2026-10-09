@@ -29,7 +29,7 @@
             "id": "act_infernal_rebuke",
             "name": "Infernal Rebuke",
             "category": "reaction",
-            "summary": "DC 14 Dexterity save; 13 (3d8) fire; recharge 5–6 (recharge 5–6)"
+            "summary": "DC 14 Dexterity save; 13 (3d8) fire; recharge 5–6"
           },
           {
             "id": "trt_hellfire_weapons",
@@ -341,51 +341,76 @@
   "response": {
     "model": "jev-1.13.0",
     "answers": {
+      "tactic": {
+        "type": "choice",
+        "choice": "flee",
+        "probabilities": {
+          "aggressive": 0.04,
+          "focus_weakest": 0.04,
+          "focus_threat": 0.05,
+          "control": 0.01,
+          "defensive": 0.17,
+          "flee": 0.68
+        },
+        "confidence": 0.62
+      },
+      "move_before": {
+        "type": "choice",
+        "choice": "hold",
+        "probabilities": {
+          "hold": 0.44,
+          "closeIn": 0.11,
+          "reachOther": 0.26,
+          "retreat": 0.18,
+          "takeCover": 0.01
+        },
+        "confidence": 0.3
+      },
       "action": {
         "type": "choice",
         "choice": "act_multiattack",
         "probabilities": {
-          "help": 0,
-          "act_hellfire_longsword": 0.03,
-          "act_multiattack": 0.67,
-          "disengage": 0.23,
+          "act_multiattack": 0.71,
+          "act_hellfire_longsword": 0.04,
           "dash": 0.01,
+          "dodge": 0.03,
+          "disengage": 0.2,
           "hide": 0.01,
-          "dodge": 0.05
+          "help": 0
         },
-        "confidence": 0.6
+        "confidence": 0.66
       },
       "move_after": {
         "type": "choice",
-        "choice": "retreat",
+        "choice": "hold",
         "probabilities": {
+          "hold": 0.33,
           "closeIn": 0.04,
-          "reachOther": 0.29,
-          "retreat": 0.35,
-          "takeCover": 0.01,
-          "hold": 0.31
+          "reachOther": 0.32,
+          "retreat": 0.3,
+          "takeCover": 0.01
         },
-        "confidence": 0.19
+        "confidence": 0.16
       },
       "target__0": {
         "type": "choice",
         "choice": "player__1",
         "probabilities": {
-          "player__1": 0.5700000000000001,
-          "player__2": 0.22,
-          "player__0": 0.21
+          "player__0": 0.21,
+          "player__1": 0.54,
+          "player__2": 0.25
         },
-        "confidence": 0.34
+        "confidence": 0.31
       },
       "target__1": {
         "type": "choice",
         "choice": "player__1",
         "probabilities": {
-          "player__1": 0.66,
-          "player__2": 0.17,
-          "player__0": 0.17
+          "player__0": 0.16,
+          "player__1": 0.64,
+          "player__2": 0.2
         },
-        "confidence": 0.5
+        "confidence": 0.46
       },
       "multiattack_fallback": {
         "type": "noul",
@@ -393,37 +418,12 @@
       },
       "should_retreat": {
         "type": "noul",
-        "noul": 0.82
-      },
-      "tactic": {
-        "type": "choice",
-        "choice": "flee",
-        "probabilities": {
-          "aggressive": 0.04,
-          "focus_threat": 0.05,
-          "focus_weakest": 0.04,
-          "flee": 0.71,
-          "control": 0.01,
-          "defensive": 0.15
-        },
-        "confidence": 0.65
-      },
-      "move_before": {
-        "type": "choice",
-        "choice": "hold",
-        "probabilities": {
-          "retreat": 0.19,
-          "takeCover": 0.01,
-          "closeIn": 0.12,
-          "reachOther": 0.22,
-          "hold": 0.45999999999999996
-        },
-        "confidence": 0.33
+        "noul": 0.8
       }
     },
     "usage": {
-      "input_tokens": 3262,
-      "output_tokens": 395
+      "input_tokens": 3253,
+      "output_tokens": 394
     }
   }
 }

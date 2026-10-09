@@ -28,7 +28,7 @@ function selectedScenarios(args: string[]): ScenarioName[] {
 
 async function record(name: ScenarioName): Promise<void> {
   const { tracker, situation } = buildScenario(name);
-  const options = buildLegalOptions(tracker.reviewed, tracker.state, situation);
+  const options = buildLegalOptions(tracker.reviewed, tracker.state, situation, tracker.settings.temperament);
   if (options.blocked) throw new Error(`${name}: the monster is blocked (${options.blocked.reason}); there is nothing to ask Jev`);
 
   const { request } = buildJevRequest(tracker, situation, options);

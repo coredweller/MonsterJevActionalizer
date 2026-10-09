@@ -2,10 +2,11 @@
 
 import { useMemo, useState } from "react";
 import { describeUses, summarize } from "@/lib/monster/describe";
-import { confirmReview, parseDamage, type ReviewDraft } from "@/lib/monster/extract";
+import { confirmReview, parseDamage, spellsMissingLevel, type ReviewDraft } from "@/lib/monster/extract";
 import {
   AbilityCategorySchema,
   AbilityNameSchema,
+  AbilityUsesSchema,
   AreaShapeSchema,
   ReviewedMonsterSchema,
   type Ability,
@@ -25,13 +26,24 @@ const CATEGORY_LABEL: Record<Ability["category"], string> = {
 
 const int = (s: string, fallback: number) => (Number.isFinite(Number.parseInt(s, 10)) ? Number.parseInt(s, 10) : fallback);
 
+/** Every uses kind, read from the schema so the select can narrow its value without a cast. */
+const USES_KINDS = AbilityUsesSchema.options.map((o) => o.shape.kind.value);
+
 function UsesEditor({ uses, onChange }: { uses: AbilityUses; onChange: (u: AbilityUses) => void }) {
   const amount = uses.kind === "per-day" ? uses.max : uses.kind === "recharge" ? uses.min : uses.kind === "slot" ? uses.level : undefined;
-  function setKind(kind: AbilityUses["kind"]) {
-    if (kind === "at-will") onChange({ kind });
-    if (kind === "per-day") onChange({ kind, max: 1 });
-    if (kind === "recharge") onChange({ kind, min: 5 });
-    if (kind === "slot") onChange({ kind, level: 1 });
+  function setKind(value: string) {
+    const kind = USES_KINDS.find((k) => k === value);
+    if (kind === undefined) throw new Error(`Unknown uses kind "${value}"`);
+    switch (kind) {
+      case "at-will":
+        return onChange({ kind });
+      case "per-day":
+        return onChange({ kind, max: 1 });
+      case "recharge":
+        return onChange({ kind, min: 5 });
+      case "slot":
+        return onChange({ kind, level: 1 });
+    }
   }
   function setAmount(n: number) {
     if (uses.kind === "per-day") onChange({ kind: "per-day", max: Math.max(1, n) });
@@ -42,7 +54,7 @@ function UsesEditor({ uses, onChange }: { uses: AbilityUses; onChange: (u: Abili
     <div className="flex gap-2">
       <label className={labelClass}>
         Uses
-        <select className={inputClass} value={uses.kind} onChange={(e) => setKind(e.target.value as AbilityUses["kind"])}>
+        <select className={inputClass} value={uses.kind} onChange={(e) => setKind(e.target.value)}>
           <option value="at-will">at will</option>
           <option value="per-day">per day</option>
           <option value="recharge">recharge</option>
@@ -62,6 +74,10 @@ function UsesEditor({ uses, onChange }: { uses: AbilityUses; onChange: (u: Abili
 function AbilityEditor({ ability, onChange }: { ability: Ability; onChange: (a: Ability) => void }) {
   const set = (patch: Partial<Ability>) => onChange({ ...ability, ...patch });
   const [damageText, setDamageText] = useState(ability.damage?.map((d) => `${d.dice} ${d.type}`).join(", ") ?? "");
+  // Narrowed once here; the const narrowing carries into the onChange closures below.
+  const { attack, save, area } = ability;
+  // An unknown at-will/X-day spell has no level until the DM enters one.
+  const isSpell = ability.spellLevel !== undefined || ability.known === false;
 
   return (
     <div className="mt-2 grid grid-cols-1 gap-3 rounded bg-stone-50 p-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -76,39 +92,40 @@ function AbilityEditor({ ability, onChange }: { ability: Ability; onChange: (a: 
         </select>
       </label>
       <UsesEditor uses={ability.uses} onChange={(uses) => set({ uses })} />
-      {ability.spellLevel !== undefined && (
+      {isSpell && (
         <label className={labelClass}>
-          Spell level (0 = cantrip)
+          Spell level (0 = cantrip){ability.spellLevel === undefined && " (required)"}
           <input
             className={inputClass}
             type="number"
             min={0}
             max={9}
-            value={ability.spellLevel}
-            onChange={(e) => set({ spellLevel: Math.min(9, Math.max(0, int(e.target.value, 0))) })}
+            required
+            aria-invalid={ability.spellLevel === undefined}
+            value={ability.spellLevel ?? ""}
+            onChange={(e) => set({ spellLevel: e.target.value === "" ? undefined : Math.min(9, Math.max(0, int(e.target.value, 0))) })}
           />
         </label>
       )}
-      {ability.attack && (
+      {attack && (
         <div className="flex gap-2">
           <label className={labelClass}>
             To hit
             <input
               className={`${inputClass} w-20`}
               type="number"
-              value={ability.attack.bonus}
-              onChange={(e) => set({ attack: { ...ability.attack!, bonus: int(e.target.value, ability.attack!.bonus) } })}
+              value={attack.bonus}
+              onChange={(e) => set({ attack: { ...attack, bonus: int(e.target.value, attack.bonus) } })}
             />
           </label>
           <label className={labelClass}>
-            {ability.attack.kind === "melee" ? "Reach (ft.)" : "Range (ft.)"}
+            {attack.kind === "melee" ? "Reach (ft.)" : "Range (ft.)"}
             <input
               className={`${inputClass} w-24`}
               type="number"
-              value={ability.attack.kind === "melee" ? (ability.attack.reach ?? 5) : (ability.attack.range?.normal ?? 0)}
+              value={attack.kind === "melee" ? (attack.reach ?? 5) : (attack.range?.normal ?? 0)}
               onChange={(e) => {
                 const n = int(e.target.value, 0);
-                const attack = ability.attack!;
                 set({ attack: attack.kind === "melee" ? { ...attack, reach: n } : { ...attack, range: { ...attack.range, normal: n } } });
               }}
             />
@@ -120,8 +137,8 @@ function AbilityEditor({ ability, onChange }: { ability: Ability; onChange: (a: 
           Save
           <select
             className={inputClass}
-            value={ability.save?.ability ?? ""}
-            onChange={(e) => set({ save: e.target.value ? { ability: AbilityNameSchema.parse(e.target.value), dc: ability.save?.dc ?? 13 } : undefined })}
+            value={save?.ability ?? ""}
+            onChange={(e) => set({ save: e.target.value ? { ability: AbilityNameSchema.parse(e.target.value), dc: save?.dc ?? 13 } : undefined })}
           >
             <option value="">none</option>
             {AbilityNameSchema.options.map((a) => (
@@ -131,14 +148,14 @@ function AbilityEditor({ ability, onChange }: { ability: Ability; onChange: (a: 
             ))}
           </select>
         </label>
-        {ability.save && (
+        {save && (
           <label className={labelClass}>
             DC
             <input
               className={`${inputClass} w-20`}
               type="number"
-              value={ability.save.dc}
-              onChange={(e) => set({ save: { ...ability.save!, dc: int(e.target.value, ability.save!.dc) } })}
+              value={save.dc}
+              onChange={(e) => set({ save: { ...save, dc: int(e.target.value, save.dc) } })}
             />
           </label>
         )}
@@ -148,10 +165,10 @@ function AbilityEditor({ ability, onChange }: { ability: Ability; onChange: (a: 
           Area
           <select
             className={inputClass}
-            value={ability.area?.shape ?? ""}
+            value={area?.shape ?? ""}
             onChange={(e) => {
               const shape = e.target.value;
-              set(shape ? { area: { shape: AreaShapeSchema.parse(shape), size: ability.area?.size ?? 15 }, singleTarget: false } : { area: undefined });
+              set(shape ? { area: { shape: AreaShapeSchema.parse(shape), size: area?.size ?? 15 }, singleTarget: false } : { area: undefined });
             }}
           >
             <option value="">none</option>
@@ -162,19 +179,19 @@ function AbilityEditor({ ability, onChange }: { ability: Ability; onChange: (a: 
             ))}
           </select>
         </label>
-        {ability.area && (
+        {area && (
           <label className={labelClass}>
             Size (ft.)
             <input
               className={`${inputClass} w-20`}
               type="number"
-              value={ability.area.size}
-              onChange={(e) => set({ area: { ...ability.area!, size: Math.max(1, int(e.target.value, ability.area!.size)) } })}
+              value={area.size}
+              onChange={(e) => set({ area: { ...area, size: Math.max(1, int(e.target.value, area.size)) } })}
             />
           </label>
         )}
       </div>
-      {!ability.attack && (
+      {!attack && (
         <label className={labelClass}>
           Range (ft., 0 = self)
           <input
@@ -230,6 +247,7 @@ export function ReviewScreen({
   const names = useMemo(() => Object.fromEntries(draft.abilities.map((a) => [a.id, a.name])), [draft.abilities]);
   const slots = draft.spellcasting?.slots ?? {};
   const unknown = draft.abilities.filter((a) => a.known === false);
+  const missingLevel = spellsMissingLevel(draft);
 
   function updateAbility(next: Ability) {
     setDraft((d) => ({
@@ -237,7 +255,8 @@ export function ReviewScreen({
       abilities: d.abilities.map((a) => (a.id === next.id ? next : a)),
       spellcasting: d.spellcasting && {
         ...d.spellcasting,
-        spells: d.spellcasting.spells.map((s) => (s.abilityId === next.id ? { ...s, level: next.spellLevel ?? s.level, uses: next.uses } : s)),
+        // The spell entry mirrors its ability, including a level the DM has cleared.
+        spells: d.spellcasting.spells.map((s) => (s.abilityId === next.id ? { ...s, level: next.spellLevel, uses: next.uses } : s)),
       },
     }));
   }
@@ -261,7 +280,7 @@ export function ReviewScreen({
       actions={
         <>
           <Button onClick={onBack}>Back</Button>
-          <Button variant="primary" onClick={confirm}>
+          <Button variant="primary" onClick={confirm} disabled={missingLevel.length > 0} aria-describedby={missingLevel.length > 0 ? "missing-spell-levels" : undefined}>
             Confirm and create tracker
           </Button>
         </>
@@ -317,6 +336,12 @@ export function ReviewScreen({
           <p className="rounded bg-amber-50 p-2 text-sm text-amber-900">
             Not in the SRD spell table: {unknown.map((a) => a.name).join(", ")}. Open each one and fill in its level, category, save
             and range.
+          </p>
+        )}
+
+        {missingLevel.length > 0 && (
+          <p id="missing-spell-levels" role="status" className="rounded bg-amber-50 p-2 text-sm font-medium text-amber-900">
+            Confirm is disabled until every spell has a level. Missing: {missingLevel.join(", ")}.
           </p>
         )}
 

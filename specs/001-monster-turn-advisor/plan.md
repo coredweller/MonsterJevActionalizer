@@ -24,7 +24,7 @@ and Apply spends what was actually chosen.
 **Performance Goals**: at most one Jev request per turn; turn-to-apply under 60 s for the DM (SC-001,
 checked by hand in the quickstart run)
 **Constraints**: API key server-only; `lib/monster|encounter|decide` pure (no React, `fetch`, `localStorage`);
-choice questions ≤ 255 options; Jev timeout 30 s with one retry; tablet-usable layout
+choice questions ≤ 255 options; Jev timeout 20 s per attempt with one retry (worst case ≈ 45 s); tablet-usable layout
 **Scale/Scope**: one DM; a handful of trackers per fight; ~11 components; fixtures of ~10 monsters
 
 ## Constitution Check

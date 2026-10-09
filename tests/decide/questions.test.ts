@@ -3,8 +3,9 @@ import { buildClusters } from "@/lib/decide/clusters";
 import { CLUSTER_CANDIDATES, HISTORY_TURNS, SLOT_CANDIDATES, TARGET_CANDIDATES } from "@/lib/decide/constants";
 import { askedNoulKeys, buildJevRequest, buildJevState, rankOptions } from "@/lib/decide/questions";
 import { createTracker } from "@/lib/encounter/state";
-import type { EncounterState, PlayerTurn, Situation, Tracker, TurnLogEntry } from "@/lib/encounter/types";
+import type { EncounterState, PlayerTurn, Settings, Situation, Temperament, Tracker, TurnLogEntry } from "@/lib/encounter/types";
 import type { ChoiceQuestion, Question } from "@/lib/jev/types";
+import { describeUses } from "@/lib/monster/describe";
 import { buildLegalOptions, type LegalOptions } from "@/lib/monster/options";
 import type { Ability, ReviewedMonster } from "@/lib/monster/types";
 import { ability, extractedReviewed, handReviewed, playerTurn, situationWith } from "../helpers/reviewed";
@@ -18,8 +19,15 @@ interface Built {
   result: ReturnType<typeof buildJevRequest>;
 }
 
-function build(reviewed: ReviewedMonster, players: PlayerTurn[], edit: Partial<EncounterState> = {}, log: TurnLogEntry[] = []): Built {
-  const base = createTracker(reviewed, "t1", NOW);
+function build(
+  reviewed: ReviewedMonster,
+  players: PlayerTurn[],
+  edit: Partial<EncounterState> = {},
+  log: TurnLogEntry[] = [],
+  settings: Partial<Settings> = {},
+): Built {
+  const created = createTracker(reviewed, "t1", NOW);
+  const base = { ...created, settings: { ...created.settings, ...settings } };
   const situation = situationWith(players);
   const tracker: Tracker = {
     ...base,
@@ -28,7 +36,7 @@ function build(reviewed: ReviewedMonster, players: PlayerTurn[], edit: Partial<E
     situation,
     log,
   };
-  const options = buildLegalOptions(tracker.reviewed, tracker.state, situation);
+  const options = buildLegalOptions(tracker.reviewed, tracker.state, situation, tracker.settings.temperament);
   return { tracker, situation, options, result: buildJevRequest(tracker, situation, options) };
 }
 
@@ -148,6 +156,32 @@ describe("buildJevRequest: criteria come from the legal options", () => {
       expect(criteriaKeys(choiceQ(questions, c.key))).toEqual(c.levels.map((n) => `level__${n}`));
     }
     expect(asked).toBeGreaterThan(0);
+  });
+});
+
+describe("buildJevRequest: downed players (PLAN.md 'Legal options')", () => {
+  // Bite reaches everyone engaged; Curse targets a creature but has no readable range.
+  const curse = ability({ id: "act_curse", name: "Curse", raw: "The monster curses one creature it can see." });
+  const reviewed = handReviewed("TunnelWasp", [attack("act_bite", "melee", 5, 7), curse]);
+  const players = [
+    playerTurn({ playerId: "p0", zone: "engaged", apparentHp: "down" }),
+    playerTurn({ playerId: "p1", zone: "engaged" }),
+    playerTurn({ playerId: "p2", zone: "engaged" }),
+  ];
+
+  it.each([
+    ["mindless", ["p1", "p2"]],
+    ["cunning", ["p1", "p2"]],
+    ["feral", ["p0", "p1", "p2"]],
+    ["genius", ["p0", "p1", "p2"]],
+  ] as const satisfies readonly (readonly [Temperament, readonly string[]])[])("%s: target questions offer %j", (temperament, expected) => {
+    const b = build(reviewed, players, {}, [], { temperament });
+    const { targets, players: keyToId } = b.result.candidates;
+    expect(targets.map((c) => c.optionKey)).toEqual(["act_bite", "act_curse"]);
+    for (const c of targets) {
+      expect(c.playerIds).toEqual(expected);
+      expect(criteriaKeys(choiceQ(b.result.request.questions, c.key)).map((k) => keyToId[k])).toEqual(expected);
+    }
   });
 });
 
@@ -370,6 +404,18 @@ describe("buildJevState", () => {
     const { rawUnparsed } = buildJevState(b.tracker, b.situation, b.options).monster;
     expect(rawUnparsed).toHaveLength(unparsed.length);
     unparsed.forEach((a, i) => expect(rawUnparsed[i]).toContain(a.raw));
+  });
+
+  it("states each ability's uses exactly once in its summary (no 'recharge 5–6 (recharge 5–6)')", () => {
+    for (const name of ["MaestroDrazzuk", "AshenWarpriest", "TunnelWasp"]) {
+      const b = build(extractedReviewed(name), warpriestParty);
+      const { abilities } = buildJevState(b.tracker, b.situation, b.options).monster;
+      for (const a of b.tracker.reviewed.abilities) {
+        const summary = abilities.find((x) => x.id === a.id)?.summary ?? "";
+        const phrase = describeUses(a.uses);
+        expect(summary.split(phrase).length - 1, `${name} ${a.id}: ${summary}`).toBe(1);
+      }
+    }
   });
 
   it("includes temperament and morale from the tracker's settings, the encounter state and HP", () => {

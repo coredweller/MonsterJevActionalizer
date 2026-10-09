@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { freshState } from "@/lib/encounter/state";
-import type { Condition, EncounterState, Movement, Situation } from "@/lib/encounter/types";
+import type { Condition, EncounterState, Movement, Situation, Temperament } from "@/lib/encounter/types";
 import { buildLegalOptions, type LegalOptions, type Option } from "@/lib/monster/options";
 import type { Ability, ReviewedMonster } from "@/lib/monster/types";
 import { loadMonsterFixtures } from "../helpers/fixtures";
@@ -18,8 +18,9 @@ const crossbow = ability({
 
 const oneEngaged = situationWith([playerTurn({ playerId: "p1", zone: "engaged" })]);
 
-function build(reviewed: ReviewedMonster, situation: Situation = oneEngaged, edit: Partial<EncounterState> = {}): LegalOptions {
-  return buildLegalOptions(reviewed, { ...freshState(reviewed), ...edit }, situation);
+/** Defaults to a genius monster, which may target anyone, so only the downed-player tests depend on temperament. */
+function build(reviewed: ReviewedMonster, situation: Situation = oneEngaged, edit: Partial<EncounterState> = {}, temperament: Temperament = "genius"): LegalOptions {
+  return buildLegalOptions(reviewed, { ...freshState(reviewed), ...edit }, situation, temperament);
 }
 
 const keys = (opts: Option[]) => opts.map((o) => o.key);
@@ -296,6 +297,42 @@ describe("range flags", () => {
     expect(option(hag.actions, "spell_thornward_hex").range.kind).toBe("unknown");
     const warpriest = build(extractedReviewed("AshenWarpriest"), players);
     expect(option(warpriest.bonusActions, "spell_healing_word").range.kind).toBe("noTarget");
+  });
+});
+
+describe("downed players (PLAN.md 'Legal options')", () => {
+  // Mace reaches the downed player now and p2 after moving; "Curse" targets a player with no readable range.
+  const curse = ability({ id: "act_curse", name: "Curse", raw: "The monster curses one creature it can see." });
+  const reviewed = handReviewed("TunnelWasp", [mace, crossbow, curse]);
+  const situation = situationWith([
+    playerTurn({ playerId: "downed", zone: "engaged", apparentHp: "down" }),
+    playerTurn({ playerId: "p2", zone: "near" }),
+  ]);
+
+  it.each(["mindless", "cunning"] as const)("%s: a downed player is in no range list and not targetable", (temperament) => {
+    const opts = build(reviewed, situation, {}, temperament);
+    expect(rangeOf(option(opts.actions, "act_mace"))).toMatchObject({ inRangeNow: [], inRangeAfterMove: ["p2"] });
+    expect(rangeOf(option(opts.actions, "act_light_crossbow"))).toMatchObject({ inRangeNow: ["p2"], inRangeAfterMove: ["p2"] });
+    expect(option(opts.actions, "act_curse").range.kind).toBe("unknown");
+    expect(opts.targetableIds).toEqual(["p2"]);
+  });
+
+  it.each(["feral", "genius"] as const)("%s: downed players stay targetable", (temperament) => {
+    const opts = build(reviewed, situation, {}, temperament);
+    expect(rangeOf(option(opts.actions, "act_mace"))).toMatchObject({ inRangeNow: ["downed"], inRangeAfterMove: ["downed", "p2"] });
+    expect(opts.targetableIds).toEqual(["downed", "p2"]);
+  });
+
+  it("an attack whose only reachable player is downed is out of range for a cunning monster", () => {
+    const alone = situationWith([
+      playerTurn({ playerId: "downed", zone: "engaged", apparentHp: "down" }),
+      playerTurn({ playerId: "far", zone: "veryFar", distanceFt: 200 }),
+    ]);
+    expect(rangeOf(option(build(reviewed, alone, {}, "cunning").actions, "act_mace"))).toMatchObject({ inRangeNow: [], inRangeAfterMove: [] });
+  });
+
+  it("a blocked monster still lists who could be targeted", () => {
+    expect(build(reviewed, situation, { conditions: ["stunned"] }, "cunning").targetableIds).toEqual(["p2"]);
   });
 });
 

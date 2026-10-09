@@ -15,7 +15,15 @@ import { normalize } from "../../lib/monster/normalize";
 import { parseMonster } from "../../lib/monster/schema";
 import type { Ability, ReviewedMonster } from "../../lib/monster/types";
 
-export const SCENARIO_NAMES = ["lone-melee", "spread-party", "low-hp-retreat", "concentrating-caster", "warpriest-dual-spells"] as const;
+export const SCENARIO_NAMES = [
+  "lone-melee",
+  "spread-party",
+  "low-hp-retreat",
+  "concentrating-caster",
+  "warpriest-dual-spells",
+  // Not a PLAN.md scenario: gives the bonus-action range rule (F07) a real out-of-range bonus action.
+  "out-of-range-bonus",
+] as const;
 export type ScenarioName = (typeof SCENARIO_NAMES)[number];
 
 export interface Scenario {
@@ -132,6 +140,21 @@ function build(name: ScenarioName): Omit<Scenario, "name"> {
       return {
         purpose: "Maestro Drazzuk already concentrating on Suggestion, with leveled concentration spells available: check the warning and slot level.",
         tracker: { ...cast, state: { ...cast.state, round: cast.state.round + 1 } },
+        situation: s,
+      };
+    }
+    case "out-of-range-bonus": {
+      // Maestro moves 30 ft.; Unsettling Words reaches 60 ft. At 70–90 ft. nobody is in its range now,
+      // but everyone is after closing in. Hypnotic Pattern (120 ft.) reaches everyone without moving.
+      const s = situation([
+        turn("brakka", "veryFar", { distanceFt: 70 }),
+        turn("lio", "veryFar", { distanceFt: 80, clusteredWith: ["sefa"] }),
+        turn("sefa", "veryFar", { distanceFt: 90 }),
+      ]);
+      const roster = [hero("brakka", "Brakka", "melee", "Fighter", 18), hero("lio", "Lio", "caster", "Sorcerer", 13), hero("sefa", "Sefa", "melee", "Rogue", 15)];
+      return {
+        purpose: "Maestro Drazzuk with the whole party 70–90 ft. away: Unsettling Words (60 ft.) reaches nobody without closing in first.",
+        tracker: start(name, "MaestroDrazzuk.CR10.2014.json", roster, s),
         situation: s,
       };
     }

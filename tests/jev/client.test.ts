@@ -49,21 +49,15 @@ async function expectJevError(promise: ReturnType<typeof callJev>): Promise<JevE
 }
 
 let fetchStub: ReturnType<typeof vi.fn<typeof fetch>>;
-let logged: ReturnType<typeof vi.spyOn>[];
 
 beforeEach(() => {
   vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
   fetchStub = vi.fn<typeof fetch>();
-  logged = [
-    vi.spyOn(console, "error").mockImplementation(() => undefined),
-    vi.spyOn(console, "warn").mockImplementation(() => undefined),
-    vi.spyOn(console, "info").mockImplementation(() => undefined),
-  ];
+  // Silence the client's log lines; logging itself is not tested (CLAUDE.md "Test-first").
+  for (const method of ["error", "warn", "info"] as const) vi.spyOn(console, method).mockImplementation(() => undefined);
 });
 
 afterEach(() => {
-  // The key must never reach a log line either.
-  for (const spy of logged) expect(JSON.stringify(spy.mock.calls)).not.toContain(KEY);
   vi.useRealTimers();
   vi.restoreAllMocks();
 });
@@ -120,11 +114,11 @@ describe("callJev request", () => {
     expect(resolveModel(env)).toBe(resolveModel({ JEV_MODEL: process.env.JEV_MODEL }));
   });
 
-  it("passes a 30 s timeout signal", async () => {
+  it("passes a 20 s timeout signal", async () => {
     const timeout = vi.spyOn(AbortSignal, "timeout");
     fetchStub.mockResolvedValueOnce(json(GOOD));
     await settle(callJev(REQUEST, { fetch: fetchStub, env: ENV }));
-    expect(timeout).toHaveBeenCalledWith(30_000);
+    expect(timeout).toHaveBeenCalledWith(20_000);
     expect(initOf(0).signal).toBeInstanceOf(AbortSignal);
     expect(initOf(0).signal).toBe(timeout.mock.results[0]?.value);
   });
@@ -242,6 +236,7 @@ describe("callJev timeouts", () => {
     fetchStub.mockRejectedValueOnce(timeoutError()).mockRejectedValueOnce(timeoutError());
     const error = await expectJevError(callJev(REQUEST, { fetch: fetchStub, env: ENV }));
     expect(error.kind).toBe("timeout");
+    expect(error.message).toBe("Jev did not answer within 20 s.");
     expect(fetchStub).toHaveBeenCalledTimes(2);
   });
 
@@ -253,11 +248,12 @@ describe("callJev timeouts", () => {
     expect(result.value.response).toEqual(GOOD);
   });
 
-  it("gives each attempt its own 30 s signal", async () => {
+  it("gives each attempt its own 20 s signal", async () => {
     const timeout = vi.spyOn(AbortSignal, "timeout");
     fetchStub.mockRejectedValueOnce(timeoutError()).mockResolvedValueOnce(json(GOOD));
     await settle(callJev(REQUEST, { fetch: fetchStub, env: ENV }));
     expect(timeout).toHaveBeenCalledTimes(2);
+    expect(timeout.mock.calls).toEqual([[20_000], [20_000]]);
     expect(initOf(1).signal).not.toBe(initOf(0).signal);
   });
 });

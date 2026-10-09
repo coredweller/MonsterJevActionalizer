@@ -3,6 +3,7 @@
 import { useMemo, useState, type FormEvent } from "react";
 import { syncSituation, updatePlayerTurn } from "@/lib/encounter/state";
 import { SituationSchema, type Player, type Situation } from "@/lib/encounter/types";
+import { log } from "@/lib/log";
 import { PlayerRow } from "./PlayerRow";
 import { Button, CheckboxField, NumberField, Panel, inputClass, labelClass } from "./ui";
 
@@ -53,7 +54,7 @@ export function SituationForm({
     e.preventDefault();
     const parsed = SituationSchema.safeParse(synced);
     if (!parsed.success) {
-      console.error("SituationForm: situation failed validation", parsed.error.issues);
+      log.error("situation.invalid", { issues: parsed.error.issues.length, paths: parsed.error.issues.map((i) => i.path.join(".")).join(",") });
       setError(parsed.error.issues.map((i) => `${i.path.join(".")}: ${i.message}`).join("; "));
       return;
     }

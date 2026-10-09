@@ -46,7 +46,7 @@ records the ones the plan left open or that depend on the local environment.
 - **Alternatives**: two Jev calls (violates one-request-per-turn); asking target for every option (wasteful
   and can exceed sensible question counts).
 - **Consequence**: if the chosen action isn't a candidate, `interpret.ts` picks its target with a
-  deterministic fallback (lowest apparent HP in range) and marks the target "code pick" in the explanation.
+  deterministic fallback (lowest apparent HP in range, excluding downed players unless the temperament is feral or genius) and marks the target "code pick" in the explanation.
 
 ## R6. Clusters
 
@@ -80,7 +80,7 @@ records the ones the plan left open or that depend on the local environment.
 
 ## R10. Jev client retry policy
 
-- **Decision**: Bearer auth, `AbortSignal.timeout(30_000)`, one retry on 408/429/5xx/529 after a short
+- **Decision**: Bearer auth, `AbortSignal.timeout(20_000)` per attempt (was 30 s; cut on 2026-10-08 so the worst case, ≈ 45 s, fits SC-001), one retry on 408/429/5xx/529 after a short
   delay (honour `Retry-After` up to 5 s), mirroring `api.py`. The prototype's `server.ts` proxy has the
   timeout but no retry; we add it.
 - **Rationale**: Constitution Technical Constraints.

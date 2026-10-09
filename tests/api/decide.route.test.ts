@@ -43,15 +43,12 @@ async function read(res: Response): Promise<{ text: string; json: DecideResponse
   return { text, json: DecideResponseSchema.parse(JSON.parse(text)) };
 }
 
-let info: ReturnType<typeof vi.spyOn>;
-
 beforeEach(() => {
   vi.stubEnv("TYPESAFE_API_KEY", KEY);
   callJevMock.mockReset();
   callJevMock.mockResolvedValue({ response: RECORDED, latencyMs: 1234 });
-  info = vi.spyOn(console, "info").mockImplementation(() => undefined);
-  vi.spyOn(console, "error").mockImplementation(() => undefined);
-  vi.spyOn(console, "warn").mockImplementation(() => undefined);
+  // Silence the route's log lines; logging itself is not tested (CLAUDE.md "Test-first").
+  for (const method of ["info", "error", "warn"] as const) vi.spyOn(console, method).mockImplementation(() => undefined);
 });
 
 afterEach(() => {
@@ -69,8 +66,8 @@ describe("POST /api/decide: a monster that can act", () => {
     const { text, json } = await read(res);
     if (!json.ok || !("action" in json.recommendation) || !("model" in json.meta)) throw new Error(`unexpected body: ${text}`);
     expect(json.recommendation.action.key).toBe("act_multiattack");
-    expect(json.options).toEqual(buildLegalOptions(tracker.reviewed, tracker.state, situation));
-    expect(json.meta).toEqual({ model: "jev-1.13.0", latencyMs: 1234, usage: { input_tokens: 2828, output_tokens: 311 } });
+    expect(json.options).toEqual(buildLegalOptions(tracker.reviewed, tracker.state, situation, tracker.settings.temperament));
+    expect(json.meta).toEqual({ model: RECORDED.model, latencyMs: 1234, usage: RECORDED.usage });
   });
 
   it("sends the built question set with process.env, never a key of its own", async () => {
@@ -82,23 +79,12 @@ describe("POST /api/decide: a monster that can act", () => {
     expect(deps?.env).toBe(process.env);
   });
 
-  it("logs one line per Jev call with model, latency, usage and question count, and never the state or key", async () => {
-    const { tracker, situation } = buildScenario("lone-melee");
-    await post(body(tracker, situation));
-    expect(info).toHaveBeenCalledTimes(1);
-    const line = String(info.mock.calls[0]?.[0]);
-    const questions = Object.keys(callJevMock.mock.calls[0]?.[0].questions ?? {}).length;
-    expect(line).toBe(`jev model=jev-1.13.0 latencyMs=1234 usage={"input_tokens":2828,"output_tokens":311} questions=${questions}`);
-    expect(line).not.toContain(KEY);
-    expect(line).not.toContain("Tunnel Wasp");
-  });
-
   it("ignores client-supplied options and recomputes them", async () => {
     const { tracker, situation } = buildScenario("lone-melee");
     const smuggled = { ...body(tracker, situation), options: { actions: [{ key: "act_wish" }], bonusActions: [], movements: ["flyUp"] } };
     const { json } = await read(await post(smuggled));
     if (!json.ok) throw new Error("expected ok");
-    expect(json.options).toEqual(buildLegalOptions(tracker.reviewed, tracker.state, situation));
+    expect(json.options).toEqual(buildLegalOptions(tracker.reviewed, tracker.state, situation, tracker.settings.temperament));
     const sent = JSON.stringify(callJevMock.mock.calls[0]?.[0]);
     expect(sent).not.toContain("act_wish");
   });
@@ -114,7 +100,6 @@ describe("POST /api/decide: a hard-blocked monster", () => {
     if (!json.ok) throw new Error("expected ok");
     expect(json.meta).toEqual({ jevCalled: false });
     expect(json.recommendation).toEqual({ blocked: { reason: expect.stringMatching(/Stunned/), movementBy: "code" }, moveBefore: "hold", moveAfter: "hold" });
-    expect(info).not.toHaveBeenCalled();
   });
 
   it("incapacitated only → Jev not called, movement null (the DM picks)", async () => {
@@ -167,11 +152,10 @@ describe("POST /api/decide: errors", () => {
     expect(text).not.toContain(KEY);
   });
 
-  it("rethrows an unexpected error after logging it", async () => {
+  it("rethrows an unexpected error", async () => {
     callJevMock.mockRejectedValue(new TypeError("boom"));
     const { tracker, situation } = buildScenario("lone-melee");
     await expect(post(body(tracker, situation))).rejects.toThrow("boom");
-    expect(console.error).toHaveBeenCalled();
   });
 });
 

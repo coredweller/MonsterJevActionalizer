@@ -243,13 +243,13 @@ export function rankOptions(list: readonly Option[], abilities: readonly Ability
   ).map((p) => p.option);
 }
 
-/** Player ids an option can reach this turn. Unknown range can't rule anyone out. */
-function reachable(o: Option, situation: Situation): string[] {
+/** Targetable player ids an option can reach this turn. Unknown range can't rule out any targetable player. */
+function reachable(o: Option, options: LegalOptions): readonly string[] {
   switch (o.range.kind) {
     case "ft":
       return o.range.inRangeAfterMove;
     case "unknown":
-      return situation.players.map((p) => p.playerId);
+      return options.targetableIds;
     case "noTarget":
       return [];
   }
@@ -335,7 +335,8 @@ export function buildJevState(tracker: DecideTracker, situation: Situation, opti
         id: a.id,
         name: a.name,
         category: a.category,
-        summary: `${summarize(a, names)} (${describeUses(a.uses)})`,
+        // summarize() already ends with the uses of a limited ability; only "at will" is added here.
+        summary: a.uses.kind === "at-will" ? `${summarize(a, names)} (${describeUses(a.uses)})` : summarize(a, names),
       })),
       rawUnparsed: reviewed.abilities.filter((a) => a.parsed === "none").map((a) => `${a.name}: ${a.raw}`),
     },
@@ -405,7 +406,7 @@ export function buildJevRequest(
     .filter((p) => p.option.singleTarget)
     .slice(0, TARGET_CANDIDATES)
     .map((p, i) => {
-      const playerIds = reachable(p.option, situation);
+      const playerIds = reachable(p.option, options);
       const key = `target__${i}`;
       const criteria = criteriaOf(
         playerIds,
@@ -426,7 +427,7 @@ export function buildJevRequest(
     .filter((p) => p.option.area)
     .slice(0, CLUSTER_CANDIDATES)
     .map((p, i) => {
-      const inReach = new Set(reachable(p.option, situation));
+      const inReach = new Set(reachable(p.option, options));
       const offered = clusters.map((c, k) => ({ c, k })).filter(({ c }) => c.playerIds.some((id) => inReach.has(id)));
       const key = `cluster__${i}`;
       const criteria = criteriaOf(

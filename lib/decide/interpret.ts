@@ -5,12 +5,14 @@
  * Fixed order, each step recorded in `adjustments`:
  *  1. Read the answers. Keys the request didn't offer are ignored (`unknown-keys`). Each question's
  *     pick is the argmax of `probabilities`, never `choice` alone (`choice-not-argmax`). A tie at the
- *     max goes to Jev's `choice` if it is tied, otherwise to the first tied key in legal order
+ *     max (within TIE_EPSILON) goes to Jev's `choice` if it is tied, otherwise to the first tied key in legal order
  *     (`tie-break`). A question with no usable answer falls back to code ranking (`code-pick`).
  *  2. `retreat`: should_retreat ≥ RETREAT_THRESHOLD → Disengage or Dash (the more probable), hold, then retreat.
  *  3. `spend-resource-low`: spend_resource < SPEND_RESOURCE_LOW → a pick that spends a slot, recharge
  *     or daily use gives way to the most probable option that spends none.
- *  4. `out-of-range`: an action with no target in reach after move_before → the most probable action in reach.
+ *  4. `out-of-range`: an action, then a bonus action, with no target in reach after move_before → the
+ *     most probable one in reach. Range lists only hold targetable players (downed players are left
+ *     out unless the monster is feral or a genius; buildLegalOptions decides).
  *  5. `one-leveled-spell`: action and bonus action both leveled spells → the less probable one is
  *     replaced by its best alternative that isn't one.
  *  6. `attack-dependent-bonus`: a bonus action that needs the Attack action is replaced when the
@@ -21,7 +23,7 @@
  * or a code pick), confidence from the action's probability, and the template explanation.
  *
  * Every replacement is the most probable option that passes the rules already applied plus the
- * standing pairwise rules (action in reach; never two leveled spells; never an attack-dependent bonus
+ * standing rules (action and bonus action in reach; never two leveled spells; never an attack-dependent bonus
  * without an attack), so a later step can't undo an earlier one. Dash and Disengage, and `none`, pass
  * every rule, so a replacement always exists.
  */
@@ -29,7 +31,7 @@ import type { Movement, PlayerTurn, Situation } from "../encounter/types";
 import type { SystemOneResponse } from "../jev/types";
 import type { Blocked, LegalOptions, Option } from "../monster/options";
 import type { Ability } from "../monster/types";
-import { CONFIDENCE_HIGH, CONFIDENCE_MEDIUM, RETREAT_THRESHOLD, SPEND_RESOURCE_LOW } from "./constants";
+import { CONFIDENCE_HIGH, CONFIDENCE_MEDIUM, RETREAT_THRESHOLD, SPEND_RESOURCE_LOW, TIE_EPSILON } from "./constants";
 import { explain } from "./explain";
 import { askedNoulKeys, type Candidates, type OptionList, rankOptions } from "./questions";
 import {
@@ -84,21 +86,21 @@ const needsAttackAction = (o: Option, abilities: readonly Ability[]) => abilityO
 /** Movements that bring the monster toward a target, so "in range after moving" counts. */
 const CLOSING: ReadonlySet<Movement> = new Set<Movement>(["closeIn", "reachOther"]);
 
-/** Players an option reaches this turn given move_before, in situation order. Unknown range rules no one out. */
-function playersInReach(o: Option, moveBefore: Movement, situation: Situation): readonly string[] {
+/** Targetable players an option reaches this turn given move_before, in situation order. Unknown range rules no targetable player out. */
+function playersInReach(o: Option, moveBefore: Movement, options: LegalOptions): readonly string[] {
   switch (o.range.kind) {
     case "ft":
       return CLOSING.has(moveBefore) ? o.range.inRangeAfterMove : o.range.inRangeNow;
     case "unknown":
-      return situation.players.map((p) => p.playerId);
+      return options.targetableIds;
     case "noTarget":
       return [];
   }
 }
 
 /** Only a measured range can be out of reach; no target needed or an unknown range passes. */
-const inReach = (o: Option, moveBefore: Movement, situation: Situation) =>
-  o.range.kind !== "ft" || playersInReach(o, moveBefore, situation).length > 0;
+const inReach = (o: Option, moveBefore: Movement, options: LegalOptions) =>
+  o.range.kind !== "ft" || playersInReach(o, moveBefore, options).length > 0;
 
 const HP_ORDER: Record<PlayerTurn["apparentHp"], number> = { down: 0, nearDown: 1, bloodied: 2, healthy: 3 };
 
@@ -183,6 +185,7 @@ function readAnswers(
 interface ResolveContext {
   readonly candidates: Candidates;
   readonly situation: Situation;
+  readonly options: LegalOptions;
   readonly moveBefore: Movement;
   readonly adjust: (rule: AdjustmentRule, detail: string) => void;
   /** Jev's argmax (with the tie-break) for a candidate question, or undefined when it has no usable answer. */
@@ -211,7 +214,7 @@ function areaPart(o: Option, list: OptionList, ctx: ResolveContext): TargetPart 
   }
 
   // Ties go to the first group in situation order.
-  const reach = new Set(playersInReach(o, ctx.moveBefore, ctx.situation));
+  const reach = new Set(playersInReach(o, ctx.moveBefore, ctx.options));
   let top: { id: string; playerIds: string[]; caught: number } | undefined;
   for (const c of clusters.values()) {
     const caught = c.playerIds.filter((id) => reach.has(id)).length;
@@ -235,7 +238,7 @@ function targetPart(o: Option, list: OptionList, ctx: ResolveContext): TargetPar
 
   const hp = new Map(ctx.situation.players.map((pl) => [pl.playerId, HP_ORDER[pl.apparentHp]]));
   // Array.prototype.sort is stable, so equal HP keeps situation order.
-  const lowest = [...playersInReach(o, ctx.moveBefore, ctx.situation)].sort((a, b) => (hp.get(a) ?? 0) - (hp.get(b) ?? 0))[0];
+  const lowest = [...playersInReach(o, ctx.moveBefore, ctx.options)].sort((a, b) => (hp.get(a) ?? 0) - (hp.get(b) ?? 0))[0];
   ctx.adjust("code-pick", `${o.name}: no usable target answer; ${lowest === undefined ? "no target in reach" : `${lowest} (lowest apparent HP in range)`}`);
   return { targetIds: lowest === undefined ? [] : [lowest], targetBy: { by: "code" } };
 }
@@ -286,7 +289,7 @@ export function interpret(
     const pool = keys.filter(allowed);
     const prob = (k: string) => read.dist[k] ?? 0;
     const max = Math.max(...pool.map(prob));
-    const tied = pool.filter((k) => prob(k) === max);
+    const tied = pool.filter((k) => max - prob(k) <= TIE_EPSILON);
     const pick = read.choice !== null && tied.includes(read.choice) ? read.choice : tied[0];
     if (tied.length > 1 && pick !== undefined) {
       adjust("tie-break", `${question}: ${tied.join(", ")} tie at ${pct(max)}; took ${pick} (${pick === read.choice ? "Jev's choice" : "first in legal order"})`);
@@ -338,10 +341,11 @@ export function interpret(
   const bonusRules: ((o: Option) => boolean)[] = [];
   const actionAllowed = (o: Option) =>
     actionRules.every((rule) => rule(o)) &&
-    inReach(o, moveBefore, situation) &&
+    inReach(o, moveBefore, options) &&
     !(isLeveledSpell(o, abilities) && isLeveledSpell(bonus, abilities));
   const bonusAllowed = (o: Option) =>
     bonusRules.every((rule) => rule(o)) &&
+    inReach(o, moveBefore, options) &&
     !(isLeveledSpell(o, abilities) && isLeveledSpell(action, abilities)) &&
     !(needsAttackAction(o, abilities) && !isAttackAction(action, abilities));
 
@@ -393,10 +397,15 @@ export function interpret(
   }
 
   // ---- 4. Out of range -----------------------------------------------------
-  if (!inReach(action, moveBefore, situation)) {
+  if (!inReach(action, moveBefore, options)) {
     const before = action;
     replaceAction();
     adjust("out-of-range", `${before.name} has no target in reach after "${moveBefore}": → ${showP("action", action)}`);
+  }
+  if (!inReach(bonus, moveBefore, options)) {
+    const before = bonus;
+    replaceBonus();
+    adjust("out-of-range", `bonus action ${before.name} has no target in reach after "${moveBefore}": → ${showP("bonus_action", bonus)}`);
   }
 
   // ---- 5. One leveled spell per turn --------------------------------------
@@ -404,8 +413,8 @@ export function interpret(
     const pa = p("action", action.key) ?? 0;
     const pb = p("bonus_action", bonus.key) ?? 0;
     const both = `${showP("action", action)} and ${showP("bonus_action", bonus)} are both leveled spells`;
-    // On a tie the action is kept: it's the turn's main choice.
-    if (pb <= pa) {
+    // On a tie (within TIE_EPSILON) the action is kept: it's the turn's main choice.
+    if (pb - pa <= TIE_EPSILON) {
       const before = bonus;
       replaceBonus();
       adjust("one-leveled-spell", `${both}: bonus action ${before.name} → ${showP("bonus_action", bonus)}`);
@@ -439,6 +448,7 @@ export function interpret(
   const ctx: ResolveContext = {
     candidates,
     situation,
+    options,
     moveBefore,
     adjust,
     jevPick: (question, keys) => {

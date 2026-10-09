@@ -1,3 +1,5 @@
+"use client";
+
 /** Small hand-rolled primitives shared by the components. Touch targets are at least 44px. */
 import { useEffect, useId, useRef, useState, type ButtonHTMLAttributes, type ReactNode } from "react";
 

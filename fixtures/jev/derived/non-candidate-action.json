@@ -31,7 +31,7 @@
             "id": "act_discordant_strike",
             "name": "Discordant Strike",
             "category": "action",
-            "summary": "DC 17 Wisdom save; 27 (6d8) psychic; 30-ft. emanation; range 30 ft.; recharge 5–6 (recharge 5–6)"
+            "summary": "DC 17 Wisdom save; 27 (6d8) psychic; 30-ft. emanation; range 30 ft.; recharge 5–6"
           },
           {
             "id": "bon_unsettling_words",
@@ -61,55 +61,55 @@
             "id": "spell_dissonant_whispers",
             "name": "Dissonant Whispers",
             "category": "action",
-            "summary": "level 1 slot (level 1 slot)"
+            "summary": "level 1 slot"
           },
           {
             "id": "spell_charm_person",
             "name": "Charm Person",
             "category": "action",
-            "summary": "DC 17 Wisdom save; range 30 ft.; level 1 slot (level 1 slot)"
+            "summary": "DC 17 Wisdom save; range 30 ft.; level 1 slot"
           },
           {
             "id": "spell_suggestion",
             "name": "Suggestion",
             "category": "action",
-            "summary": "DC 17 Wisdom save; range 30 ft.; concentration; level 2 slot (level 2 slot)"
+            "summary": "DC 17 Wisdom save; range 30 ft.; concentration; level 2 slot"
           },
           {
             "id": "spell_shatter",
             "name": "Shatter",
             "category": "action",
-            "summary": "DC 17 Constitution save; 13 (3d8) thunder; 10-ft. sphere; range 60 ft.; level 2 slot (level 2 slot)"
+            "summary": "DC 17 Constitution save; 13 (3d8) thunder; 10-ft. sphere; range 60 ft.; level 2 slot"
           },
           {
             "id": "spell_fear",
             "name": "Fear",
             "category": "action",
-            "summary": "DC 17 Wisdom save; 30-ft. cone; self; concentration; level 3 slot (level 3 slot)"
+            "summary": "DC 17 Wisdom save; 30-ft. cone; self; concentration; level 3 slot"
           },
           {
             "id": "spell_hypnotic_pattern",
             "name": "Hypnotic Pattern",
             "category": "action",
-            "summary": "DC 17 Wisdom save; range 120 ft.; concentration; level 3 slot (level 3 slot)"
+            "summary": "DC 17 Wisdom save; 30-ft. cube; range 120 ft.; concentration; level 3 slot"
           },
           {
             "id": "spell_dominate_beast",
             "name": "Dominate Beast",
             "category": "action",
-            "summary": "DC 17 Wisdom save; range 60 ft.; concentration; level 4 slot (level 4 slot)"
+            "summary": "DC 17 Wisdom save; range 60 ft.; concentration; level 4 slot"
           },
           {
             "id": "spell_greater_invisibility",
             "name": "Greater Invisibility",
             "category": "action",
-            "summary": "range 5 ft.; concentration; level 4 slot (level 4 slot)"
+            "summary": "range 5 ft.; concentration; level 4 slot"
           },
           {
             "id": "spell_dominate_person",
             "name": "Dominate Person",
             "category": "action",
-            "summary": "DC 17 Wisdom save; range 60 ft.; concentration; level 5 slot (level 5 slot)"
+            "summary": "DC 17 Wisdom save; range 60 ft.; concentration; level 5 slot"
           },
           {
             "id": "trt_psychic_blades",
@@ -127,7 +127,7 @@
             "id": "leg_conduct",
             "name": "Conduct",
             "category": "legendary",
-            "summary": "1/day (1/day)"
+            "summary": "1/day"
           }
         ],
         "rawUnparsed": [
@@ -440,11 +440,11 @@
           },
           {
             "key": "spell_hypnotic_pattern",
-            "summary": "Hypnotic Pattern: DC 17 Wisdom save; range 120 ft.; concentration; level 3 slot",
+            "summary": "Hypnotic Pattern: DC 17 Wisdom save; 30-ft. cube; range 120 ft.; concentration; level 3 slot",
             "usesResource": true,
             "concentration": true,
-            "singleTarget": true,
-            "area": false,
+            "singleTarget": false,
+            "area": true,
             "slotLevels": [
               3,
               4,
@@ -686,7 +686,7 @@
           "spell_suggestion": "Suggestion: DC 17 Wisdom save; range 30 ft.; concentration; level 2 slot [in range now]",
           "spell_shatter": "Shatter: DC 17 Constitution save; 13 (3d8) thunder; 10-ft. sphere; range 60 ft.; level 2 slot [in range now]",
           "spell_fear": "Fear: DC 17 Wisdom save; 30-ft. cone; self; concentration; level 3 slot [in range now]",
-          "spell_hypnotic_pattern": "Hypnotic Pattern: DC 17 Wisdom save; range 120 ft.; concentration; level 3 slot [in range now]",
+          "spell_hypnotic_pattern": "Hypnotic Pattern: DC 17 Wisdom save; 30-ft. cube; range 120 ft.; concentration; level 3 slot [in range now]",
           "spell_dominate_beast": "Dominate Beast: DC 17 Wisdom save; range 60 ft.; concentration; level 4 slot [in range now]",
           "spell_greater_invisibility": "Greater Invisibility: range 5 ft.; concentration; level 4 slot",
           "spell_dominate_person": "Dominate Person: DC 17 Wisdom save; range 60 ft.; concentration; level 5 slot [in range now]",
@@ -850,114 +850,114 @@
         "type": "choice",
         "choice": "control",
         "probabilities": {
-          "focus_threat": 0.07,
-          "defensive": 0,
-          "control": 0.71,
-          "focus_weakest": 0.13,
           "aggressive": 0.09,
+          "focus_weakest": 0.15,
+          "focus_threat": 0.07,
+          "control": 0.69,
+          "defensive": 0,
           "flee": 0
         },
-        "confidence": 0.65
+        "confidence": 0.63
       },
       "move_before": {
         "type": "choice",
         "choice": "hold",
         "probabilities": {
-          "retreat": 0,
-          "reachOther": 0.01,
+          "hold": 0.97,
           "closeIn": 0.01,
-          "takeCover": 0,
-          "hold": 0.98
+          "reachOther": 0.02,
+          "retreat": 0,
+          "takeCover": 0
         },
-        "confidence": 0.97
+        "confidence": 0.96
       },
       "action": {
         "type": "choice",
         "choice": "spell_charm_person",
         "probabilities": {
-          "spell_greater_invisibility": 0,
+          "act_multiattack": 0.05,
+          "act_maestro_s_blade": 0,
+          "act_discordant_strike": 0.1,
+          "spell_vicious_mockery": 0,
+          "spell_minor_illusion": 0,
           "spell_mage_hand": 0,
+          "spell_dissonant_whispers": 0,
+          "spell_charm_person": 0.7,
+          "spell_suggestion": 0.1,
+          "spell_shatter": 0,
+          "spell_fear": 0,
+          "spell_hypnotic_pattern": 0.05,
+          "spell_dominate_beast": 0,
+          "spell_greater_invisibility": 0,
+          "spell_dominate_person": 0,
+          "dash": 0,
           "dodge": 0,
           "disengage": 0,
-          "spell_suggestion": 0.1,
-          "help": 0,
-          "spell_charm_person": 0.7,
-          "act_discordant_strike": 0.1,
-          "spell_dominate_beast": 0,
-          "act_maestro_s_blade": 0.07,
-          "dash": 0,
-          "spell_vicious_mockery": 0,
           "hide": 0,
-          "spell_fear": 0,
-          "spell_dissonant_whispers": 0,
-          "spell_minor_illusion": 0,
-          "spell_dominate_person": 0,
-          "spell_shatter": 0,
-          "act_multiattack": 0.05,
-          "spell_hypnotic_pattern": 0.05
+          "help": 0
         },
-        "confidence": 0.31
+        "confidence": 0.29
       },
       "bonus_action": {
         "type": "choice",
         "choice": "none",
         "probabilities": {
-          "none": 0.61,
-          "bon_unsettling_words": 0.39
+          "bon_unsettling_words": 0.46,
+          "none": 0.54
         },
-        "confidence": 0.21
+        "confidence": 0.08
       },
       "move_after": {
         "type": "choice",
         "choice": "hold",
         "probabilities": {
-          "retreat": 0,
+          "hold": 0.97,
           "closeIn": 0.01,
-          "reachOther": 0.03,
-          "takeCover": 0,
-          "hold": 0.96
+          "reachOther": 0.02,
+          "retreat": 0,
+          "takeCover": 0
         },
-        "confidence": 0.94
+        "confidence": 0.96
       },
       "target__0": {
         "type": "choice",
         "choice": "player__0",
         "probabilities": {
+          "player__0": 0.85,
           "player__1": 0.07,
-          "player__0": 0.84,
-          "player__2": 0.09
+          "player__2": 0.08
         },
-        "confidence": 0.76
+        "confidence": 0.77
       },
       "target__1": {
         "type": "choice",
         "choice": "player__0",
         "probabilities": {
+          "player__0": 0.9,
           "player__1": 0.03,
-          "player__0": 0.91,
-          "player__2": 0.06
+          "player__2": 0.07
         },
-        "confidence": 0.87
+        "confidence": 0.85
       },
       "target__2": {
         "type": "choice",
         "choice": "player__1",
         "probabilities": {
-          "player__1": 0.49,
           "player__0": 0.14,
+          "player__1": 0.49,
           "player__2": 0.37
         },
-        "confidence": 0.22
+        "confidence": 0.23
       },
       "target__3": {
         "type": "choice",
         "choice": "player__2",
         "probabilities": {
-          "player__1": 0.24,
-          "player__0": 0.31,
-          "player__2": 0.45
+          "player__0": 0.3,
+          "player__1": 0.22,
+          "player__2": 0.48
         },
-        "confidence": 0.18
+        "confidence": 0.22
       },
       "cluster__0": {
         "type": "choice",
@@ -966,16 +966,16 @@
           "cluster__0": 0.03,
           "cluster__1": 0.97
         },
-        "confidence": 0.93
+        "confidence": 0.94
       },
       "cluster__1": {
         "type": "choice",
         "choice": "cluster__1",
         "probabilities": {
-          "cluster__0": 0.05,
-          "cluster__1": 0.95
+          "cluster__0": 0.08,
+          "cluster__1": 0.92
         },
-        "confidence": 0.89
+        "confidence": 0.84
       },
       "cluster__2": {
         "type": "choice",
@@ -990,10 +990,10 @@
         "type": "choice",
         "choice": "level__2",
         "probabilities": {
+          "level__2": 0.99,
           "level__3": 0.01,
-          "level__5": 0,
           "level__4": 0,
-          "level__2": 0.99
+          "level__5": 0
         },
         "confidence": 0.99
       },
@@ -1001,11 +1001,11 @@
         "type": "choice",
         "choice": "level__1",
         "probabilities": {
-          "level__3": 0,
           "level__1": 0.99,
-          "level__5": 0,
+          "level__2": 0.01,
+          "level__3": 0,
           "level__4": 0,
-          "level__2": 0.01
+          "level__5": 0
         },
         "confidence": 0.99
       },
@@ -1013,10 +1013,10 @@
         "type": "choice",
         "choice": "level__2",
         "probabilities": {
-          "level__4": 0,
-          "level__5": 0,
+          "level__2": 0.99,
           "level__3": 0.01,
-          "level__2": 0.99
+          "level__4": 0,
+          "level__5": 0
         },
         "confidence": 0.99
       },
@@ -1024,27 +1024,27 @@
         "type": "choice",
         "choice": "level__3",
         "probabilities": {
-          "level__5": 0,
+          "level__3": 1,
           "level__4": 0,
-          "level__3": 1
+          "level__5": 0
         },
-        "confidence": 0.99
+        "confidence": 1
       },
       "multiattack_fallback": {
         "type": "noul",
-        "noul": 0.72
+        "noul": 0.73
       },
       "should_retreat": {
         "type": "noul",
-        "noul": 0.17
+        "noul": 0.18
       },
       "spend_resource": {
         "type": "noul",
-        "noul": 0.67
+        "noul": 0.66
       }
     },
     "usage": {
-      "input_tokens": 7929,
+      "input_tokens": 7883,
       "output_tokens": 1010
     }
   }

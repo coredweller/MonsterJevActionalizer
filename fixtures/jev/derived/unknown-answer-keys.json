@@ -306,12 +306,12 @@
         "type": "choice",
         "choice": "aggressive",
         "probabilities": {
+          "aggressive": 0.97,
           "focus_weakest": 0,
-          "control": 0,
           "focus_threat": 0.03,
-          "flee": 0,
+          "control": 0,
           "defensive": 0,
-          "aggressive": 0.97
+          "flee": 0
         },
         "confidence": 0.96
       },
@@ -319,11 +319,11 @@
         "type": "choice",
         "choice": "hold",
         "probabilities": {
-          "closeIn": 0.35,
+          "hold": 0.64,
+          "closeIn": 0.36,
           "reachOther": 0,
-          "takeCover": 0,
-          "hold": 0.65,
           "retreat": 0,
+          "takeCover": 0,
           "flyUp": 0.9
         },
         "confidence": 0.55
@@ -332,14 +332,14 @@
         "type": "choice",
         "choice": "act_fireball",
         "probabilities": {
-          "disengage": 0,
-          "help": 0,
-          "dodge": 0.01,
-          "dash": 0,
-          "act_sting": 0,
-          "act_mandibles": 0.03,
-          "hide": 0,
           "act_multiattack": 0.96,
+          "act_mandibles": 0.03,
+          "act_sting": 0,
+          "dash": 0,
+          "dodge": 0.01,
+          "disengage": 0,
+          "hide": 0,
+          "help": 0,
           "act_fireball": 0.99
         },
         "confidence": 0.95
@@ -348,21 +348,21 @@
         "type": "choice",
         "choice": "hold",
         "probabilities": {
-          "takeCover": 0,
+          "hold": 0.85,
+          "closeIn": 0.15,
           "reachOther": 0,
-          "closeIn": 0.16,
-          "hold": 0.84,
-          "retreat": 0
+          "retreat": 0,
+          "takeCover": 0
         },
-        "confidence": 0.8
+        "confidence": 0.81
       },
       "multiattack_fallback": {
         "type": "noul",
-        "noul": 0.53
+        "noul": 0.52
       },
       "should_retreat": {
         "type": "noul",
-        "noul": 0.15
+        "noul": 0.14
       },
       "target__0": {
         "type": "choice",

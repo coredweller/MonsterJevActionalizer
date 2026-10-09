@@ -12,15 +12,22 @@ import { jevFixturePath } from "./fixtures";
 /** Everything record-jev.ts builds before its one live call, built offline. */
 function prepared(name: ScenarioName) {
   const { tracker, situation } = buildScenario(name);
-  const options = buildLegalOptions(tracker.reviewed, tracker.state, situation);
+  const options = buildLegalOptions(tracker.reviewed, tracker.state, situation, tracker.settings.temperament);
   return { tracker, situation, options, ...buildJevRequest(tracker, situation, options) };
 }
 
 const keys = (list: { key: string }[]) => list.map((o) => o.key);
 
 describe("fixtures/jev/scenarios.ts (inputs to npm run record:jev)", () => {
-  it("defines the five PLAN.md scenarios", () => {
-    expect([...SCENARIO_NAMES]).toEqual(["lone-melee", "spread-party", "low-hp-retreat", "concentrating-caster", "warpriest-dual-spells"]);
+  it("defines the five PLAN.md scenarios, plus out-of-range-bonus for the bonus-action range rule (F07)", () => {
+    expect([...SCENARIO_NAMES]).toEqual([
+      "lone-melee",
+      "spread-party",
+      "low-hp-retreat",
+      "concentrating-caster",
+      "warpriest-dual-spells",
+      "out-of-range-bonus",
+    ]);
     expect(buildScenarios().map((s) => s.name)).toEqual([...SCENARIO_NAMES]);
   });
 
@@ -64,6 +71,27 @@ describe("fixtures/jev/scenarios.ts (inputs to npm run record:jev)", () => {
     expect(candidates.clusters.some((c) => c.asked)).toBe(true);
   });
 
+  it("out-of-range-bonus: Unsettling Words reaches nobody now but someone after moving, with an in-range fallback and an action in range", () => {
+    expect([...SCENARIO_NAMES]).toContain("out-of-range-bonus");
+    const { options, request } = prepared("out-of-range-bonus");
+    expect(options.blocked).toBeUndefined();
+
+    const words = options.bonusActions.find((o) => o.key === "bon_unsettling_words");
+    expect(words?.range).toMatchObject({ kind: "ft", inRangeNow: [] });
+    expect(words?.range.kind === "ft" ? words.range.inRangeAfterMove.length : 0).toBeGreaterThan(0);
+
+    // Held in place (move_before "hold"), F07 must fall back to a bonus action that needs no move.
+    const fallbacks = options.bonusActions.filter(
+      (o) => o.key !== "bon_unsettling_words" && (o.range.kind === "noTarget" || (o.range.kind === "ft" && o.range.inRangeNow.length > 0)),
+    );
+    expect(fallbacks.map((o) => o.key)).toContain("none");
+
+    const bonus = request.questions.bonus_action;
+    expect(bonus?.type === "choice" ? Object.keys(bonus.criteria) : []).toEqual(keys(options.bonusActions));
+    expect(options.bonusActions.length).toBeGreaterThanOrEqual(2);
+    expect(options.actions.some((o) => o.range.kind === "ft" && o.range.inRangeNow.length > 0)).toBe(true);
+  });
+
   it("low-hp-retreat: low HP, cowardly morale and an escape route", () => {
     const { tracker, situation } = prepared("low-hp-retreat");
     expect(tracker.state.hp / tracker.state.hpMax).toBeLessThan(0.25);
@@ -97,6 +125,9 @@ const DERIVED_RULES = [
   "non-candidate-action",
   "unknown-answer-keys",
   "tie-break-choice",
+  "downed-not-targeted",
+  "tie-epsilon",
+  "out-of-range-bonus",
 ] as const;
 
 const RecordedSchema = z.object({ request: z.unknown(), response: z.unknown() }).strict();

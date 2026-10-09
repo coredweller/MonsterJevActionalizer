@@ -4,7 +4,7 @@
  * unknown. Nothing is inferred beyond what the text says.
  */
 import type { Monster } from "./schema";
-import { lookupSpell } from "./spells";
+import { lookupSpell, stripUsesSuffix } from "./spells";
 import type {
   Ability,
   AbilityCategory,
@@ -62,13 +62,6 @@ export function parseUses(name: string, text: string): AbilityUses {
     if (d) return { kind: "per-day", max: Number(d[1]) };
   }
   return { kind: "at-will" };
-}
-
-/** The name without its "(Recharge 5–6)" / "(3/Day)" suffix. */
-export function cleanName(name: string): string {
-  return name
-    .replace(new RegExp(`\\s*\\((?:Recharge[^)]*|\\d+\\s*/\\s*Day[^)]*)\\)`, "gi"), "")
-    .trim();
 }
 
 export function parseAttack(text: string): Attack | undefined {
@@ -184,7 +177,7 @@ const DEPENDS_ON_ATTACK = /\btakes? the Attack action\b/i;
 const SINGLE_TARGET = /\b(?:one|a|the) (?:target|creature)\b|\btarget(?:s)? (?:a|one) creature\b|\bchoose a creature\b|\bone creature\b/i;
 
 function parseEntry(source: AbilitySource, rawName: string, raw: string, ids: Ids): Ability {
-  const name = cleanName(rawName);
+  const name = stripUsesSuffix(rawName);
   let category = SOURCE_CATEGORY[source];
   if (source === "SpecialTraits" && BONUS_ACTION.test(raw)) category = "bonus";
   if (source === "Actions" && /^\s*As a reaction\b/i.test(raw)) category = "reaction";
@@ -219,9 +212,10 @@ function parseEntry(source: AbilitySource, rawName: string, raw: string, ids: Id
   else if (grantsBasicAction) ability.parsed = "full";
   else if (damage.length > 0 || area || rangeFt !== undefined) ability.parsed = "partial";
 
-  // An entry named after an SRD spell ("Misty Step (2/Day)") takes the spell's concentration and range.
+  // An entry named after an SRD spell ("Misty Step (2/Day)") takes the spell's level, concentration and range.
   const asSpell = !attack && !save && source !== "SpecialTraits" ? lookupSpell(name) : undefined;
   if (asSpell?.known) {
+    ability.spellLevel = asSpell.spell.level;
     ability.concentration = asSpell.spell.concentration;
     const spellRange = srdRangeFt(asSpell.spell.range);
     if (spellRange !== undefined && ability.rangeFt === undefined) ability.rangeFt = spellRange;
@@ -291,7 +285,8 @@ function spellAbility(
 ): { ability: Ability; entry: SpellEntry } {
   const lookup = lookupSpell(name);
   const spell: SrdSpell | undefined = lookup.known ? lookup.spell : undefined;
-  const level = lineLevel ?? spell?.level ?? 0;
+  // From the statblock's slot/cantrip line or the SRD table; an unknown at-will/X-day spell has none.
+  const level = lineLevel ?? spell?.level;
   const category: AbilityCategory = castAsAction
     ? "action"
     : !spell
@@ -310,7 +305,7 @@ function spellAbility(
     category,
     uses,
     singleTarget: spell ? offensive && !spell.area : true,
-    spellLevel: level,
+    ...(level !== undefined ? { spellLevel: level } : {}),
     known: Boolean(spell),
     raw: spell ? `${spell.name}: level ${spell.level}, ${spell.castingTime}, range ${spell.range}` : name,
     parsed: spell ? "full" : "partial",
@@ -334,7 +329,10 @@ function spellAbility(
       if (dmg && avg !== undefined) ability.damage = [{ dice: dmg[1], avg, type: dmg[2] }];
     }
   }
-  return { ability, entry: { abilityId: id, name: ability.name, level, uses, known: Boolean(spell), ...(spell ? { spell } : {}) } };
+  const entry: SpellEntry = { abilityId: id, name: ability.name, uses, known: Boolean(spell) };
+  if (level !== undefined) entry.level = level;
+  if (spell) entry.spell = spell;
+  return { ability, entry };
 }
 
 function parseSpellcasting(raw: string, castAsAction: boolean, ids: Ids): { abilities: Ability[]; spellcasting: Spellcasting } {
@@ -440,6 +438,11 @@ export function extractAbilities(monster: Monster): ReviewDraft {
     speed: parseSpeed(body.Speed),
     intScore: body.AbilityScores.Intelligence.Score,
   };
+}
+
+/** Names of spells with no level yet (unknown at-will/X-day spells). The DM must fill them in before confirming. */
+export function spellsMissingLevel(draft: ReviewDraft): string[] {
+  return (draft.spellcasting?.spells ?? []).filter((s) => s.level === undefined).map((s) => s.name);
 }
 
 /** Confirm a draft on the review screen. */

@@ -2,11 +2,16 @@
  * `npm run build:spells`: generates data/srd-spells.json from the SRD 5.1 spell list
  * (CC BY 4.0), via the 5e-bits/5e-database export. Keeps only the fields options and
  * questions need. Run once and commit the output; the app never fetches spells at runtime.
+ *
+ * The export leaves `dc` and `area_of_effect` out of some spells whose SRD text states them
+ * (Spirit Guardians: "must make a wisdom saving throw", "to a distance of 15 feet"). When a
+ * structured field is missing, the save and area are read from the spell's own description;
+ * nothing is filled in that the text doesn't say.
  */
 import { writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { z } from "zod";
-import { SrdSpellSchema, type SrdSpell } from "../lib/monster/types";
+import { AbilityNameSchema, AreaShapeSchema, SrdSpellSchema, type Area, type SrdSpell } from "../lib/monster/types";
 
 const SOURCE = "https://raw.githubusercontent.com/5e-bits/5e-database/main/src/2014/en/5e-SRD-Spells.json";
 const OUT = fileURLToPath(new URL("../data/srd-spells.json", import.meta.url));
@@ -19,6 +24,7 @@ const SourceDamage = z.object({
 
 const SourceSpell = z.object({
   name: z.string(),
+  desc: z.array(z.string()),
   level: z.number().int(),
   casting_time: z.string(),
   range: z.string(),
@@ -51,6 +57,31 @@ function castingTime(s: string): SrdSpell["castingTime"] {
   return "other";
 }
 
+/** "must make a wisdom saving throw", "makes a Wisdom saving throw", "succeeds on a constitution saving throw". */
+const TEXT_SAVE = /\b(?:makes?|succeeds?) (?:on )?an? (strength|dexterity|constitution|intelligence|wisdom|charisma) saving throw/i;
+
+function textSave(desc: string): SrdSpell["save"] {
+  const m = TEXT_SAVE.exec(desc);
+  return m ? AbilityNameSchema.options.find((a) => a.toLowerCase() === m[1].toLowerCase()) : undefined;
+}
+
+/**
+ * "a 20-foot-radius sphere", "a 30-foot cube", and Spirit Guardians' "to a distance of 15 feet" (an
+ * emanation). A bare "N-foot radius" is skipped: in the SRD text it is nearly always a light radius.
+ */
+const TEXT_AREA_SHAPED = /\b(\d+)-foot(?:-radius)? (sphere|cube|cone|line|cylinder)\b/i;
+const TEXT_AREA_AROUND = /\bto a distance of (\d+) feet\b/i;
+
+function textArea(desc: string): Area | undefined {
+  const shaped = TEXT_AREA_SHAPED.exec(desc);
+  if (shaped) {
+    const shape = AreaShapeSchema.safeParse(shaped[2].toLowerCase());
+    return shape.success ? { shape: shape.data, size: Number(shaped[1]) } : undefined;
+  }
+  const around = TEXT_AREA_AROUND.exec(desc);
+  return around ? { shape: "emanation", size: Number(around[1]) } : undefined;
+}
+
 function damage(d: z.infer<typeof SourceSpell>["damage"]): string | undefined {
   if (!d) return undefined;
   const table = d.damage_at_slot_level ?? d.damage_at_character_level;
@@ -66,16 +97,22 @@ async function main() {
 
   const spells: SrdSpell[] = source
     .map((s) => {
-      const area = s.area_of_effect && SHAPES.has(s.area_of_effect.type) ? s.area_of_effect : undefined;
+      const desc = s.desc.join("\n");
+      const save = s.dc ? SAVE[s.dc.dc_type.index] : textSave(desc);
+      const dmg = damage(s.damage);
+      const sourceArea = s.area_of_effect && SHAPES.has(s.area_of_effect.type) ? { shape: s.area_of_effect.type, size: s.area_of_effect.size } : undefined;
+      // Only a spell that harms or calls for a save has an area of effect; elsewhere "a 20-foot cube"
+      // is a size limit (Major Image) or a volume of material (Fabricate).
+      const area = sourceArea ?? (save || dmg ? textArea(desc) : undefined);
       return SrdSpellSchema.parse({
         name: s.name,
         level: s.level,
         castingTime: castingTime(s.casting_time),
         range: s.range,
-        ...(area ? { area: { shape: area.type, size: area.size } } : {}),
-        ...(s.dc ? { save: SAVE[s.dc.dc_type.index] } : {}),
+        ...(area ? { area } : {}),
+        ...(save ? { save } : {}),
         ...(s.attack_type ? { attack: s.attack_type } : {}),
-        ...(damage(s.damage) ? { damage: damage(s.damage) } : {}),
+        ...(dmg ? { damage: dmg } : {}),
         concentration: s.concentration,
       });
     })

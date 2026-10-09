@@ -5,15 +5,16 @@
  * the route supplies `process.env` and tests supply a stub. The key is never put in an error
  * message or a log line.
  *
- * Transport policy (research R10, mirroring the prototype's `api.py`): Bearer auth, a 30 s
+ * Transport policy (research R10, mirroring the prototype's `api.py`): Bearer auth, a 20 s
  * timeout per attempt, and one retry of the same request on 408/429/5xx/529 or a timeout,
  * honouring `Retry-After` up to 5 s.
  */
+import { errorText, log } from "../log";
 import { type SystemOneRequest, type SystemOneResponse, SystemOneResponseSchema } from "./types";
 
 export const DEFAULT_BASE_URL = "https://api.typesafe.ai";
 export const DEFAULT_MODEL = "jev-latest";
-export const TIMEOUT_MS = 30_000;
+export const TIMEOUT_MS = 20_000;
 const MAX_ATTEMPTS = 2;
 const DEFAULT_RETRY_DELAY_MS = 400;
 const MAX_RETRY_DELAY_MS = 5_000;
@@ -80,9 +81,7 @@ function retryDelayMs(retryAfter: string | null): number {
 }
 
 function fail(error: JevError, cause?: unknown): never {
-  const status = error.status === undefined ? "" : ` status=${error.status}`;
-  const detail = cause instanceof Error ? ` cause=${cause.name}: ${cause.message}` : "";
-  console.error(`jev error kind=${error.kind}${status} message=${error.message}${detail}`);
+  log.error("jev.error", { kind: error.kind, status: error.status, message: error.message, cause: cause === undefined ? undefined : errorText(cause) });
   throw error;
 }
 
@@ -122,7 +121,7 @@ function parseResponse(text: string): SystemOneResponse {
 /**
  * Sends one System One request. Throws `JevError`: `config` when the key is missing (before any
  * fetch), `upstream` for a non-2xx after the retry, a network failure or a body that fails zod,
- * and `timeout` when the 30 s abort fires on the final attempt.
+ * and `timeout` when the 20 s abort fires on the final attempt.
  */
 export async function callJev(req: JevRequest, { fetch: fetchImpl = globalThis.fetch, env }: CallJevDeps): Promise<JevResult> {
   const key = env.TYPESAFE_API_KEY?.trim();
@@ -146,14 +145,14 @@ export async function callJev(req: JevRequest, { fetch: fetchImpl = globalThis.f
         return { response: parseResponse(result.text), latencyMs: Math.round(performance.now() - started) };
       case "timeout":
         if (final) return fail(new JevError("timeout", `Jev did not answer within ${TIMEOUT_MS / 1000} s.`));
-        console.warn(`jev retry reason=timeout attempt=${n}`);
+        log.warn("jev.retry", { reason: "timeout", attempt: n });
         break;
       case "http-error": {
         if (final || !isRetryableStatus(result.status)) {
           return fail(new JevError("upstream", `Jev returned HTTP ${result.status}.`, result.status));
         }
         const delay = retryDelayMs(result.retryAfter);
-        console.warn(`jev retry reason=status status=${result.status} attempt=${n} delayMs=${delay}`);
+        log.warn("jev.retry", { reason: "status", status: result.status, attempt: n, delayMs: delay });
         await sleep(delay);
         break;
       }

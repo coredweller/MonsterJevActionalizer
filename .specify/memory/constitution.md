@@ -1,4 +1,12 @@
 <!--
+Sync Impact Report (1.1.1, 2026-10-08)
+- Version change: 1.1.0 → 1.1.1 (PATCH: clarification, no principle redefined)
+- Principle V: logging is exempt from the test-first rule and from tests generally. Log calls,
+  line formats and lib/log.ts are not tested; tests may silence console output but don't assert on it.
+- Propagated to: CLAUDE.md ("Test-first (always)"). Logging tests removed (tests/log.test.ts and the
+  log-line assertions in tests/jev/client.test.ts and tests/api/decide.route.test.ts).
+- Templates: none affected.
+
 Sync Impact Report (1.1.0, 2026-10-03)
 - Version change: 1.0.1 → 1.1.0 (MINOR: materially expanded guidance in Principle V)
 - Principle V: tests for core logic are now written first and seen to fail before the
@@ -109,6 +117,8 @@ fixes keep the DM in control of their own content.
   and helpers added along the way), the test is written or extended and run, and seen to
   fail on the missing behaviour, before the implementation is written. Reports MUST name the
   tests seen failing first and state any change where that step was skipped.
+- Logging is exempt: log calls, log-line formats and the shared logger (`lib/log.ts`) are not
+  tested, first or otherwise. Tests MAY silence console output but MUST NOT assert on it.
 - Interpretation tests MUST use recorded Jev responses from `fixtures/jev/`,
   not live calls. A derived fixture (a copy of a recorded response with probabilities edited and a
   `derivedFrom` field naming its source) counts as recorded.
@@ -174,4 +184,4 @@ is the only real secret.
 - **Compliance:** every plan's Constitution Check and every code review MUST verify compliance.
   Unjustified complexity is grounds to reject a change.
 
-**Version**: 1.1.0 | **Ratified**: 2026-09-30 | **Last Amended**: 2026-10-03
+**Version**: 1.1.1 | **Ratified**: 2026-09-30 | **Last Amended**: 2026-10-08

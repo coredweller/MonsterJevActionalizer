@@ -31,7 +31,7 @@
             "id": "act_discordant_strike",
             "name": "Discordant Strike",
             "category": "action",
-            "summary": "DC 17 Wisdom save; 27 (6d8) psychic; 30-ft. emanation; range 30 ft.; recharge 5–6 (recharge 5–6)"
+            "summary": "DC 17 Wisdom save; 27 (6d8) psychic; 30-ft. emanation; range 30 ft.; recharge 5–6"
           },
           {
             "id": "bon_unsettling_words",
@@ -61,55 +61,55 @@
             "id": "spell_dissonant_whispers",
             "name": "Dissonant Whispers",
             "category": "action",
-            "summary": "level 1 slot (level 1 slot)"
+            "summary": "level 1 slot"
           },
           {
             "id": "spell_charm_person",
             "name": "Charm Person",
             "category": "action",
-            "summary": "DC 17 Wisdom save; range 30 ft.; level 1 slot (level 1 slot)"
+            "summary": "DC 17 Wisdom save; range 30 ft.; level 1 slot"
           },
           {
             "id": "spell_suggestion",
             "name": "Suggestion",
             "category": "action",
-            "summary": "DC 17 Wisdom save; range 30 ft.; concentration; level 2 slot (level 2 slot)"
+            "summary": "DC 17 Wisdom save; range 30 ft.; concentration; level 2 slot"
           },
           {
             "id": "spell_shatter",
             "name": "Shatter",
             "category": "action",
-            "summary": "DC 17 Constitution save; 13 (3d8) thunder; 10-ft. sphere; range 60 ft.; level 2 slot (level 2 slot)"
+            "summary": "DC 17 Constitution save; 13 (3d8) thunder; 10-ft. sphere; range 60 ft.; level 2 slot"
           },
           {
             "id": "spell_fear",
             "name": "Fear",
             "category": "action",
-            "summary": "DC 17 Wisdom save; 30-ft. cone; self; concentration; level 3 slot (level 3 slot)"
+            "summary": "DC 17 Wisdom save; 30-ft. cone; self; concentration; level 3 slot"
           },
           {
             "id": "spell_hypnotic_pattern",
             "name": "Hypnotic Pattern",
             "category": "action",
-            "summary": "DC 17 Wisdom save; range 120 ft.; concentration; level 3 slot (level 3 slot)"
+            "summary": "DC 17 Wisdom save; 30-ft. cube; range 120 ft.; concentration; level 3 slot"
           },
           {
             "id": "spell_dominate_beast",
             "name": "Dominate Beast",
             "category": "action",
-            "summary": "DC 17 Wisdom save; range 60 ft.; concentration; level 4 slot (level 4 slot)"
+            "summary": "DC 17 Wisdom save; range 60 ft.; concentration; level 4 slot"
           },
           {
             "id": "spell_greater_invisibility",
             "name": "Greater Invisibility",
             "category": "action",
-            "summary": "range 5 ft.; concentration; level 4 slot (level 4 slot)"
+            "summary": "range 5 ft.; concentration; level 4 slot"
           },
           {
             "id": "spell_dominate_person",
             "name": "Dominate Person",
             "category": "action",
-            "summary": "DC 17 Wisdom save; range 60 ft.; concentration; level 5 slot (level 5 slot)"
+            "summary": "DC 17 Wisdom save; range 60 ft.; concentration; level 5 slot"
           },
           {
             "id": "trt_psychic_blades",
@@ -127,7 +127,7 @@
             "id": "leg_conduct",
             "name": "Conduct",
             "category": "legendary",
-            "summary": "1/day (1/day)"
+            "summary": "1/day"
           }
         ],
         "rawUnparsed": [
@@ -272,7 +272,6 @@
                 "player__2"
               ],
               "inRangeAfterMove": [
-                "player__0",
                 "player__1",
                 "player__2",
                 "player__3"
@@ -289,13 +288,11 @@
             "range": {
               "ft": 60,
               "inRangeNow": [
-                "player__0",
                 "player__1",
                 "player__2",
                 "player__3"
               ],
               "inRangeAfterMove": [
-                "player__0",
                 "player__1",
                 "player__2",
                 "player__3"
@@ -357,7 +354,6 @@
                 "player__2"
               ],
               "inRangeAfterMove": [
-                "player__0",
                 "player__1",
                 "player__2",
                 "player__3"
@@ -384,7 +380,6 @@
                 "player__2"
               ],
               "inRangeAfterMove": [
-                "player__0",
                 "player__1",
                 "player__2",
                 "player__3"
@@ -407,13 +402,11 @@
             "range": {
               "ft": 60,
               "inRangeNow": [
-                "player__0",
                 "player__1",
                 "player__2",
                 "player__3"
               ],
               "inRangeAfterMove": [
-                "player__0",
                 "player__1",
                 "player__2",
                 "player__3"
@@ -439,7 +432,6 @@
                 "player__2"
               ],
               "inRangeAfterMove": [
-                "player__0",
                 "player__1",
                 "player__2",
                 "player__3"
@@ -448,11 +440,11 @@
           },
           {
             "key": "spell_hypnotic_pattern",
-            "summary": "Hypnotic Pattern: DC 17 Wisdom save; range 120 ft.; concentration; level 3 slot",
+            "summary": "Hypnotic Pattern: DC 17 Wisdom save; 30-ft. cube; range 120 ft.; concentration; level 3 slot",
             "usesResource": true,
             "concentration": true,
-            "singleTarget": true,
-            "area": false,
+            "singleTarget": false,
+            "area": true,
             "slotLevels": [
               3,
               4,
@@ -461,13 +453,11 @@
             "range": {
               "ft": 120,
               "inRangeNow": [
-                "player__0",
                 "player__1",
                 "player__2",
                 "player__3"
               ],
               "inRangeAfterMove": [
-                "player__0",
                 "player__1",
                 "player__2",
                 "player__3"
@@ -488,13 +478,11 @@
             "range": {
               "ft": 60,
               "inRangeNow": [
-                "player__0",
                 "player__1",
                 "player__2",
                 "player__3"
               ],
               "inRangeAfterMove": [
-                "player__0",
                 "player__1",
                 "player__2",
                 "player__3"
@@ -527,13 +515,11 @@
             "range": {
               "ft": 60,
               "inRangeNow": [
-                "player__0",
                 "player__1",
                 "player__2",
                 "player__3"
               ],
               "inRangeAfterMove": [
-                "player__0",
                 "player__1",
                 "player__2",
                 "player__3"
@@ -597,13 +583,11 @@
             "range": {
               "ft": 60,
               "inRangeNow": [
-                "player__0",
                 "player__1",
                 "player__2",
                 "player__3"
               ],
               "inRangeAfterMove": [
-                "player__0",
                 "player__1",
                 "player__2",
                 "player__3"
@@ -693,7 +677,7 @@
           "spell_suggestion": "Suggestion: DC 17 Wisdom save; range 30 ft.; concentration; level 2 slot [in range now]",
           "spell_shatter": "Shatter: DC 17 Constitution save; 13 (3d8) thunder; 10-ft. sphere; range 60 ft.; level 2 slot [in range now]",
           "spell_fear": "Fear: DC 17 Wisdom save; 30-ft. cone; self; concentration; level 3 slot [in range now]",
-          "spell_hypnotic_pattern": "Hypnotic Pattern: DC 17 Wisdom save; range 120 ft.; concentration; level 3 slot [in range now]",
+          "spell_hypnotic_pattern": "Hypnotic Pattern: DC 17 Wisdom save; 30-ft. cube; range 120 ft.; concentration; level 3 slot [in range now]",
           "spell_dominate_beast": "Dominate Beast: DC 17 Wisdom save; range 60 ft.; concentration; level 4 slot [in range now]",
           "spell_greater_invisibility": "Greater Invisibility: range 5 ft.; concentration; level 4 slot",
           "spell_dominate_person": "Dominate Person: DC 17 Wisdom save; range 60 ft.; concentration; level 5 slot [in range now]",
@@ -727,7 +711,6 @@
         "type": "choice",
         "instructions": "Who should \"Vicious Mockery\" target?",
         "criteria": {
-          "player__0": "player 0: Wren (caster, Wizard, AC 12); down; 60 ft. away; cover: none",
           "player__1": "player 1: Kell (melee, Paladin, AC 18); healthy; 25 ft. away; cover: none; hit the monster last round",
           "player__2": "player 2: Iso (ranged, Ranger, AC 15); healthy; 30 ft. away; cover: none",
           "player__3": "player 3: Bree (healer, Cleric, AC 16); healthy; 50 ft. away; cover: half"
@@ -737,7 +720,6 @@
         "type": "choice",
         "instructions": "Who should \"Unsettling Words\" target?",
         "criteria": {
-          "player__0": "player 0: Wren (caster, Wizard, AC 12); down; 60 ft. away; cover: none",
           "player__1": "player 1: Kell (melee, Paladin, AC 18); healthy; 25 ft. away; cover: none; hit the monster last round",
           "player__2": "player 2: Iso (ranged, Ranger, AC 15); healthy; 30 ft. away; cover: none",
           "player__3": "player 3: Bree (healer, Cleric, AC 16); healthy; 50 ft. away; cover: half"
@@ -747,7 +729,6 @@
         "type": "choice",
         "instructions": "Who should \"Charm Person\" target?",
         "criteria": {
-          "player__0": "player 0: Wren (caster, Wizard, AC 12); down; 60 ft. away; cover: none",
           "player__1": "player 1: Kell (melee, Paladin, AC 18); healthy; 25 ft. away; cover: none; hit the monster last round",
           "player__2": "player 2: Iso (ranged, Ranger, AC 15); healthy; 30 ft. away; cover: none",
           "player__3": "player 3: Bree (healer, Cleric, AC 16); healthy; 50 ft. away; cover: half"
@@ -757,7 +738,6 @@
         "type": "choice",
         "instructions": "Who should \"Suggestion\" target?",
         "criteria": {
-          "player__0": "player 0: Wren (caster, Wizard, AC 12); down; 60 ft. away; cover: none",
           "player__1": "player 1: Kell (melee, Paladin, AC 18); healthy; 25 ft. away; cover: none; hit the monster last round",
           "player__2": "player 2: Iso (ranged, Ranger, AC 15); healthy; 30 ft. away; cover: none",
           "player__3": "player 3: Bree (healer, Cleric, AC 16); healthy; 50 ft. away; cover: half"
@@ -767,7 +747,6 @@
         "type": "choice",
         "instructions": "Which group of players should \"Discordant Strike\" be aimed at?",
         "criteria": {
-          "cluster__0": "player 0: Wren (caster, Wizard, AC 12): catches 1",
           "cluster__1": "player 1: Kell (melee, Paladin, AC 18), player 2: Iso (ranged, Ranger, AC 15): catches 2",
           "cluster__2": "player 3: Bree (healer, Cleric, AC 16): catches 1"
         }
@@ -776,7 +755,6 @@
         "type": "choice",
         "instructions": "Which group of players should \"Shatter\" be aimed at?",
         "criteria": {
-          "cluster__0": "player 0: Wren (caster, Wizard, AC 12): catches 1",
           "cluster__1": "player 1: Kell (melee, Paladin, AC 18), player 2: Iso (ranged, Ranger, AC 15): catches 2",
           "cluster__2": "player 3: Bree (healer, Cleric, AC 16): catches 1"
         }
@@ -785,7 +763,6 @@
         "type": "choice",
         "instructions": "Which group of players should \"Fear\" be aimed at?",
         "criteria": {
-          "cluster__0": "player 0: Wren (caster, Wizard, AC 12): catches 1",
           "cluster__1": "player 1: Kell (melee, Paladin, AC 18), player 2: Iso (ranged, Ranger, AC 15): catches 2",
           "cluster__2": "player 3: Bree (healer, Cleric, AC 16): catches 1"
         }
@@ -860,213 +837,206 @@
   "response": {
     "model": "jev-1.13.0",
     "answers": {
-      "cluster__1": {
-        "type": "choice",
-        "choice": "cluster__1",
-        "probabilities": {
-          "cluster__1": 0.89,
-          "cluster__0": 0.1,
-          "cluster__2": 0.01
-        },
-        "confidence": 0.84
-      },
-      "cluster__2": {
-        "type": "choice",
-        "choice": "cluster__1",
-        "probabilities": {
-          "cluster__1": 0.96,
-          "cluster__0": 0.03,
-          "cluster__2": 0.01
-        },
-        "confidence": 0.95
-      },
-      "slot_level__1": {
-        "type": "choice",
-        "choice": "level__1",
-        "probabilities": {
-          "level__1": 1,
-          "level__5": 0,
-          "level__3": 0,
-          "level__2": 0,
-          "level__4": 0
-        },
-        "confidence": 1
-      },
-      "should_retreat": {
-        "type": "noul",
-        "noul": 0.18
-      },
-      "target__3": {
-        "type": "choice",
-        "choice": "player__1",
-        "probabilities": {
-          "player__0": 0.08,
-          "player__2": 0.14,
-          "player__1": 0.74,
-          "player__3": 0.04
-        },
-        "confidence": 0.64
-      },
-      "slot_level__0": {
-        "type": "choice",
-        "choice": "level__2",
-        "probabilities": {
-          "level__3": 0,
-          "level__4": 0,
-          "level__2": 1,
-          "level__5": 0
-        },
-        "confidence": 0.99
-      },
-      "slot_level__2": {
-        "type": "choice",
-        "choice": "level__2",
-        "probabilities": {
-          "level__4": 0,
-          "level__5": 0,
-          "level__2": 0.99,
-          "level__3": 0.01
-        },
-        "confidence": 0.99
-      },
-      "multiattack_fallback": {
-        "type": "noul",
-        "noul": 0.78
-      },
-      "spend_resource": {
-        "type": "noul",
-        "noul": 0.15
-      },
       "tactic": {
         "type": "choice",
         "choice": "control",
         "probabilities": {
-          "focus_weakest": 0.12,
-          "control": 0.74,
-          "aggressive": 0.07,
+          "aggressive": 0.08,
+          "focus_weakest": 0.13,
+          "focus_threat": 0.11,
+          "control": 0.68,
           "defensive": 0,
-          "focus_threat": 0.07,
           "flee": 0
         },
-        "confidence": 0.68
-      },
-      "bonus_action": {
-        "type": "choice",
-        "choice": "bon_unsettling_words",
-        "probabilities": {
-          "none": 0.43,
-          "bon_unsettling_words": 0.57
-        },
-        "confidence": 0.14
+        "confidence": 0.62
       },
       "move_before": {
         "type": "choice",
         "choice": "closeIn",
         "probabilities": {
-          "closeIn": 0.55,
-          "hold": 0.37,
+          "hold": 0.39,
+          "closeIn": 0.52,
+          "reachOther": 0.07,
           "retreat": 0.01,
-          "takeCover": 0.01,
-          "reachOther": 0.06
+          "takeCover": 0.01
         },
-        "confidence": 0.44
-      },
-      "target__0": {
-        "type": "choice",
-        "choice": "player__0",
-        "probabilities": {
-          "player__0": 0.73,
-          "player__2": 0.01,
-          "player__1": 0.21,
-          "player__3": 0.05
-        },
-        "confidence": 0.63
-      },
-      "target__2": {
-        "type": "choice",
-        "choice": "player__1",
-        "probabilities": {
-          "player__0": 0.12,
-          "player__2": 0.15,
-          "player__1": 0.65,
-          "player__3": 0.08
-        },
-        "confidence": 0.52
-      },
-      "slot_level__3": {
-        "type": "choice",
-        "choice": "level__3",
-        "probabilities": {
-          "level__4": 0,
-          "level__5": 0,
-          "level__3": 1
-        },
-        "confidence": 1
+        "confidence": 0.4
       },
       "action": {
         "type": "choice",
         "choice": "act_discordant_strike",
         "probabilities": {
+          "act_multiattack": 0.07,
+          "act_maestro_s_blade": 0.02,
+          "act_discordant_strike": 0.49,
           "spell_vicious_mockery": 0.01,
-          "spell_mage_hand": 0,
-          "spell_shatter": 0.02,
-          "act_discordant_strike": 0.44,
-          "dodge": 0,
-          "act_maestro_s_blade": 0.01,
           "spell_minor_illusion": 0,
-          "spell_suggestion": 0,
-          "spell_charm_person": 0,
+          "spell_mage_hand": 0,
           "spell_dissonant_whispers": 0,
-          "help": 0,
+          "spell_charm_person": 0,
+          "spell_suggestion": 0,
+          "spell_shatter": 0.01,
           "spell_fear": 0,
-          "spell_dominate_person": 0.01,
-          "spell_greater_invisibility": 0,
+          "spell_hypnotic_pattern": 0.38,
           "spell_dominate_beast": 0,
-          "act_multiattack": 0.08,
-          "hide": 0,
+          "spell_greater_invisibility": 0,
+          "spell_dominate_person": 0.01,
           "dash": 0.01,
+          "dodge": 0,
           "disengage": 0,
-          "spell_hypnotic_pattern": 0.41000000000000003
+          "hide": 0,
+          "help": 0
         },
-        "confidence": 0.4
+        "confidence": 0.46
+      },
+      "bonus_action": {
+        "type": "choice",
+        "choice": "bon_unsettling_words",
+        "probabilities": {
+          "bon_unsettling_words": 0.57,
+          "none": 0.43
+        },
+        "confidence": 0.14
       },
       "move_after": {
         "type": "choice",
         "choice": "closeIn",
         "probabilities": {
-          "closeIn": 0.56,
-          "retreat": 0.01,
           "hold": 0.31,
-          "takeCover": 0.01,
-          "reachOther": 0.11
+          "closeIn": 0.55,
+          "reachOther": 0.11,
+          "retreat": 0.02,
+          "takeCover": 0.01
         },
-        "confidence": 0.45
+        "confidence": 0.44
+      },
+      "target__0": {
+        "type": "choice",
+        "choice": "player__1",
+        "probabilities": {
+          "player__1": 0.61,
+          "player__2": 0.08,
+          "player__3": 0.31
+        },
+        "confidence": 0.41
       },
       "target__1": {
         "type": "choice",
-        "choice": "player__0",
+        "choice": "player__1",
         "probabilities": {
-          "player__0": 0.66,
-          "player__2": 0.02,
-          "player__1": 0.26,
+          "player__1": 0.62,
+          "player__2": 0.06,
+          "player__3": 0.32
+        },
+        "confidence": 0.43
+      },
+      "target__2": {
+        "type": "choice",
+        "choice": "player__1",
+        "probabilities": {
+          "player__1": 0.71,
+          "player__2": 0.18,
+          "player__3": 0.11
+        },
+        "confidence": 0.56
+      },
+      "target__3": {
+        "type": "choice",
+        "choice": "player__1",
+        "probabilities": {
+          "player__1": 0.8,
+          "player__2": 0.14,
           "player__3": 0.06
         },
-        "confidence": 0.55
+        "confidence": 0.7
       },
       "cluster__0": {
         "type": "choice",
         "choice": "cluster__1",
         "probabilities": {
           "cluster__1": 0.98,
-          "cluster__0": 0.02,
-          "cluster__2": 0
+          "cluster__2": 0.02
         },
-        "confidence": 0.97
+        "confidence": 0.96
+      },
+      "cluster__1": {
+        "type": "choice",
+        "choice": "cluster__1",
+        "probabilities": {
+          "cluster__1": 0.96,
+          "cluster__2": 0.04
+        },
+        "confidence": 0.92
+      },
+      "cluster__2": {
+        "type": "choice",
+        "choice": "cluster__1",
+        "probabilities": {
+          "cluster__1": 0.98,
+          "cluster__2": 0.02
+        },
+        "confidence": 0.96
+      },
+      "slot_level__0": {
+        "type": "choice",
+        "choice": "level__2",
+        "probabilities": {
+          "level__2": 0.99,
+          "level__3": 0.01,
+          "level__4": 0,
+          "level__5": 0
+        },
+        "confidence": 0.99
+      },
+      "slot_level__1": {
+        "type": "choice",
+        "choice": "level__1",
+        "probabilities": {
+          "level__1": 1,
+          "level__2": 0,
+          "level__3": 0,
+          "level__4": 0,
+          "level__5": 0
+        },
+        "confidence": 1
+      },
+      "slot_level__2": {
+        "type": "choice",
+        "choice": "level__2",
+        "probabilities": {
+          "level__2": 0.99,
+          "level__3": 0.01,
+          "level__4": 0,
+          "level__5": 0
+        },
+        "confidence": 0.99
+      },
+      "slot_level__3": {
+        "type": "choice",
+        "choice": "level__3",
+        "probabilities": {
+          "level__3": 1,
+          "level__4": 0,
+          "level__5": 0
+        },
+        "confidence": 1
+      },
+      "multiattack_fallback": {
+        "type": "noul",
+        "noul": 0.76
+      },
+      "should_retreat": {
+        "type": "noul",
+        "noul": 0.18
+      },
+      "spend_resource": {
+        "type": "noul",
+        "noul": 0.15
       }
     },
     "usage": {
-      "input_tokens": 8236,
-      "output_tokens": 1079
+      "input_tokens": 7834,
+      "output_tokens": 1016
     }
   }
 }
