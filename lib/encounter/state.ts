@@ -24,11 +24,12 @@ export function suggestTemperament(int: number): Temperament {
 
 export const DEFAULT_MORALE = 50;
 
+/** Flying is assumed possible; the DM ticks "Flying not possible" for a low ceiling and the like (F29). */
 export function blankSituation(): Situation {
   return {
     players: [],
     allies: { present: false, count: 0 },
-    terrain: { difficult: false, chokepoint: false, escapeRoute: false, flyingPossible: false },
+    terrain: { difficult: false, chokepoint: false, escapeRoute: false, flyingPossible: true },
     notes: "",
   };
 }

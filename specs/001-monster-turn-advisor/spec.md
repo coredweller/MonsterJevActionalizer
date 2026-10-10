@@ -79,7 +79,8 @@ and logged the turn.
    **Then** the only movement intent offered is "hold".
 3. **Given** a recharge ability that is spent, an X/day ability with no uses left, or a leveled spell
    with no slot at or above its level, **When** options are built, **Then** that option is not offered.
-4. **Given** the monster has no fly speed, **When** options are built, **Then** "fly up" is not offered.
+4. **Given** the monster has no fly speed, or the DM ticked "flying not possible", **When** options are
+   built, **Then** "fly up" is not offered.
 5. **Given** a spread-out party with a downed caster and two clustered players, **When** the monster
    has an area effect, **Then** the recommendation picks a cluster and shows how many players it catches.
 6. **Given** the monster is at low HP, morale is cowardly and an escape route exists, **When** a
@@ -246,14 +247,15 @@ suggestion is "mindless" and the reminder cards list the legendary/lair options 
   distance, apparent HP, conditions, cover, hit-the-monster-last-round, clustered-with — which carry
   over from the previous turn.
 - **FR-020**: Users MUST be able to enter allies present and count, terrain flags (difficult terrain,
-  chokepoint, escape route, flying possible) and free-text notes.
+  chokepoint, escape route, flying not possible; flying is assumed possible unless ticked) and
+  free-text notes.
 
 **Legal options and decision**
 
 - **FR-021**: System MUST deterministically compute legal options before consulting the decision
   service: available Actions (incl. Multiattack and spells with resources remaining, plus Dash, Dodge,
   Disengage, Hide, Help), Bonus Actions (incl. trait-granted and bonus-action spells, plus none),
-  and movement intents (hold, close in, reach another target, retreat, take cover, fly up if it can fly).
+  and movement intents (hold, close in, reach another target, retreat, take cover, fly up if it can fly and flying is possible).
 - **FR-022**: System MUST apply hard blocks: no Action/Bonus Action when incapacitated, stunned,
   paralyzed, petrified or unconscious (the decision service is not called); movement "hold" only when
   stunned, paralyzed, petrified or unconscious, or when speed is 0; when only incapacitated, the DM

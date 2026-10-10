@@ -69,7 +69,8 @@ type inferred from it (`z.infer`), because a `ReviewedMonster` is read back from
   hitMonsterLastRound: boolean, clusteredWith: playerId[] }`.
   Zone defaults: engaged 5, near 30, far 60, veryFar 61+ ft.
 - **Situation**: `{ players: PlayerTurn[], allies: { present, count }, terrain: { difficult, chokepoint,
-  escapeRoute, flyingPossible }, notes }`. Carried forward on Apply.
+  escapeRoute, flyingPossible }, notes }`. Carried forward on Apply. `flyingPossible` defaults to true; the
+  form shows it as "Flying not possible".
 - **TurnLogEntry**: `{ round, moveBefore, actionId, targetIds, clusterId?, slotLevel?, bonusActionId,
   bonusSlotLevel? /*a leveled bonus-action spell such as Spiritual Weapon*/, moveAfter,
   result?: "hit"|"miss"|"downed"|"effect", note?, recommended: boolean }`.
@@ -106,7 +107,8 @@ History sent to Jev = `log.slice(-3)`.
   out of range) | `{ kind: "ft", ft, inRangeNow: playerId[], inRangeAfterMove: playerId[] }` (after-move includes now).
   Ability keys are the ability id; basic keys are `dash` etc.; no key contains `__`.
 - **Movement**: `"hold"|"closeIn"|"reachOther"|"retreat"|"takeCover"|"flyUp"`; speed 0, stunned, paralyzed,
-  petrified or unconscious → `["hold"]`; flyUp only with fly speed.
+  petrified or unconscious → `["hold"]`; flyUp only with a fly speed and `terrain.flyingPossible`, and the fly
+  speed counts toward movement only then.
 - **Blocked**: `blocked = { reason, movementBy: "code"|"dm" }`. Stunned/paralyzed/petrified/unconscious →
   `movementBy: "code"` (hold). Incapacitated alone → `movementBy: "dm"` (full movement list, DM picks by hand).
   Jev is never called when `blocked` is set.

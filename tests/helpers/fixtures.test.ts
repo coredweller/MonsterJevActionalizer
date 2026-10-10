@@ -19,7 +19,7 @@ function prepared(name: ScenarioName) {
 const keys = (list: { key: string }[]) => list.map((o) => o.key);
 
 describe("fixtures/jev/scenarios.ts (inputs to npm run record:jev)", () => {
-  it("defines the five PLAN.md scenarios, plus out-of-range-bonus for the bonus-action range rule (F07)", () => {
+  it("defines the five PLAN.md scenarios, plus out-of-range-bonus (F07) and downed-in-cluster (F17)", () => {
     expect([...SCENARIO_NAMES]).toEqual([
       "lone-melee",
       "spread-party",
@@ -27,6 +27,7 @@ describe("fixtures/jev/scenarios.ts (inputs to npm run record:jev)", () => {
       "concentrating-caster",
       "warpriest-dual-spells",
       "out-of-range-bonus",
+      "downed-in-cluster",
     ]);
     expect(buildScenarios().map((s) => s.name)).toEqual([...SCENARIO_NAMES]);
   });
@@ -92,6 +93,14 @@ describe("fixtures/jev/scenarios.ts (inputs to npm run record:jev)", () => {
     expect(options.actions.some((o) => o.range.kind === "ft" && o.range.inRangeNow.length > 0)).toBe(true);
   });
 
+  it("downed-in-cluster: a downed player shares a cluster with a targetable one, and an area option has no cluster question", () => {
+    const { options, candidates } = prepared("downed-in-cluster");
+    expect(options.targetableIds).not.toContain("brakka");
+    expect(Object.values(candidates.clusterKeys).map((c) => c.playerIds)).toEqual([["sefa"], ["lio", "brakka"]]);
+    const asked = candidates.clusters.map((c) => c.optionKey);
+    expect(options.actions.some((o) => o.area && !asked.includes(o.key))).toBe(true);
+  });
+
   it("low-hp-retreat: low HP, cowardly morale and an escape route", () => {
     const { tracker, situation } = prepared("low-hp-retreat");
     expect(tracker.state.hp / tracker.state.hpMax).toBeLessThan(0.25);
@@ -128,6 +137,7 @@ const DERIVED_RULES = [
   "downed-not-targeted",
   "tie-epsilon",
   "out-of-range-bonus",
+  "cluster-counts-downed",
 ] as const;
 
 const RecordedSchema = z.object({ request: z.unknown(), response: z.unknown() }).strict();

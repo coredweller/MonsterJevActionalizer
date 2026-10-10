@@ -21,6 +21,12 @@ describe("defaultPlayerTurn", () => {
   });
 });
 
+describe("blankSituation", () => {
+  it("assumes flying is possible, and no other terrain feature (F29)", () => {
+    expect(blankSituation().terrain).toEqual({ difficult: false, chokepoint: false, escapeRoute: false, flyingPossible: true });
+  });
+});
+
 describe("syncSituation", () => {
   it("adds a default turn per roster player, in roster order", () => {
     const s = syncSituation(blankSituation(), [player("a"), player("b")]);

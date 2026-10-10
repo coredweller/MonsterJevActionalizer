@@ -6,7 +6,7 @@ export const CONFIDENCE_HIGH = 0.85;
 export const CONFIDENCE_MEDIUM = 0.6;
 /** `should_retreat` at or above this prefers Disengage or Dash with retreat movement. */
 export const RETREAT_THRESHOLD = 0.6;
-/** `spend_resource` below this boosts the best option that uses no limited resource (assumed; the plan says "low"). */
+/** `spend_resource` below this replaces a pick that uses a limited resource with the best one that uses none (assumed; the plan says "low"). */
 export const SPEND_RESOURCE_LOW = 0.4;
 /** Probabilities this close count as tied (PLAN.md "Interpretation"), so float noise can't break a tie. */
 export const TIE_EPSILON = 1e-9;

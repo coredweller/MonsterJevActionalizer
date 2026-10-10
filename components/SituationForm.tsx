@@ -13,8 +13,10 @@ const TERRAIN_LABEL: Record<TerrainFlag, string> = {
   difficult: "Difficult terrain",
   chokepoint: "Chokepoint",
   escapeRoute: "Escape route",
-  flyingPossible: "Flying possible",
+  flyingPossible: "Flying not possible",
 };
+/** Flags whose checkbox means the opposite: flying is assumed possible, so the DM ticks to rule it out. */
+const INVERTED: ReadonlySet<TerrainFlag> = new Set(["flyingPossible"]);
 
 /**
  * This turn's situation. Controlled: `situation` is the tracker's carried-over situation and every
@@ -105,8 +107,8 @@ export function SituationForm({
               <CheckboxField
                 key={flag}
                 label={TERRAIN_LABEL[flag]}
-                checked={synced.terrain[flag]}
-                onChange={(on) => emit({ ...synced, terrain: { ...synced.terrain, [flag]: on } })}
+                checked={INVERTED.has(flag) ? !synced.terrain[flag] : synced.terrain[flag]}
+                onChange={(ticked) => emit({ ...synced, terrain: { ...synced.terrain, [flag]: INVERTED.has(flag) ? !ticked : ticked } })}
               />
             ))}
           </div>

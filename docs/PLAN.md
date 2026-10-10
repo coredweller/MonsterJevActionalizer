@@ -189,7 +189,7 @@ A tracker belongs to one monster. It holds:
 
 **Also on the form:**
 - allies present, and how many
-- terrain checkboxes: difficult terrain, chokepoint, escape route, flying possible
+- terrain checkboxes: difficult terrain, chokepoint, escape route, flying not possible (flying is assumed possible unless ticked)
 - free-text DM notes
 
 Each zone has a default distance, used only when no exact distance is given: engaged = within 5 ft, near = within 30 ft, far = within 60 ft, very far = more than 60 ft. Code uses these distances for range checks.
@@ -203,7 +203,7 @@ Each zone has a default distance, used only when no exact distance is given: eng
   - All other conditions go to Jev as context only.
 - **Actions:** the monster's actions (including Multiattack), limited to what's still available: recharge abilities must be charged, X/day abilities must have uses left, and slot spells need a slot at or above their level. At-will and X/day spells come from the Spellcasting entry. Dash, Dodge, Disengage, Hide and Help are always offered.
 - **Bonus actions:** `BonusActions` entries, trait-granted bonus actions and bonus-action spells, plus `none`.
-- **Movement intents:** hold / close in on the target / reach another target / retreat / take cover / fly up. Fly up is offered only if the monster has a fly speed.
+- **Movement intents:** hold / close in on the target / reach another target / retreat / take cover / fly up. Fly up is offered only if the monster has a fly speed and flying is possible. When flying isn't possible, the fly speed doesn't count toward how far the monster can move.
 - **Range:** for each option, code works out whether some target is in range now, or in range after moving, from the zones and speed. Out-of-range options are flagged in the state but still offered.
 - **Downed players** (apparent HP "down"): only feral and tactical-genius monsters may target them. For mindless and cunning monsters, downed players are left out of every target choice, including the target code picks itself. They still count toward clusters.
 - **Limit:** options are capped at `MAX_CHOICE_OPTIONS` (255).
@@ -245,7 +245,7 @@ Code reads the `probabilities` distributions, not just `choice`, because the pro
 - **Innate spells** (at-will or X/day, no slot) count as leveled spells for the rule above when their level is 1 or higher, taken from the SRD table or the DM's review.
 - If `should_retreat` is high (≥ 0.60), Disengage or Dash is preferred, with retreat as the movement.
 - **Concentration:** if the monster is already concentrating and picks another concentration spell, the pick stands, with a warning saying which spell it drops.
-- If `spend_resource` is low, the best option that uses no resource gets a boost.
+- If `spend_resource` is low, a pick that uses a resource is replaced by the most probable option that uses none.
 
 **Confidence:** high ≥ 0.85, medium ≥ 0.60, otherwise "DM's call".
 

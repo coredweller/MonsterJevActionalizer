@@ -9,8 +9,8 @@ const ROLE_LABEL: Record<Role, string> = { melee: "Melee", ranged: "Ranged", cas
 
 /**
  * The tracker's party roster. Controlled: every edit emits the whole new roster, which the caller
- * saves on the tracker. Removing a player here drops their situation row when the situation is next
- * synced with the roster (`syncSituation`).
+ * saves on the tracker. Removing a player asks first, then drops their situation row when the
+ * situation is next synced with the roster (`syncSituation`).
  */
 export function PartyRoster({ roster, onChange }: { roster: readonly Player[]; onChange: (roster: Player[]) => void }) {
   function update(next: Player) {
@@ -19,6 +19,12 @@ export function PartyRoster({ roster, onChange }: { roster: readonly Player[]; o
 
   function add() {
     onChange([...roster, { id: crypto.randomUUID(), name: `Player ${roster.length + 1}`, role: "melee", class: "" }]);
+  }
+
+  function remove(player: Player) {
+    const name = player.name || "this unnamed player";
+    if (!window.confirm(`Remove ${name}? Their zone, HP, conditions and groups in the current situation go too.`)) return;
+    onChange(roster.filter((x) => x.id !== player.id));
   }
 
   function setAc(player: Player, ac: number | undefined) {
@@ -66,7 +72,7 @@ export function PartyRoster({ roster, onChange }: { roster: readonly Player[]; o
                   variant="danger"
                   className="md:@xl:mt-6"
                   aria-label={`Remove ${p.name || "unnamed player"}`}
-                  onClick={() => onChange(roster.filter((x) => x.id !== p.id))}
+                  onClick={() => remove(p)}
                 >
                   Remove
                 </Button>

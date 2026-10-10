@@ -195,7 +195,10 @@ interface ResolveContext {
 type TargetPart = Pick<ActionPick, "targetIds" | "targetBy" | "clusterId" | "clusterBy">;
 type SlotPart = Pick<ActionPick, "slotLevel" | "slotLevelBy">;
 
-/** An area option's group; its members are the targets. Code pick: the group with the most players in reach. */
+/**
+ * An area option's group; its members are the targets. Code pick: among groups with a member in
+ * reach, the one with the most players. The whole group counts, downed members too (research R6).
+ */
 function areaPart(o: Option, list: OptionList, ctx: ResolveContext): TargetPart {
   const clusters = new Map(Object.entries(ctx.candidates.clusterKeys));
   const keyOfId = new Map([...clusters].map(([key, c]) => [c.id, key]));
@@ -217,8 +220,8 @@ function areaPart(o: Option, list: OptionList, ctx: ResolveContext): TargetPart 
   const reach = new Set(playersInReach(o, ctx.moveBefore, ctx.options));
   let top: { id: string; playerIds: string[]; caught: number } | undefined;
   for (const c of clusters.values()) {
-    const caught = c.playerIds.filter((id) => reach.has(id)).length;
-    if (caught > 0 && (!top || caught > top.caught)) top = { ...c, caught };
+    const caught = c.playerIds.length;
+    if (c.playerIds.some((id) => reach.has(id)) && (!top || caught > top.caught)) top = { ...c, caught };
   }
   if (!top) return {};
   ctx.adjust("code-pick", `${o.name}: no usable group answer; aimed at ${top.playerIds.join(", ")} (catches the most)`);

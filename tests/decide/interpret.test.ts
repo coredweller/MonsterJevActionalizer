@@ -43,7 +43,7 @@ function optionByKey(list: readonly Option[], key: string): Option {
   return found;
 }
 
-const RECORDED = ["lone-melee", "spread-party", "low-hp-retreat", "concentrating-caster", "warpriest-dual-spells"];
+const RECORDED = ["lone-melee", "spread-party", "low-hp-retreat", "concentrating-caster", "warpriest-dual-spells", "downed-in-cluster"];
 const DERIVED = [
   "choice-not-argmax",
   "attack-dependent-bonus",
@@ -59,6 +59,7 @@ const DERIVED = [
   "downed-not-targeted",
   "tie-epsilon",
   "out-of-range-bonus",
+  "cluster-counts-downed",
 ].map((r) => `derived/${r}`);
 
 describe("interpret: every fixture", () => {
@@ -229,7 +230,7 @@ describe("interpret: consistency rules (derived fixtures)", () => {
     expect(rec.confidence).toBe("medium");
   });
 
-  it("low spend_resource boosts the best no-resource option: Multiattack (closing in) replaces Discordant Strike's recharge", () => {
+  it("low spend_resource replaces a resource pick with the best no-resource option: Multiattack (closing in) replaces Discordant Strike's recharge", () => {
     const { rec, response } = run("derived/spend-resource-low");
     const spend = response.answers.spend_resource;
     expect(spend?.type === "noul" && spend.noul).toBeLessThan(SPEND_RESOURCE_LOW);
@@ -286,6 +287,14 @@ describe("interpret: consistency rules (derived fixtures)", () => {
     expect(tracker.settings.temperament).toBe("cunning");
     // Wren is down and lowest; Kell, Iso and Bree are healthy, so Kell wins on situation order.
     expect(rec.action).toEqual({ key: "spell_dissonant_whispers", targetIds: ["kell"], targetBy: { by: "code" }, slotLevel: 1, slotLevelBy: { by: "code" } });
+  });
+
+  it("an area option with no cluster question is aimed at the biggest cluster, counting downed members (F17)", () => {
+    const { rec, options } = run("derived/cluster-counts-downed");
+    expect(options.targetableIds).not.toContain("brakka");
+    // Sefa's cluster comes first, but Lio's catches 2 with the downed Brakka.
+    expect(rec.action).toMatchObject({ key: "spell_hypnotic_pattern", clusterId: "cluster_1", clusterBy: { by: "code" }, targetIds: ["lio", "brakka"] });
+    expect(ruleDetails(rec, "code-pick").join(" ")).toMatch(/Hypnotic Pattern: .*lio, brakka/);
   });
 
   it("ties within TIE_EPSILON: Jev's hold beats a reachOther 1e-10 higher, and equally likely leveled spells keep the action", () => {

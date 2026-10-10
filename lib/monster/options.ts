@@ -115,15 +115,20 @@ function hardBlock(conditions: readonly Condition[]): Blocked | undefined {
   return undefined;
 }
 
-/** Feet the monster can move this turn: its fastest mode, or 0 when held, grappled or restrained. */
-function movementSpeed(reviewed: ReviewedMonster, conditions: readonly Condition[], blocked: Blocked | undefined): number {
+/**
+ * Feet the monster can move this turn: its fastest mode, or 0 when held, grappled or restrained.
+ * The fly speed only counts when the DM hasn't ruled flying out.
+ */
+function movementSpeed(reviewed: ReviewedMonster, conditions: readonly Condition[], blocked: Blocked | undefined, flyingPossible: boolean): number {
   if (blocked?.movementBy === "code" || SPEED_ZERO.some((c) => conditions.includes(c))) return 0;
-  return Math.max(0, ...Object.values(reviewed.speed).filter(isDefined));
+  const { fly, ...ground } = reviewed.speed;
+  const modes = flyingPossible ? [...Object.values(ground), fly] : Object.values(ground);
+  return Math.max(0, ...modes.filter(isDefined));
 }
 
-function legalMovements(speed: number, reviewed: ReviewedMonster): Movement[] {
+function legalMovements(speed: number, reviewed: ReviewedMonster, flyingPossible: boolean): Movement[] {
   if (speed === 0) return ["hold"];
-  const canFly = (reviewed.speed.fly ?? 0) > 0;
+  const canFly = flyingPossible && (reviewed.speed.fly ?? 0) > 0;
   return MovementSchema.options.filter((m) => m !== "flyUp" || canFly);
 }
 
@@ -253,8 +258,9 @@ const NO_BONUS_ACTION: Option = {
  */
 export function buildLegalOptions(reviewed: ReviewedMonster, state: EncounterState, situation: Situation, temperament: Temperament): LegalOptions {
   const blocked = hardBlock(state.conditions);
-  const speed = movementSpeed(reviewed, state.conditions, blocked);
-  const movements = legalMovements(speed, reviewed);
+  const { flyingPossible } = situation.terrain;
+  const speed = movementSpeed(reviewed, state.conditions, blocked, flyingPossible);
+  const movements = legalMovements(speed, reviewed, flyingPossible);
   const targetable = targetablePlayers(situation, temperament);
   const targetableIds = targetable.map((p) => p.playerId);
   if (blocked) return { blocked, actions: [], bonusActions: [], movements, targetableIds };

@@ -48,6 +48,9 @@ otherwise. Tests may silence `console` output, but never assert on it.
   field), never live Jev calls.
 - Fixture names follow `<Name>.CR<n>.<edition>.json`. The normalizer reads CR from the name.
 - Don't build anything PLAN.md marks out of scope without updating the plan first.
+- **Exception to the shared logger:** CLI scripts in `scripts/` print their report with `console`, not
+  `lib/log.ts`. That output is the script's result for a person to read, not app logging. It must still
+  never include secrets. App code (`lib/`, `app/`, `components/`) always logs through `lib/log.ts`.
 
 ## External references
 

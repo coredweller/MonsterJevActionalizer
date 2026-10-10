@@ -1,0 +1,1000 @@
+{
+  "derivedFrom": "downed-in-cluster.json",
+  "purpose": "Hypnotic Pattern had no cluster question: code aims it at the cluster with the most players, counting the downed Brakka (Lio + Brakka over Sefa).",
+  "request": {
+    "state": {
+      "monster": {
+        "name": "Maestro Drazzuk",
+        "kind": "legendary",
+        "hp": {
+          "current": 136,
+          "max": 136
+        },
+        "ac": 16,
+        "speed": {
+          "walk": 30
+        },
+        "abilities": [
+          {
+            "id": "act_multiattack",
+            "name": "Multiattack",
+            "category": "action",
+            "summary": "2× Maestro's Blade (at will)"
+          },
+          {
+            "id": "act_maestro_s_blade",
+            "name": "Maestro's Blade",
+            "category": "action",
+            "summary": "melee +7 to hit, reach 5 ft.; 9 (1d8 + 3) slashing + 16 (3d10) psychic (at will)"
+          },
+          {
+            "id": "act_discordant_strike",
+            "name": "Discordant Strike",
+            "category": "action",
+            "summary": "DC 17 Wisdom save; 27 (6d8) psychic; 30-ft. emanation; range 30 ft.; recharge 5–6"
+          },
+          {
+            "id": "bon_unsettling_words",
+            "name": "Unsettling Words",
+            "category": "bonus",
+            "summary": "range 60 ft. (at will)"
+          },
+          {
+            "id": "spell_vicious_mockery",
+            "name": "Vicious Mockery",
+            "category": "action",
+            "summary": "DC 17 Wisdom save; 2 (1d4) psychic; range 60 ft. (at will)"
+          },
+          {
+            "id": "spell_minor_illusion",
+            "name": "Minor Illusion",
+            "category": "action",
+            "summary": "range 30 ft. (at will)"
+          },
+          {
+            "id": "spell_mage_hand",
+            "name": "Mage Hand",
+            "category": "action",
+            "summary": "range 30 ft. (at will)"
+          },
+          {
+            "id": "spell_dissonant_whispers",
+            "name": "Dissonant Whispers",
+            "category": "action",
+            "summary": "level 1 slot"
+          },
+          {
+            "id": "spell_charm_person",
+            "name": "Charm Person",
+            "category": "action",
+            "summary": "DC 17 Wisdom save; range 30 ft.; level 1 slot"
+          },
+          {
+            "id": "spell_suggestion",
+            "name": "Suggestion",
+            "category": "action",
+            "summary": "DC 17 Wisdom save; range 30 ft.; concentration; level 2 slot"
+          },
+          {
+            "id": "spell_shatter",
+            "name": "Shatter",
+            "category": "action",
+            "summary": "DC 17 Constitution save; 13 (3d8) thunder; 10-ft. sphere; range 60 ft.; level 2 slot"
+          },
+          {
+            "id": "spell_fear",
+            "name": "Fear",
+            "category": "action",
+            "summary": "DC 17 Wisdom save; 30-ft. cone; self; concentration; level 3 slot"
+          },
+          {
+            "id": "spell_hypnotic_pattern",
+            "name": "Hypnotic Pattern",
+            "category": "action",
+            "summary": "DC 17 Wisdom save; 30-ft. cube; range 120 ft.; concentration; level 3 slot"
+          },
+          {
+            "id": "spell_dominate_beast",
+            "name": "Dominate Beast",
+            "category": "action",
+            "summary": "DC 17 Wisdom save; range 60 ft.; concentration; level 4 slot"
+          },
+          {
+            "id": "spell_greater_invisibility",
+            "name": "Greater Invisibility",
+            "category": "action",
+            "summary": "range 5 ft.; concentration; level 4 slot"
+          },
+          {
+            "id": "spell_dominate_person",
+            "name": "Dominate Person",
+            "category": "action",
+            "summary": "DC 17 Wisdom save; range 60 ft.; concentration; level 5 slot"
+          },
+          {
+            "id": "trt_psychic_blades",
+            "name": "Psychic Blades",
+            "category": "passive",
+            "summary": "16 (3d10) psychic (at will)"
+          },
+          {
+            "id": "trt_musical_control",
+            "name": "Musical Control",
+            "category": "passive",
+            "summary": "DC 17 Wisdom save; range 60 ft. (at will)"
+          },
+          {
+            "id": "leg_conduct",
+            "name": "Conduct",
+            "category": "legendary",
+            "summary": "1/day"
+          }
+        ],
+        "rawUnparsed": [
+          "Conduct: Drazzuk can move up to half his speed without provoking opportunity attacks and cast Hypnotic Pattern as part of this movement."
+        ]
+      },
+      "encounter": {
+        "hp": 136,
+        "hpMax": 136,
+        "slots": {
+          "1": 4,
+          "2": 3,
+          "3": 3,
+          "4": 3,
+          "5": 2
+        },
+        "perDay": {
+          "leg_conduct": 1
+        },
+        "recharge": {
+          "act_discordant_strike": "available"
+        },
+        "legendaryActionsLeft": 3,
+        "legendaryResistanceLeft": 0,
+        "conditions": [],
+        "concentration": null,
+        "round": 1
+      },
+      "temperament": "cunning",
+      "morale": {
+        "value": 50,
+        "words": "steady"
+      },
+      "situation": {
+        "players": [
+          {
+            "key": "player__0",
+            "label": "player 0: Sefa (melee, Rogue, AC 15)",
+            "zone": "near",
+            "distanceFt": 30,
+            "apparentHp": "healthy",
+            "conditions": [],
+            "cover": "none",
+            "hitMonsterLastRound": false,
+            "clusteredWith": []
+          },
+          {
+            "key": "player__1",
+            "label": "player 1: Lio (caster, Sorcerer, AC 13)",
+            "zone": "near",
+            "distanceFt": 30,
+            "apparentHp": "healthy",
+            "conditions": [],
+            "cover": "none",
+            "hitMonsterLastRound": false,
+            "clusteredWith": [
+              "player__2"
+            ]
+          },
+          {
+            "key": "player__2",
+            "label": "player 2: Brakka (melee, Fighter, AC 18)",
+            "zone": "near",
+            "distanceFt": 30,
+            "apparentHp": "down",
+            "conditions": [],
+            "cover": "none",
+            "hitMonsterLastRound": false,
+            "clusteredWith": [
+              "player__1"
+            ]
+          }
+        ],
+        "allies": {
+          "present": false,
+          "count": 0
+        },
+        "terrain": {
+          "difficult": false,
+          "chokepoint": false,
+          "escapeRoute": false,
+          "flyingPossible": false
+        },
+        "notes": ""
+      },
+      "options": {
+        "actions": [
+          {
+            "key": "act_multiattack",
+            "summary": "Multiattack: 2× Maestro's Blade",
+            "usesResource": false,
+            "concentration": false,
+            "singleTarget": true,
+            "area": false,
+            "range": {
+              "ft": 5,
+              "inRangeNow": [],
+              "inRangeAfterMove": [
+                "player__0",
+                "player__1"
+              ]
+            }
+          },
+          {
+            "key": "act_maestro_s_blade",
+            "summary": "Maestro's Blade: melee +7 to hit, reach 5 ft.; 9 (1d8 + 3) slashing + 16 (3d10) psychic",
+            "usesResource": false,
+            "concentration": false,
+            "singleTarget": true,
+            "area": false,
+            "range": {
+              "ft": 5,
+              "inRangeNow": [],
+              "inRangeAfterMove": [
+                "player__0",
+                "player__1"
+              ]
+            }
+          },
+          {
+            "key": "act_discordant_strike",
+            "summary": "Discordant Strike: DC 17 Wisdom save; 27 (6d8) psychic; 30-ft. emanation; range 30 ft.; recharge 5–6",
+            "usesResource": true,
+            "concentration": false,
+            "singleTarget": false,
+            "area": true,
+            "range": {
+              "ft": 30,
+              "inRangeNow": [
+                "player__0",
+                "player__1"
+              ],
+              "inRangeAfterMove": [
+                "player__0",
+                "player__1"
+              ]
+            }
+          },
+          {
+            "key": "spell_vicious_mockery",
+            "summary": "Vicious Mockery: DC 17 Wisdom save; 2 (1d4) psychic; range 60 ft.",
+            "usesResource": false,
+            "concentration": false,
+            "singleTarget": true,
+            "area": false,
+            "range": {
+              "ft": 60,
+              "inRangeNow": [
+                "player__0",
+                "player__1"
+              ],
+              "inRangeAfterMove": [
+                "player__0",
+                "player__1"
+              ]
+            }
+          },
+          {
+            "key": "spell_minor_illusion",
+            "summary": "Minor Illusion: range 30 ft.",
+            "usesResource": false,
+            "concentration": false,
+            "singleTarget": false,
+            "area": false,
+            "range": "no target"
+          },
+          {
+            "key": "spell_mage_hand",
+            "summary": "Mage Hand: range 30 ft.",
+            "usesResource": false,
+            "concentration": false,
+            "singleTarget": false,
+            "area": false,
+            "range": "no target"
+          },
+          {
+            "key": "spell_dissonant_whispers",
+            "summary": "Dissonant Whispers: level 1 slot",
+            "usesResource": true,
+            "concentration": false,
+            "singleTarget": true,
+            "area": false,
+            "slotLevels": [
+              1,
+              2,
+              3,
+              4,
+              5
+            ],
+            "range": "range unknown"
+          },
+          {
+            "key": "spell_charm_person",
+            "summary": "Charm Person: DC 17 Wisdom save; range 30 ft.; level 1 slot",
+            "usesResource": true,
+            "concentration": false,
+            "singleTarget": true,
+            "area": false,
+            "slotLevels": [
+              1,
+              2,
+              3,
+              4,
+              5
+            ],
+            "range": {
+              "ft": 30,
+              "inRangeNow": [
+                "player__0",
+                "player__1"
+              ],
+              "inRangeAfterMove": [
+                "player__0",
+                "player__1"
+              ]
+            }
+          },
+          {
+            "key": "spell_suggestion",
+            "summary": "Suggestion: DC 17 Wisdom save; range 30 ft.; concentration; level 2 slot",
+            "usesResource": true,
+            "concentration": true,
+            "singleTarget": true,
+            "area": false,
+            "slotLevels": [
+              2,
+              3,
+              4,
+              5
+            ],
+            "range": {
+              "ft": 30,
+              "inRangeNow": [
+                "player__0",
+                "player__1"
+              ],
+              "inRangeAfterMove": [
+                "player__0",
+                "player__1"
+              ]
+            }
+          },
+          {
+            "key": "spell_shatter",
+            "summary": "Shatter: DC 17 Constitution save; 13 (3d8) thunder; 10-ft. sphere; range 60 ft.; level 2 slot",
+            "usesResource": true,
+            "concentration": false,
+            "singleTarget": false,
+            "area": true,
+            "slotLevels": [
+              2,
+              3,
+              4,
+              5
+            ],
+            "range": {
+              "ft": 60,
+              "inRangeNow": [
+                "player__0",
+                "player__1"
+              ],
+              "inRangeAfterMove": [
+                "player__0",
+                "player__1"
+              ]
+            }
+          },
+          {
+            "key": "spell_fear",
+            "summary": "Fear: DC 17 Wisdom save; 30-ft. cone; self; concentration; level 3 slot",
+            "usesResource": true,
+            "concentration": true,
+            "singleTarget": false,
+            "area": true,
+            "slotLevels": [
+              3,
+              4,
+              5
+            ],
+            "range": {
+              "ft": 30,
+              "inRangeNow": [
+                "player__0",
+                "player__1"
+              ],
+              "inRangeAfterMove": [
+                "player__0",
+                "player__1"
+              ]
+            }
+          },
+          {
+            "key": "spell_hypnotic_pattern",
+            "summary": "Hypnotic Pattern: DC 17 Wisdom save; 30-ft. cube; range 120 ft.; concentration; level 3 slot",
+            "usesResource": true,
+            "concentration": true,
+            "singleTarget": false,
+            "area": true,
+            "slotLevels": [
+              3,
+              4,
+              5
+            ],
+            "range": {
+              "ft": 120,
+              "inRangeNow": [
+                "player__0",
+                "player__1"
+              ],
+              "inRangeAfterMove": [
+                "player__0",
+                "player__1"
+              ]
+            }
+          },
+          {
+            "key": "spell_dominate_beast",
+            "summary": "Dominate Beast: DC 17 Wisdom save; range 60 ft.; concentration; level 4 slot",
+            "usesResource": true,
+            "concentration": true,
+            "singleTarget": true,
+            "area": false,
+            "slotLevels": [
+              4,
+              5
+            ],
+            "range": {
+              "ft": 60,
+              "inRangeNow": [
+                "player__0",
+                "player__1"
+              ],
+              "inRangeAfterMove": [
+                "player__0",
+                "player__1"
+              ]
+            }
+          },
+          {
+            "key": "spell_greater_invisibility",
+            "summary": "Greater Invisibility: range 5 ft.; concentration; level 4 slot",
+            "usesResource": true,
+            "concentration": true,
+            "singleTarget": false,
+            "area": false,
+            "slotLevels": [
+              4,
+              5
+            ],
+            "range": "no target"
+          },
+          {
+            "key": "spell_dominate_person",
+            "summary": "Dominate Person: DC 17 Wisdom save; range 60 ft.; concentration; level 5 slot",
+            "usesResource": true,
+            "concentration": true,
+            "singleTarget": true,
+            "area": false,
+            "slotLevels": [
+              5
+            ],
+            "range": {
+              "ft": 60,
+              "inRangeNow": [
+                "player__0",
+                "player__1"
+              ],
+              "inRangeAfterMove": [
+                "player__0",
+                "player__1"
+              ]
+            }
+          },
+          {
+            "key": "dash",
+            "summary": "Dash: extra movement equal to its speed this turn",
+            "usesResource": false,
+            "concentration": false,
+            "singleTarget": false,
+            "area": false,
+            "range": "no target"
+          },
+          {
+            "key": "dodge",
+            "summary": "Dodge: attacks against it have disadvantage and it has advantage on Dexterity saves until its next turn",
+            "usesResource": false,
+            "concentration": false,
+            "singleTarget": false,
+            "area": false,
+            "range": "no target"
+          },
+          {
+            "key": "disengage",
+            "summary": "Disengage: its movement doesn't provoke opportunity attacks this turn",
+            "usesResource": false,
+            "concentration": false,
+            "singleTarget": false,
+            "area": false,
+            "range": "no target"
+          },
+          {
+            "key": "hide",
+            "summary": "Hide: makes a Dexterity (Stealth) check to hide",
+            "usesResource": false,
+            "concentration": false,
+            "singleTarget": false,
+            "area": false,
+            "range": "no target"
+          },
+          {
+            "key": "help",
+            "summary": "Help: gives an ally advantage on its next ability check or attack roll",
+            "usesResource": false,
+            "concentration": false,
+            "singleTarget": false,
+            "area": false,
+            "range": "no target"
+          }
+        ],
+        "bonusActions": [
+          {
+            "key": "bon_unsettling_words",
+            "summary": "Unsettling Words: range 60 ft.",
+            "usesResource": false,
+            "concentration": false,
+            "singleTarget": true,
+            "area": false,
+            "range": {
+              "ft": 60,
+              "inRangeNow": [
+                "player__0",
+                "player__1"
+              ],
+              "inRangeAfterMove": [
+                "player__0",
+                "player__1"
+              ]
+            }
+          },
+          {
+            "key": "none",
+            "summary": "None: take no bonus action",
+            "usesResource": false,
+            "concentration": false,
+            "singleTarget": false,
+            "area": false,
+            "range": "no target"
+          }
+        ],
+        "movements": [
+          "hold",
+          "closeIn",
+          "reachOther",
+          "retreat",
+          "takeCover"
+        ]
+      },
+      "clusters": [
+        {
+          "id": "cluster__0",
+          "players": [
+            "player__0"
+          ],
+          "size": 1
+        },
+        {
+          "id": "cluster__1",
+          "players": [
+            "player__1",
+            "player__2"
+          ],
+          "size": 2
+        }
+      ],
+      "history": []
+    },
+    "questions": {
+      "tactic": {
+        "type": "choice",
+        "instructions": "What is the monster's overall plan this turn, given its temperament, morale and the situation?",
+        "criteria": {
+          "aggressive": "Deal as much damage as it can this turn",
+          "focus_weakest": "Finish off or pressure the most wounded or vulnerable player",
+          "focus_threat": "Go after the player who is the biggest threat to it",
+          "control": "Disable, hinder or split up the party rather than deal damage",
+          "defensive": "Protect itself: reposition, buff or avoid damage",
+          "flee": "Get away from the fight"
+        }
+      },
+      "move_before": {
+        "type": "choice",
+        "instructions": "Before its action, how does the monster move?",
+        "criteria": {
+          "hold": "Stay where it is",
+          "closeIn": "Move toward its target",
+          "reachOther": "Move to reach a different target",
+          "retreat": "Move away from the party",
+          "takeCover": "Move behind cover"
+        }
+      },
+      "action": {
+        "type": "choice",
+        "instructions": "Which action does the monster take this turn? Range flags assume the targets in the state.",
+        "criteria": {
+          "act_multiattack": "Multiattack: 2× Maestro's Blade [in range after moving]",
+          "act_maestro_s_blade": "Maestro's Blade: melee +7 to hit, reach 5 ft.; 9 (1d8 + 3) slashing + 16 (3d10) psychic [in range after moving]",
+          "act_discordant_strike": "Discordant Strike: DC 17 Wisdom save; 27 (6d8) psychic; 30-ft. emanation; range 30 ft.; recharge 5–6 [in range now]",
+          "spell_vicious_mockery": "Vicious Mockery: DC 17 Wisdom save; 2 (1d4) psychic; range 60 ft. [in range now]",
+          "spell_minor_illusion": "Minor Illusion: range 30 ft.",
+          "spell_mage_hand": "Mage Hand: range 30 ft.",
+          "spell_dissonant_whispers": "Dissonant Whispers: level 1 slot [range unknown]",
+          "spell_charm_person": "Charm Person: DC 17 Wisdom save; range 30 ft.; level 1 slot [in range now]",
+          "spell_suggestion": "Suggestion: DC 17 Wisdom save; range 30 ft.; concentration; level 2 slot [in range now]",
+          "spell_shatter": "Shatter: DC 17 Constitution save; 13 (3d8) thunder; 10-ft. sphere; range 60 ft.; level 2 slot [in range now]",
+          "spell_fear": "Fear: DC 17 Wisdom save; 30-ft. cone; self; concentration; level 3 slot [in range now]",
+          "spell_hypnotic_pattern": "Hypnotic Pattern: DC 17 Wisdom save; 30-ft. cube; range 120 ft.; concentration; level 3 slot [in range now]",
+          "spell_dominate_beast": "Dominate Beast: DC 17 Wisdom save; range 60 ft.; concentration; level 4 slot [in range now]",
+          "spell_greater_invisibility": "Greater Invisibility: range 5 ft.; concentration; level 4 slot",
+          "spell_dominate_person": "Dominate Person: DC 17 Wisdom save; range 60 ft.; concentration; level 5 slot [in range now]",
+          "dash": "Dash: extra movement equal to its speed this turn",
+          "dodge": "Dodge: attacks against it have disadvantage and it has advantage on Dexterity saves until its next turn",
+          "disengage": "Disengage: its movement doesn't provoke opportunity attacks this turn",
+          "hide": "Hide: makes a Dexterity (Stealth) check to hide",
+          "help": "Help: gives an ally advantage on its next ability check or attack roll"
+        }
+      },
+      "bonus_action": {
+        "type": "choice",
+        "instructions": "Which bonus action does the monster take this turn, if any?",
+        "criteria": {
+          "bon_unsettling_words": "Unsettling Words: range 60 ft. [in range now]",
+          "none": "None: take no bonus action"
+        }
+      },
+      "move_after": {
+        "type": "choice",
+        "instructions": "After its action, how does the monster move?",
+        "criteria": {
+          "hold": "Stay where it is",
+          "closeIn": "Move toward its target",
+          "reachOther": "Move to reach a different target",
+          "retreat": "Move away from the party",
+          "takeCover": "Move behind cover"
+        }
+      },
+      "target__0": {
+        "type": "choice",
+        "instructions": "Who should \"Vicious Mockery\" target?",
+        "criteria": {
+          "player__0": "player 0: Sefa (melee, Rogue, AC 15); healthy; 30 ft. away; cover: none",
+          "player__1": "player 1: Lio (caster, Sorcerer, AC 13); healthy; 30 ft. away; cover: none"
+        }
+      },
+      "target__1": {
+        "type": "choice",
+        "instructions": "Who should \"Unsettling Words\" target?",
+        "criteria": {
+          "player__0": "player 0: Sefa (melee, Rogue, AC 15); healthy; 30 ft. away; cover: none",
+          "player__1": "player 1: Lio (caster, Sorcerer, AC 13); healthy; 30 ft. away; cover: none"
+        }
+      },
+      "target__2": {
+        "type": "choice",
+        "instructions": "Who should \"Charm Person\" target?",
+        "criteria": {
+          "player__0": "player 0: Sefa (melee, Rogue, AC 15); healthy; 30 ft. away; cover: none",
+          "player__1": "player 1: Lio (caster, Sorcerer, AC 13); healthy; 30 ft. away; cover: none"
+        }
+      },
+      "target__3": {
+        "type": "choice",
+        "instructions": "Who should \"Suggestion\" target?",
+        "criteria": {
+          "player__0": "player 0: Sefa (melee, Rogue, AC 15); healthy; 30 ft. away; cover: none",
+          "player__1": "player 1: Lio (caster, Sorcerer, AC 13); healthy; 30 ft. away; cover: none"
+        }
+      },
+      "cluster__0": {
+        "type": "choice",
+        "instructions": "Which group of players should \"Discordant Strike\" be aimed at?",
+        "criteria": {
+          "cluster__0": "player 0: Sefa (melee, Rogue, AC 15): catches 1",
+          "cluster__1": "player 1: Lio (caster, Sorcerer, AC 13), player 2: Brakka (melee, Fighter, AC 18): catches 2"
+        }
+      },
+      "cluster__1": {
+        "type": "choice",
+        "instructions": "Which group of players should \"Shatter\" be aimed at?",
+        "criteria": {
+          "cluster__0": "player 0: Sefa (melee, Rogue, AC 15): catches 1",
+          "cluster__1": "player 1: Lio (caster, Sorcerer, AC 13), player 2: Brakka (melee, Fighter, AC 18): catches 2"
+        }
+      },
+      "cluster__2": {
+        "type": "choice",
+        "instructions": "Which group of players should \"Fear\" be aimed at?",
+        "criteria": {
+          "cluster__0": "player 0: Sefa (melee, Rogue, AC 15): catches 1",
+          "cluster__1": "player 1: Lio (caster, Sorcerer, AC 13), player 2: Brakka (melee, Fighter, AC 18): catches 2"
+        }
+      },
+      "slot_level__0": {
+        "type": "choice",
+        "instructions": "If it casts \"Shatter\", which spell slot level should it use?",
+        "criteria": {
+          "level__2": "Cast with a level 2 slot (3 left)",
+          "level__3": "Cast with a level 3 slot (3 left)",
+          "level__4": "Cast with a level 4 slot (3 left)",
+          "level__5": "Cast with a level 5 slot (2 left)"
+        }
+      },
+      "slot_level__1": {
+        "type": "choice",
+        "instructions": "If it casts \"Charm Person\", which spell slot level should it use?",
+        "criteria": {
+          "level__1": "Cast with a level 1 slot (4 left)",
+          "level__2": "Cast with a level 2 slot (3 left)",
+          "level__3": "Cast with a level 3 slot (3 left)",
+          "level__4": "Cast with a level 4 slot (3 left)",
+          "level__5": "Cast with a level 5 slot (2 left)"
+        }
+      },
+      "slot_level__2": {
+        "type": "choice",
+        "instructions": "If it casts \"Suggestion\", which spell slot level should it use?",
+        "criteria": {
+          "level__2": "Cast with a level 2 slot (3 left)",
+          "level__3": "Cast with a level 3 slot (3 left)",
+          "level__4": "Cast with a level 4 slot (3 left)",
+          "level__5": "Cast with a level 5 slot (2 left)"
+        }
+      },
+      "slot_level__3": {
+        "type": "choice",
+        "instructions": "If it casts \"Fear\", which spell slot level should it use?",
+        "criteria": {
+          "level__3": "Cast with a level 3 slot (3 left)",
+          "level__4": "Cast with a level 4 slot (3 left)",
+          "level__5": "Cast with a level 5 slot (2 left)"
+        }
+      },
+      "multiattack_fallback": {
+        "type": "noul",
+        "instructions": "If it uses Multiattack and its first target drops partway through, should it switch its remaining attacks to another adjacent target?",
+        "criteria": {
+          "true": "Yes: keep attacking whoever else is in reach.",
+          "false": "No: stop, or save the remaining attacks' movement for something else."
+        }
+      },
+      "should_retreat": {
+        "type": "noul",
+        "instructions": "Given its HP, morale, temperament and the situation, should the monster break off from this fight now?",
+        "criteria": {
+          "true": "Yes: it should get away this turn.",
+          "false": "No: it should keep fighting."
+        }
+      },
+      "spend_resource": {
+        "type": "noul",
+        "instructions": "Is this moment worth spending a limited resource (a spell slot, a recharge ability or a daily use)?",
+        "criteria": {
+          "true": "Yes: spend it now.",
+          "false": "No: save it for later."
+        }
+      }
+    },
+    "model": "jev-latest"
+  },
+  "response": {
+    "model": "jev-1.13.0",
+    "answers": {
+      "tactic": {
+        "type": "choice",
+        "choice": "control",
+        "probabilities": {
+          "aggressive": 0.12,
+          "focus_weakest": 0.18,
+          "focus_threat": 0.01,
+          "control": 0.69,
+          "defensive": 0,
+          "flee": 0
+        },
+        "confidence": 0.63
+      },
+      "move_before": {
+        "type": "choice",
+        "choice": "closeIn",
+        "probabilities": {
+          "hold": 0.47,
+          "closeIn": 0.49,
+          "reachOther": 0.03,
+          "retreat": 0.01,
+          "takeCover": 0
+        },
+        "confidence": 0.36
+      },
+      "action": {
+        "type": "choice",
+        "choice": "spell_hypnotic_pattern",
+        "probabilities": {
+          "act_multiattack": 0.11,
+          "act_maestro_s_blade": 0.02,
+          "act_discordant_strike": 0.27,
+          "spell_vicious_mockery": 0,
+          "spell_minor_illusion": 0,
+          "spell_mage_hand": 0,
+          "spell_dissonant_whispers": 0,
+          "spell_charm_person": 0,
+          "spell_suggestion": 0,
+          "spell_shatter": 0,
+          "spell_fear": 0,
+          "spell_hypnotic_pattern": 0.58,
+          "spell_dominate_beast": 0,
+          "spell_greater_invisibility": 0,
+          "spell_dominate_person": 0.01,
+          "dash": 0.01,
+          "dodge": 0,
+          "disengage": 0,
+          "hide": 0,
+          "help": 0
+        },
+        "confidence": 0.56
+      },
+      "bonus_action": {
+        "type": "choice",
+        "choice": "none",
+        "probabilities": {
+          "bon_unsettling_words": 0.48,
+          "none": 0.52
+        },
+        "confidence": 0.04
+      },
+      "move_after": {
+        "type": "choice",
+        "choice": "closeIn",
+        "probabilities": {
+          "hold": 0.4,
+          "closeIn": 0.54,
+          "reachOther": 0.05,
+          "retreat": 0.01,
+          "takeCover": 0
+        },
+        "confidence": 0.42
+      },
+      "target__0": {
+        "type": "choice",
+        "choice": "player__1",
+        "probabilities": {
+          "player__0": 0.16,
+          "player__1": 0.84
+        },
+        "confidence": 0.68
+      },
+      "target__1": {
+        "type": "choice",
+        "choice": "player__1",
+        "probabilities": {
+          "player__0": 0.22,
+          "player__1": 0.78
+        },
+        "confidence": 0.56
+      },
+      "target__2": {
+        "type": "choice",
+        "choice": "player__1",
+        "probabilities": {
+          "player__0": 0.3,
+          "player__1": 0.7
+        },
+        "confidence": 0.4
+      },
+      "target__3": {
+        "type": "choice",
+        "choice": "player__1",
+        "probabilities": {
+          "player__0": 0.28,
+          "player__1": 0.72
+        },
+        "confidence": 0.44
+      },
+      "cluster__0": {
+        "type": "choice",
+        "choice": "cluster__1",
+        "probabilities": {
+          "cluster__0": 0.04,
+          "cluster__1": 0.96
+        },
+        "confidence": 0.92
+      },
+      "cluster__1": {
+        "type": "choice",
+        "choice": "cluster__1",
+        "probabilities": {
+          "cluster__0": 0.04,
+          "cluster__1": 0.96
+        },
+        "confidence": 0.92
+      },
+      "cluster__2": {
+        "type": "choice",
+        "choice": "cluster__1",
+        "probabilities": {
+          "cluster__0": 0.07,
+          "cluster__1": 0.93
+        },
+        "confidence": 0.86
+      },
+      "slot_level__0": {
+        "type": "choice",
+        "choice": "level__2",
+        "probabilities": {
+          "level__2": 0.99,
+          "level__3": 0.01,
+          "level__4": 0,
+          "level__5": 0
+        },
+        "confidence": 0.99
+      },
+      "slot_level__1": {
+        "type": "choice",
+        "choice": "level__1",
+        "probabilities": {
+          "level__1": 1,
+          "level__2": 0,
+          "level__3": 0,
+          "level__4": 0,
+          "level__5": 0
+        },
+        "confidence": 1
+      },
+      "slot_level__2": {
+        "type": "choice",
+        "choice": "level__2",
+        "probabilities": {
+          "level__2": 0.99,
+          "level__3": 0.01,
+          "level__4": 0,
+          "level__5": 0
+        },
+        "confidence": 0.99
+      },
+      "slot_level__3": {
+        "type": "choice",
+        "choice": "level__3",
+        "probabilities": {
+          "level__3": 1,
+          "level__4": 0,
+          "level__5": 0
+        },
+        "confidence": 1
+      },
+      "multiattack_fallback": {
+        "type": "noul",
+        "noul": 0.75
+      },
+      "should_retreat": {
+        "type": "noul",
+        "noul": 0.18
+      },
+      "spend_resource": {
+        "type": "noul",
+        "noul": 0.73
+      }
+    },
+    "usage": {
+      "input_tokens": 7433,
+      "output_tokens": 976
+    }
+  }
+}

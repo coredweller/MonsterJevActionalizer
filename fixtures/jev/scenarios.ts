@@ -23,6 +23,8 @@ export const SCENARIO_NAMES = [
   "warpriest-dual-spells",
   // Not a PLAN.md scenario: gives the bonus-action range rule (F07) a real out-of-range bonus action.
   "out-of-range-bonus",
+  // Not a PLAN.md scenario: a downed player shares a cluster with a healthy one (F17).
+  "downed-in-cluster",
 ] as const;
 export type ScenarioName = (typeof SCENARIO_NAMES)[number];
 
@@ -66,6 +68,8 @@ const turn = (playerId: string, zone: PlayerTurn["zone"], extra: Partial<PlayerT
   ...extra,
 });
 
+// flyingPossible stays false here although the app defaults to true (F29): no scenario monster flies,
+// and flipping it would change every recorded request.
 const situation = (players: PlayerTurn[], terrain: Partial<Situation["terrain"]> = {}, notes = ""): Situation => ({
   players,
   allies: { present: false, count: 0 },
@@ -154,6 +158,21 @@ function build(name: ScenarioName): Omit<Scenario, "name"> {
       const roster = [hero("brakka", "Brakka", "melee", "Fighter", 18), hero("lio", "Lio", "caster", "Sorcerer", 13), hero("sefa", "Sefa", "melee", "Rogue", 15)];
       return {
         purpose: "Maestro Drazzuk with the whole party 70–90 ft. away: Unsettling Words (60 ft.) reaches nobody without closing in first.",
+        tracker: start(name, "MaestroDrazzuk.CR10.2014.json", roster, s),
+        situation: s,
+      };
+    }
+    case "downed-in-cluster": {
+      // Sefa stands alone; Lio is clustered with the downed Brakka, whom a cunning monster may not target.
+      // An area effect still hits Brakka, so Lio's cluster catches 2 and Sefa's catches 1.
+      const s = situation([
+        turn("sefa", "near"),
+        turn("lio", "near", { clusteredWith: ["brakka"] }),
+        turn("brakka", "near", { apparentHp: "down", clusteredWith: ["lio"] }),
+      ]);
+      const roster = [hero("brakka", "Brakka", "melee", "Fighter", 18), hero("lio", "Lio", "caster", "Sorcerer", 13), hero("sefa", "Sefa", "melee", "Rogue", 15)];
+      return {
+        purpose: "Maestro Drazzuk facing a lone Sefa, and Lio clustered with the downed Brakka: an area effect's cluster counts Brakka too.",
         tracker: start(name, "MaestroDrazzuk.CR10.2014.json", roster, s),
         situation: s,
       };

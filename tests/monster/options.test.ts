@@ -18,6 +18,9 @@ const crossbow = ability({
 
 const oneEngaged = situationWith([playerTurn({ playerId: "p1", zone: "engaged" })]);
 
+/** The DM ticked "Flying not possible" (a low ceiling, say). */
+const noFlying = (s: Situation): Situation => ({ ...s, terrain: { ...s.terrain, flyingPossible: false } });
+
 /** Defaults to a genius monster, which may target anyone, so only the downed-player tests depend on temperament. */
 function build(reviewed: ReviewedMonster, situation: Situation = oneEngaged, edit: Partial<EncounterState> = {}, temperament: Temperament = "genius"): LegalOptions {
   return buildLegalOptions(reviewed, { ...freshState(reviewed), ...edit }, situation, temperament);
@@ -96,6 +99,11 @@ describe("speed 0", () => {
   it("a fly-only monster (walk 0) can still move", () => {
     const opts = build(extractedReviewed("TollOfForgottenWatcher"));
     expect(opts.movements).toEqual([...ALL_MOVES, "flyUp"]);
+  });
+
+  it("a fly-only monster holds when flying isn't possible (F29)", () => {
+    const opts = build(extractedReviewed("TollOfForgottenWatcher"), noFlying(oneEngaged));
+    expect(opts.movements).toEqual(["hold"]);
   });
 });
 
@@ -227,6 +235,10 @@ describe("movements", () => {
     expect(build(extractedReviewed("TunnelWasp")).movements).toEqual(ALL_MOVES);
     expect(build(extractedReviewed("Zarielith")).movements).toEqual([...ALL_MOVES, "flyUp"]);
   });
+
+  it("no flyUp when flying isn't possible, even with a fly speed (F29)", () => {
+    expect(build(extractedReviewed("Zarielith"), noFlying(oneEngaged)).movements).toEqual(ALL_MOVES);
+  });
 });
 
 describe("range flags", () => {
@@ -259,6 +271,11 @@ describe("range flags", () => {
   it("the fastest movement mode counts for after-move", () => {
     const opts = build(handReviewed("TunnelWasp", [mace], { speed: { walk: 30, fly: 60 } }), players);
     expect(rangeOf(option(opts.actions, "act_mace")).inRangeAfterMove).toEqual(["engaged", "near", "far", "engagedButExact20", "downed"]);
+  });
+
+  it("a fly speed doesn't count for after-move when flying isn't possible (F29)", () => {
+    const opts = build(handReviewed("TunnelWasp", [mace], { speed: { walk: 30, fly: 60 } }), noFlying(players));
+    expect(rangeOf(option(opts.actions, "act_mace")).inRangeAfterMove).toEqual(["engaged", "near", "engagedButExact20", "downed"]);
   });
 
   it("speed 0 means after-move equals now", () => {

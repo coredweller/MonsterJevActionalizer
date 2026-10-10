@@ -137,7 +137,7 @@ description: "Task list for Monster Turn Advisor (v1)"
 - [X] T053 [P] [US2] Build `components/PartyRoster.tsx`: add, edit and remove players (name, role, class, optional AC), saved on the tracker
 - [X] T054 [P] [US2] Build `components/PlayerRow.tsx`: zone select plus optional exact feet, apparent HP, conditions, cover, hit-last-round, clustered-with multi-select of other players
 - [X] T055 [US2] Build `components/SituationForm.tsx`: one PlayerRow per roster player, pre-filled from the tracker's carried-over `situation`; allies present and count; terrain checkboxes (difficult, chokepoint, escape route, flying possible); DM notes; a "Recommend" button
-- [ ] T056 [US2] Build `components/RecommendationCard.tsx`: move before → action (target/cluster/slot) → bonus action → move after; confidence badge ("DM's call" below medium); explanation; warnings; collapsed runners-up with probabilities; a separate override control for **each** of: move before, action, action target(s), cluster (area actions), slot level (leveled spells), bonus action, bonus-action target(s), move after, each listing every legal option computed client-side with `buildLegalOptions` (Principle III); an Apply button that calls `apply` with the DM's final choices; a blocked state that shows the reason, fixes movement to "hold" when `movementBy: "code"`, and shows movement selects for the DM when `movementBy: "dm"`
+- [ ] T056 [US2] Build `components/RecommendationCard.tsx`: move before → action (target/cluster/slot) → bonus action → move after; confidence badge ("DM's call" below medium); explanation; warnings; collapsed runners-up with probabilities; a separate override control for **each** of: move before, action, action target(s), cluster (area actions), slot level (leveled spells), bonus action, bonus-action target(s), move after, each listing every legal option computed client-side with `buildLegalOptions` (Principle III), and the target overrides listing every player, downed ones included, with no warning (F18); an Apply button that calls `apply` with the DM's final choices; a blocked state that shows the reason, fixes movement to "hold" when `movementBy: "code"`, and shows movement selects for the DM when `movementBy: "dm"`
 - [ ] T057 [US2] Wire the decide flow in `app/page.tsx`: POST `/api/decide` with `{ tracker, situation }`; on `ok: false` or a network error, show `error.message` and render RecommendationCard in manual mode from local options; on Apply, `upsert` the updated tracker; show `meta.latencyMs` and usage in a small debug footer
 - [ ] T058 [US2] Verify secret safety: `TYPESAFE_API_KEY` is referenced only in `lib/jev/client.ts` (plus `.env.example`, `.env.local` and docs); `lib/jev` is never imported from a `"use client"` file; after `npm run build`, grep `.next/static` for the key name and confirm no match
 
@@ -170,18 +170,18 @@ Each item states the **current behaviour**, the **recommendation** and what a ch
 
 **Unanswered questions (decide before T056):**
 
-- [ ] F17 **Clusters with a downed member.** Current: the code-picked cluster (an area option with no `cluster__<i>` question) is ranked by how many members are in reach, so a downed player the monster may not target doesn't add to the count (`lib/decide/interpret.ts`). PLAN.md says downed players "still count toward clusters", and research R6 says the count is the whole cluster. **Recommendation: count the whole cluster**, since an area effect hits everyone in it. Code-pick only, so no re-record. No current scenario has a partly reachable cluster, so the test needs a derived fixture or a new scenario
-- [ ] F18 **DM override onto a downed player.** Current: none yet; T056 builds the override controls. `LegalOptions.targetableIds` lists the players the temperament allows. **Recommendation: list every player in the target override, and show a warning when the DM picks one outside `targetableIds`** (Principle III, the DM has final say). Folds into T056
+- [X] F17 **Clusters with a downed member.** *Decided 2026-10-09: downed players count toward a cluster like anyone else, no special rule. The code pick now ranks clusters with a member in reach by their whole size. Tested via the new `downed-in-cluster` scenario (recorded alone) and derived fixture `cluster-counts-downed`.* Was: the code-picked cluster (an area option with no `cluster__<i>` question) is ranked by how many members are in reach, so a downed player the monster may not target doesn't add to the count (`lib/decide/interpret.ts`). PLAN.md says downed players "still count toward clusters", and research R6 says the count is the whole cluster. **Recommendation: count the whole cluster**, since an area effect hits everyone in it. Code-pick only, so no re-record. No current scenario has a partly reachable cluster, so the test needs a derived fixture or a new scenario
+- [X] F18 **DM override onto a downed player.** *Decided 2026-10-09: the target override lists every player, downed ones included, with no warning and no special rule. Built in T056.* Was: none yet; T056 builds the override controls. `LegalOptions.targetableIds` lists the players the temperament allows. **Recommendation: list every player in the target override, and show a warning when the DM picks one outside `targetableIds`** (Principle III, the DM has final say). Folds into T056
 
 **Judgment calls the spec left open: recommend keeping as is (confirm or overrule):**
 
-- [ ] F19 Interpret fallbacks: with no usable Jev answer, the cluster catching the most players and the lowest available slot level are picked (`PickSource { by: "code" }`)
-- [ ] F20 A low `spend_resource` (< `SPEND_RESOURCE_LOW`) replaces a resource-spending pick outright with the best no-resource option, rather than "boosting" it by some amount
-- [ ] F21 "The Attack action" (War Priest and similar) means a weapon attack or Multiattack, not a spell attack (5e rules)
-- [ ] F22 The one-leveled-spell rule keeps the action on a tie; confidence comes from the final action's probability, after any replacement
-- [ ] F23 Target questions offer only players reachable this turn (`inRangeAfterMove`, or `targetableIds` for an unknown range). Candidate ranking (research R5) treats a no-target option as in range now and an unknown-range option as in range after moving
-- [ ] F24 Morale words sent to Jev: < 20 cowardly, < 40 wary, ≤ 60 steady, ≤ 80 bold, above that fanatical
-- [ ] F25 Legal-option defaults:
+- [X] F19 *Kept 2026-10-09.* Interpret fallbacks: with no usable Jev answer, the cluster catching the most players and the lowest available slot level are picked (`PickSource { by: "code" }`)
+- [X] F20 *Kept 2026-10-09 (replace outright; scaling and warn-only were considered).* A low `spend_resource` (< `SPEND_RESOURCE_LOW`) replaces a resource-spending pick outright with the best no-resource option, rather than "boosting" it by some amount
+- [X] F21 *Kept 2026-10-09.* "The Attack action" (War Priest and similar) means a weapon attack or Multiattack, not a spell attack (5e rules)
+- [X] F22 *Kept 2026-10-09.* The one-leveled-spell rule keeps the action on a tie; confidence comes from the final action's probability, after any replacement
+- [X] F23 *Kept 2026-10-09, including the known fallback quirk: an unlimited no-target option such as Dodge can outrank a damage-free slot spell in range.* Target questions offer only players reachable this turn (`inRangeAfterMove`, or `targetableIds` for an unknown range). Candidate ranking (research R5) treats a no-target option as in range now and an unknown-range option as in range after moving
+- [X] F24 *Kept 2026-10-09.* Morale words sent to Jev: < 20 cowardly, < 40 wary, ≤ 60 steady, ≤ 80 bold, above that fanatical
+- [X] F25 *Kept 2026-10-09; whether the fastest speed ignores a fly speed when flying isn't possible moved to F29.* Legal-option defaults:
   - Ranged attacks count their long range.
   - Melee with no stated reach is 5 ft.
   - Multiattack uses its longest component range.
@@ -190,17 +190,17 @@ Each item states the **current behaviour**, the **recommendation** and what a ch
   - A missing per-day or recharge entry counts as unavailable.
   - A blocked turn has no `none` bonus.
   - Clusters are a partition (each player in exactly one).
-- [ ] F26 `apply` never changes HP (damage is a manual edit, US3). A timeout is retried once; a network error (`TypeError`) is not
-- [ ] F27 Situation form:
+- [X] F26 *Kept 2026-10-09.* `apply` never changes HP (damage is a manual edit, US3). A timeout is retried once; a network error (`TypeError`) is not
+- [X] F27 *Decided 2026-10-09: the other three kept; removing a player now asks first (`window.confirm` in `components/PartyRoster.tsx`).* Situation form:
   - New players start in "near".
-  - Removing a player has no confirm step.
+  - ~~Removing a player has no confirm step.~~ Removing a player asks for confirmation, naming what is lost.
   - Every edit saves to the tracker as you type.
   - Ticking "allies present" sets the count to at least 1, and unticking sets it to 0.
-- [ ] F28 Runners-up are sorted by exact probability (the tie epsilon applies to picks only); `scripts/*.ts` print CLI output with `console`, not `lib/log.ts`
+- [X] F28 *Kept 2026-10-09; the scripts' `console` output is recorded as an exception in CLAUDE.md "Gotchas".* Runners-up are sorted by exact probability (the tie epsilon applies to picks only); `scripts/*.ts` print CLI output with `console`, not `lib/log.ts`
 
 **Judgment calls: recommend changing:**
 
-- [ ] F29 `flyUp` requires both a fly speed **and** `terrain.flyingPossible` (today only the fly speed gates it; a low ceiling should rule it out). `lib/monster/options.ts`. No current scenario monster flies, so the guards should stay green
+- [X] F29 *Done 2026-10-09: flying is now assumed possible (`blankSituation`), the form shows "Flying not possible", and the fly speed only counts toward movement when flying is possible. Scenarios keep an explicit `false`, so no re-record.* `flyUp` requires both a fly speed **and** `terrain.flyingPossible` (today only the fly speed gates it; a low ceiling should rule it out). `lib/monster/options.ts`. No current scenario monster flies, so the guards should stay green. *From F25: decide too whether the fly speed should stop counting toward after-move reach (the fastest speed) when `flyingPossible` is off.*
 - [ ] F30 Offer `reachOther` only when there are at least 2 targetable players (today it's offered even with one). Changes `lone-melee`'s movement lists, so **re-record lone-melee** and re-derive its fixtures (`choice-not-argmax`, `retreat-high`, `confidence-buckets`, `unknown-answer-keys`)
 - [ ] F31 A player behind total cover can't be the target of a single-target option (5e rules): leave them out of those options' range lists. Today total cover changes nothing. Area options still count them
 - [ ] F32 Difficult terrain halves movement when working out `inRangeAfterMove` (today `terrain.difficult` is ignored)
