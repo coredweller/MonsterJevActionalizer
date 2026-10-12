@@ -1,5 +1,6 @@
 "use client";
 
+import { mismatchedZone } from "@/lib/encounter/state";
 import {
   ApparentHpSchema,
   CONDITIONS,
@@ -49,6 +50,7 @@ export function PlayerRow({
   const set = (patch: Partial<Omit<PlayerTurn, "playerId">>) => onChange({ ...turn, ...patch });
   // Conditions are free strings in the data model; keep any carried-over non-standard ones toggleable.
   const conditionChoices = [...CONDITIONS, ...turn.conditions.filter((c) => !CONDITIONS.some((k) => k === c))];
+  const zoneHint = mismatchedZone(turn);
 
   function setDistance(distanceFt: number | undefined) {
     const { distanceFt: _previous, ...rest } = turn;
@@ -69,25 +71,32 @@ export function PlayerRow({
       {/* Two columns only on md+ screens AND when this row is itself wide enough: the page's xl grid makes the situation column narrow. */}
       <div className="@container">
         <div className="grid grid-cols-1 gap-3 md:@lg:grid-cols-2">
-          <div className="flex min-w-0 gap-2">
-            <label className={`${labelClass} min-w-0 flex-1`}>
-              Zone
-              <select className={inputClass} value={turn.zone} onChange={(e) => set({ zone: ZoneSchema.parse(e.target.value) })}>
-                {ZoneSchema.options.map((z) => (
-                  <option key={z} value={z}>
-                    {ZONE_LABEL[z]}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <NumberField
-              className="w-24 shrink-0"
-              label="Exact ft."
-              optional
-              value={turn.distanceFt}
-              placeholder={`${ZONE_DEFAULT_FT[turn.zone]}`}
-              onChange={setDistance}
-            />
+          <div className="min-w-0">
+            <div className="flex min-w-0 gap-2">
+              <label className={`${labelClass} min-w-0 flex-1`}>
+                Zone
+                <select className={inputClass} value={turn.zone} onChange={(e) => set({ zone: ZoneSchema.parse(e.target.value) })}>
+                  {ZoneSchema.options.map((z) => (
+                    <option key={z} value={z}>
+                      {ZONE_LABEL[z]}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <NumberField
+                className="w-24 shrink-0"
+                label="Exact ft."
+                optional
+                value={turn.distanceFt}
+                placeholder={`${ZONE_DEFAULT_FT[turn.zone]}`}
+                onChange={setDistance}
+              />
+            </div>
+            {zoneHint && (
+              <p role="status" className="mt-1 rounded bg-amber-50 p-2 text-xs text-amber-900">
+                {turn.distanceFt} ft. is {ZONE_LABEL[zoneHint]}, not {ZONE_LABEL[turn.zone]}. Range checks use the {turn.distanceFt} ft.; update the zone to match.
+              </p>
+            )}
           </div>
   
           <label className={labelClass}>

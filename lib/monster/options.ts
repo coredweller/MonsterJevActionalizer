@@ -15,13 +15,17 @@ export type BasicAction = z.infer<typeof BasicActionSchema>;
 /**
  * Whether players are in range. `ft` lists the ids of targetable players (see `targetableIds`)
  * within `ft` feet now, and within `ft` feet after moving up to the monster's speed (a superset of
- * `inRangeNow`). Out-of-range options are still offered, with empty lists.
+ * `inRangeNow`). Out-of-range options are still offered, with empty lists. A single-target option
+ * never lists a player behind total cover.
  */
 export const OptionRangeSchema = z.discriminatedUnion("kind", [
   /** Doesn't target a player: Dash, Dodge, healing, self buffs, `none`. */
   z.object({ kind: z.literal("noTarget") }),
-  /** Targets a player, but the statblock gives no range code could read. Never assumed. */
-  z.object({ kind: z.literal("unknown") }),
+  /**
+   * Targets a player, but the statblock gives no range code could read. Never assumed: any of
+   * `possibleTargetIds` (targetable players, minus total cover for a single-target option) may be in reach.
+   */
+  z.object({ kind: z.literal("unknown"), possibleTargetIds: z.array(z.string()) }),
   z.object({
     kind: z.literal("ft"),
     ft: z.number().int().min(0),
@@ -73,8 +77,8 @@ export const LegalOptionsSchema = z.object({
   movements: z.array(MovementSchema).max(MAX_CHOICE_OPTIONS),
   /**
    * Players the monster may target this turn, in situation order: everyone except downed players,
-   * unless it is feral or a genius. Range lists only contain these; an option of unknown range can
-   * reach any of them. Downed players still count toward clusters.
+   * unless it is feral or a genius. Range lists only contain these. Downed players still count
+   * toward clusters.
    */
   targetableIds: z.array(z.string()),
 });
@@ -117,19 +121,24 @@ function hardBlock(conditions: readonly Condition[]): Blocked | undefined {
 
 /**
  * Feet the monster can move this turn: its fastest mode, or 0 when held, grappled or restrained.
- * The fly speed only counts when the DM hasn't ruled flying out.
+ * The fly speed only counts when the DM hasn't ruled flying out. Difficult terrain halves the
+ * ground modes; a flier passes over it, so the fly speed is never halved.
  */
-function movementSpeed(reviewed: ReviewedMonster, conditions: readonly Condition[], blocked: Blocked | undefined, flyingPossible: boolean): number {
+function movementSpeed(reviewed: ReviewedMonster, conditions: readonly Condition[], blocked: Blocked | undefined, terrain: Situation["terrain"]): number {
   if (blocked?.movementBy === "code" || SPEED_ZERO.some((c) => conditions.includes(c))) return 0;
   const { fly, ...ground } = reviewed.speed;
-  const modes = flyingPossible ? [...Object.values(ground), fly] : Object.values(ground);
+  const groundModes = Object.values(ground)
+    .filter(isDefined)
+    .map((ft) => (terrain.difficult ? ft / 2 : ft));
+  const modes = terrain.flyingPossible ? [...groundModes, fly] : groundModes;
   return Math.max(0, ...modes.filter(isDefined));
 }
 
-function legalMovements(speed: number, reviewed: ReviewedMonster, flyingPossible: boolean): Movement[] {
+/** `reachOther` needs a second player the monster may target; with one or none there is no other target. */
+function legalMovements(speed: number, reviewed: ReviewedMonster, flyingPossible: boolean, targetableCount: number): Movement[] {
   if (speed === 0) return ["hold"];
   const canFly = flyingPossible && (reviewed.speed.fly ?? 0) > 0;
-  return MovementSchema.options.filter((m) => m !== "flyUp" || canFly);
+  return MovementSchema.options.filter((m) => (m !== "flyUp" || canFly) && (m !== "reachOther" || targetableCount >= 2));
 }
 
 /** Slot levels at or above `base` with a slot left, ascending. A level with no entry has no slots. */
@@ -181,12 +190,14 @@ function reachOf(a: Ability, byId: ReadonlyMap<string, Ability>): Reach {
   return "unknown";
 }
 
-function rangeFlags(reach: Reach, targetable: Situation["players"], speed: number): OptionRange {
+/** Total cover rules a player out as the target of a single-target option (5e); an area still reaches them. */
+function rangeFlags(reach: Reach, targetable: Situation["players"], speed: number, singleTarget: boolean): OptionRange {
   if (reach === "noTarget") return { kind: "noTarget" };
-  if (reach === "unknown") return { kind: "unknown" };
+  const candidates = singleTarget ? targetable.filter((p) => p.cover !== "total") : targetable;
+  if (reach === "unknown") return { kind: "unknown", possibleTargetIds: candidates.map((p) => p.playerId) };
   const inRangeNow: string[] = [];
   const inRangeAfterMove: string[] = [];
-  for (const p of targetable) {
+  for (const p of candidates) {
     const distance = p.distanceFt ?? ZONE_DEFAULT_FT[p.zone];
     if (distance <= reach) inRangeNow.push(p.playerId);
     if (distance - speed <= reach) inRangeAfterMove.push(p.playerId);
@@ -215,7 +226,7 @@ function abilityOption(
     concentration: a.concentration ?? false,
     singleTarget: a.singleTarget,
     area: a.area !== undefined,
-    range: rangeFlags(reachOf(a, byId), targetable, speed),
+    range: rangeFlags(reachOf(a, byId), targetable, speed, a.singleTarget),
   };
   if (a.uses.kind === "slot") {
     option.leveledSpell = { baseLevel: a.uses.level, availableLevels: slotLevelsFrom(a.uses.level, state.slots) };
@@ -258,11 +269,10 @@ const NO_BONUS_ACTION: Option = {
  */
 export function buildLegalOptions(reviewed: ReviewedMonster, state: EncounterState, situation: Situation, temperament: Temperament): LegalOptions {
   const blocked = hardBlock(state.conditions);
-  const { flyingPossible } = situation.terrain;
-  const speed = movementSpeed(reviewed, state.conditions, blocked, flyingPossible);
-  const movements = legalMovements(speed, reviewed, flyingPossible);
+  const speed = movementSpeed(reviewed, state.conditions, blocked, situation.terrain);
   const targetable = targetablePlayers(situation, temperament);
   const targetableIds = targetable.map((p) => p.playerId);
+  const movements = legalMovements(speed, reviewed, situation.terrain.flyingPossible, targetable.length);
   if (blocked) return { blocked, actions: [], bonusActions: [], movements, targetableIds };
 
   const names: Record<string, string> = {};

@@ -243,13 +243,13 @@ export function rankOptions(list: readonly Option[], abilities: readonly Ability
   ).map((p) => p.option);
 }
 
-/** Targetable player ids an option can reach this turn. Unknown range can't rule out any targetable player. */
-function reachable(o: Option, options: LegalOptions): readonly string[] {
+/** Targetable player ids an option can reach this turn. Unknown range rules out only what options.ts already did (total cover). */
+function reachable(o: Option): readonly string[] {
   switch (o.range.kind) {
     case "ft":
       return o.range.inRangeAfterMove;
     case "unknown":
-      return options.targetableIds;
+      return o.range.possibleTargetIds;
     case "noTarget":
       return [];
   }
@@ -406,7 +406,7 @@ export function buildJevRequest(
     .filter((p) => p.option.singleTarget)
     .slice(0, TARGET_CANDIDATES)
     .map((p, i) => {
-      const playerIds = reachable(p.option, options);
+      const playerIds = reachable(p.option);
       const key = `target__${i}`;
       const criteria = criteriaOf(
         playerIds,
@@ -427,7 +427,7 @@ export function buildJevRequest(
     .filter((p) => p.option.area)
     .slice(0, CLUSTER_CANDIDATES)
     .map((p, i) => {
-      const inReach = new Set(reachable(p.option, options));
+      const inReach = new Set(reachable(p.option));
       const offered = clusters.map((c, k) => ({ c, k })).filter(({ c }) => c.playerIds.some((id) => inReach.has(id)));
       const key = `cluster__${i}`;
       const criteria = criteriaOf(

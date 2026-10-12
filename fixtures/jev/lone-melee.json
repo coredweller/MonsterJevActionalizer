@@ -213,7 +213,6 @@
         "movements": [
           "hold",
           "closeIn",
-          "reachOther",
           "retreat",
           "takeCover"
         ]
@@ -248,7 +247,6 @@
         "criteria": {
           "hold": "Stay where it is",
           "closeIn": "Move toward its target",
-          "reachOther": "Move to reach a different target",
           "retreat": "Move away from the party",
           "takeCover": "Move behind cover"
         }
@@ -273,7 +271,6 @@
         "criteria": {
           "hold": "Stay where it is",
           "closeIn": "Move toward its target",
-          "reachOther": "Move to reach a different target",
           "retreat": "Move away from the party",
           "takeCover": "Move behind cover"
         }
@@ -317,13 +314,12 @@
         "type": "choice",
         "choice": "hold",
         "probabilities": {
-          "hold": 0.64,
-          "closeIn": 0.36,
-          "reachOther": 0,
+          "hold": 0.58,
+          "closeIn": 0.42,
           "retreat": 0,
           "takeCover": 0
         },
-        "confidence": 0.55
+        "confidence": 0.44
       },
       "action": {
         "type": "choice",
@@ -344,13 +340,12 @@
         "type": "choice",
         "choice": "hold",
         "probabilities": {
-          "hold": 0.85,
-          "closeIn": 0.15,
-          "reachOther": 0,
+          "hold": 0.79,
+          "closeIn": 0.21,
           "retreat": 0,
           "takeCover": 0
         },
-        "confidence": 0.81
+        "confidence": 0.72
       },
       "multiattack_fallback": {
         "type": "noul",
@@ -362,8 +357,8 @@
       }
     },
     "usage": {
-      "input_tokens": 2828,
-      "output_tokens": 311
+      "input_tokens": 2781,
+      "output_tokens": 291
     }
   }
 }

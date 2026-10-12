@@ -86,21 +86,20 @@ const needsAttackAction = (o: Option, abilities: readonly Ability[]) => abilityO
 /** Movements that bring the monster toward a target, so "in range after moving" counts. */
 const CLOSING: ReadonlySet<Movement> = new Set<Movement>(["closeIn", "reachOther"]);
 
-/** Targetable players an option reaches this turn given move_before, in situation order. Unknown range rules no targetable player out. */
-function playersInReach(o: Option, moveBefore: Movement, options: LegalOptions): readonly string[] {
+/** Targetable players an option reaches this turn given move_before, in situation order. Unknown range rules out only what options.ts already did (total cover). */
+function playersInReach(o: Option, moveBefore: Movement): readonly string[] {
   switch (o.range.kind) {
     case "ft":
       return CLOSING.has(moveBefore) ? o.range.inRangeAfterMove : o.range.inRangeNow;
     case "unknown":
-      return options.targetableIds;
+      return o.range.possibleTargetIds;
     case "noTarget":
       return [];
   }
 }
 
 /** Only a measured range can be out of reach; no target needed or an unknown range passes. */
-const inReach = (o: Option, moveBefore: Movement, options: LegalOptions) =>
-  o.range.kind !== "ft" || playersInReach(o, moveBefore, options).length > 0;
+const inReach = (o: Option, moveBefore: Movement) => o.range.kind !== "ft" || playersInReach(o, moveBefore).length > 0;
 
 const HP_ORDER: Record<PlayerTurn["apparentHp"], number> = { down: 0, nearDown: 1, bloodied: 2, healthy: 3 };
 
@@ -217,7 +216,7 @@ function areaPart(o: Option, list: OptionList, ctx: ResolveContext): TargetPart 
   }
 
   // Ties go to the first group in situation order.
-  const reach = new Set(playersInReach(o, ctx.moveBefore, ctx.options));
+  const reach = new Set(playersInReach(o, ctx.moveBefore));
   let top: { id: string; playerIds: string[]; caught: number } | undefined;
   for (const c of clusters.values()) {
     const caught = c.playerIds.length;
@@ -241,7 +240,7 @@ function targetPart(o: Option, list: OptionList, ctx: ResolveContext): TargetPar
 
   const hp = new Map(ctx.situation.players.map((pl) => [pl.playerId, HP_ORDER[pl.apparentHp]]));
   // Array.prototype.sort is stable, so equal HP keeps situation order.
-  const lowest = [...playersInReach(o, ctx.moveBefore, ctx.options)].sort((a, b) => (hp.get(a) ?? 0) - (hp.get(b) ?? 0))[0];
+  const lowest = [...playersInReach(o, ctx.moveBefore)].sort((a, b) => (hp.get(a) ?? 0) - (hp.get(b) ?? 0))[0];
   ctx.adjust("code-pick", `${o.name}: no usable target answer; ${lowest === undefined ? "no target in reach" : `${lowest} (lowest apparent HP in range)`}`);
   return { targetIds: lowest === undefined ? [] : [lowest], targetBy: { by: "code" } };
 }
@@ -344,11 +343,11 @@ export function interpret(
   const bonusRules: ((o: Option) => boolean)[] = [];
   const actionAllowed = (o: Option) =>
     actionRules.every((rule) => rule(o)) &&
-    inReach(o, moveBefore, options) &&
+    inReach(o, moveBefore) &&
     !(isLeveledSpell(o, abilities) && isLeveledSpell(bonus, abilities));
   const bonusAllowed = (o: Option) =>
     bonusRules.every((rule) => rule(o)) &&
-    inReach(o, moveBefore, options) &&
+    inReach(o, moveBefore) &&
     !(isLeveledSpell(o, abilities) && isLeveledSpell(action, abilities)) &&
     !(needsAttackAction(o, abilities) && !isAttackAction(action, abilities));
 
@@ -400,12 +399,12 @@ export function interpret(
   }
 
   // ---- 4. Out of range -----------------------------------------------------
-  if (!inReach(action, moveBefore, options)) {
+  if (!inReach(action, moveBefore)) {
     const before = action;
     replaceAction();
     adjust("out-of-range", `${before.name} has no target in reach after "${moveBefore}": → ${showP("action", action)}`);
   }
-  if (!inReach(bonus, moveBefore, options)) {
+  if (!inReach(bonus, moveBefore)) {
     const before = bonus;
     replaceBonus();
     adjust("out-of-range", `bonus action ${before.name} has no target in reach after "${moveBefore}": → ${showP("bonus_action", bonus)}`);

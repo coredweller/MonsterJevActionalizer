@@ -192,7 +192,7 @@ A tracker belongs to one monster. It holds:
 - terrain checkboxes: difficult terrain, chokepoint, escape route, flying not possible (flying is assumed possible unless ticked)
 - free-text DM notes
 
-Each zone has a default distance, used only when no exact distance is given: engaged = within 5 ft, near = within 30 ft, far = within 60 ft, very far = more than 60 ft. Code uses these distances for range checks.
+Each zone has a default distance, used only when no exact distance is given: engaged = within 5 ft, near = within 30 ft, far = within 60 ft, very far = more than 60 ft. Code uses these distances for range checks. When an exact distance falls in a different zone than the one picked (e.g. engaged at 40 ft.), the exact feet win for range checks, and the player's row shows a hint naming the zone that distance belongs to, so the DM can fix it.
 
 ## Legal options (`options.ts`, deterministic)
 - **Hard blocks (Q11):**
@@ -203,8 +203,9 @@ Each zone has a default distance, used only when no exact distance is given: eng
   - All other conditions go to Jev as context only.
 - **Actions:** the monster's actions (including Multiattack), limited to what's still available: recharge abilities must be charged, X/day abilities must have uses left, and slot spells need a slot at or above their level. At-will and X/day spells come from the Spellcasting entry. Dash, Dodge, Disengage, Hide and Help are always offered.
 - **Bonus actions:** `BonusActions` entries, trait-granted bonus actions and bonus-action spells, plus `none`.
-- **Movement intents:** hold / close in on the target / reach another target / retreat / take cover / fly up. Fly up is offered only if the monster has a fly speed and flying is possible. When flying isn't possible, the fly speed doesn't count toward how far the monster can move.
-- **Range:** for each option, code works out whether some target is in range now, or in range after moving, from the zones and speed. Out-of-range options are flagged in the state but still offered.
+- **Movement intents:** hold / close in on the target / reach another target / retreat / take cover / fly up. Reach another target is offered only when at least two players can be targeted. Fly up is offered only if the monster has a fly speed and flying is possible. When flying isn't possible, the fly speed doesn't count toward how far the monster can move.
+- **Range:** for each option, code works out whether some target is in range now, or in range after moving, from the zones and speed. Out-of-range options are flagged in the state but still offered. Difficult terrain halves the ground speeds (not the fly speed) when working out "after moving".
+- **Total cover:** a player behind total cover can't be the target of a single-target option, so they are left out of its range lists and target choices, even after moving (the DM updates cover next turn). Area options still count them.
 - **Downed players** (apparent HP "down"): only feral and tactical-genius monsters may target them. For mindless and cunning monsters, downed players are left out of every target choice, including the target code picks itself. They still count toward clusters.
 - **Limit:** options are capped at `MAX_CHOICE_OPTIONS` (255).
 

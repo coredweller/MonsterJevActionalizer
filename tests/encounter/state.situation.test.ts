@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { blankSituation, defaultPlayerTurn, syncSituation, updatePlayerTurn } from "@/lib/encounter/state";
-import { SituationSchema, type Player, type PlayerTurn, type Situation } from "@/lib/encounter/types";
+import { blankSituation, defaultPlayerTurn, mismatchedZone, syncSituation, updatePlayerTurn } from "@/lib/encounter/state";
+import { SituationSchema, type Player, type PlayerTurn, type Situation, type Zone } from "@/lib/encounter/types";
 
 const player = (id: string): Player => ({ id, name: id.toUpperCase(), role: "melee", class: "Fighter" });
 const turn = (playerId: string, patch: Partial<PlayerTurn> = {}): PlayerTurn => ({ ...defaultPlayerTurn(playerId), ...patch });
@@ -24,6 +24,35 @@ describe("defaultPlayerTurn", () => {
 describe("blankSituation", () => {
   it("assumes flying is possible, and no other terrain feature (F29)", () => {
     expect(blankSituation().terrain).toEqual({ difficult: false, chokepoint: false, escapeRoute: false, flyingPossible: true });
+  });
+});
+
+describe("mismatchedZone (F33)", () => {
+  it("is undefined with no exact distance", () => {
+    expect(mismatchedZone(turn("a", { zone: "engaged" }))).toBeUndefined();
+  });
+
+  it.each<[Zone, number]>([
+    ["engaged", 0],
+    ["engaged", 5],
+    ["near", 6],
+    ["near", 30],
+    ["far", 31],
+    ["far", 60],
+    ["veryFar", 61],
+    ["veryFar", 300],
+  ])("is undefined when %s matches %i ft.", (zone, distanceFt) => {
+    expect(mismatchedZone(turn("a", { zone, distanceFt }))).toBeUndefined();
+  });
+
+  it.each<[Zone, number, Zone]>([
+    ["engaged", 40, "far"],
+    ["near", 5, "engaged"],
+    ["far", 30, "near"],
+    ["veryFar", 60, "far"],
+    ["near", 61, "veryFar"],
+  ])("%s at %i ft. → the distance's zone, %s", (zone, distanceFt, expected) => {
+    expect(mismatchedZone(turn("a", { zone, distanceFt }))).toBe(expected);
   });
 });
 

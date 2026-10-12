@@ -185,6 +185,24 @@ describe("buildJevRequest: downed players (PLAN.md 'Legal options')", () => {
   });
 });
 
+describe("buildJevRequest: total cover (F31)", () => {
+  const curse = ability({ id: "act_curse", name: "Curse", raw: "The monster curses one creature it can see." });
+  const reviewed = handReviewed("TunnelWasp", [attack("act_bite", "melee", 5, 7), curse]);
+  const players = [
+    playerTurn({ playerId: "p0", zone: "engaged", cover: "total" }),
+    playerTurn({ playerId: "p1", zone: "engaged" }),
+    playerTurn({ playerId: "p2", zone: "engaged" }),
+  ];
+
+  it("single-target questions never offer a player behind total cover, whether the range is known or not", () => {
+    const { targets } = build(reviewed, players).result.candidates;
+    expect(targets.map((c) => [c.optionKey, c.playerIds])).toEqual([
+      ["act_bite", ["p1", "p2"]],
+      ["act_curse", ["p1", "p2"]],
+    ]);
+  });
+});
+
 describe("buildJevRequest: questions with fewer than 2 keys are not asked", () => {
   it("every asked choice question has 2–255 criteria", () => {
     for (const name of ["TunnelWasp", "AshenWarpriest", "MaestroDrazzuk", "BriarthornHag"]) {

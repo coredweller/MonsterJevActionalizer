@@ -2,17 +2,19 @@
  * Encounter reducers. All pure: ids, timestamps and randomness are parameters.
  */
 import type { ReviewedMonster } from "../monster/types";
-import type {
-  ApplyChoice,
-  ChosenOption,
-  EncounterState,
-  Player,
-  PlayerTurn,
-  Settings,
-  Situation,
-  Temperament,
-  Tracker,
-  TurnLogEntry,
+import {
+  type ApplyChoice,
+  type ChosenOption,
+  type EncounterState,
+  type Player,
+  type PlayerTurn,
+  type Settings,
+  type Situation,
+  type Temperament,
+  type Tracker,
+  type TurnLogEntry,
+  ZONE_DEFAULT_FT,
+  type Zone,
 } from "./types";
 
 export function suggestTemperament(int: number): Temperament {
@@ -37,6 +39,18 @@ export function blankSituation(): Situation {
 /** The row a newly added player starts with: near, healthy, in the open, not clustered. */
 export function defaultPlayerTurn(playerId: string): PlayerTurn {
   return { playerId, zone: "near", apparentHp: "healthy", conditions: [], cover: "none", hitMonsterLastRound: false, clusteredWith: [] };
+}
+
+/**
+ * The zone a player's exact distance falls in, when it differs from the zone the DM picked; else
+ * undefined. Zones split by their defaults: ≤ 5 ft. engaged, ≤ 30 near, ≤ 60 far, beyond that very far.
+ * Range checks already use the exact feet, so this only tells the DM the zone is stale (F33).
+ */
+export function mismatchedZone(turn: PlayerTurn): Zone | undefined {
+  const ft = turn.distanceFt;
+  if (ft === undefined) return undefined;
+  const zone: Zone = ft <= ZONE_DEFAULT_FT.engaged ? "engaged" : ft <= ZONE_DEFAULT_FT.near ? "near" : ft <= ZONE_DEFAULT_FT.far ? "far" : "veryFar";
+  return zone === turn.zone ? undefined : zone;
 }
 
 /** Each player's cluster links with self links, unknown ids and duplicates dropped, then mirrored so every link goes both ways. */

@@ -331,6 +331,24 @@ describe("interpret: consistency rules (derived fixtures)", () => {
   });
 });
 
+describe("interpret: total cover (F31)", () => {
+  it("an unknown-range single-target action never lands on a player behind total cover", () => {
+    const curse = ability({ id: "act_curse", name: "Curse", raw: "The monster curses one creature it can see." });
+    const reviewed = handReviewed("TunnelWasp", [curse]);
+    const tracker = createTracker(reviewed, "t", "2026-10-11T00:00:00.000Z");
+    // The hidden player comes first and is lowest, so they would win any code pick they were allowed in.
+    const situation = situationWith([
+      playerTurn({ playerId: "hidden", zone: "engaged", cover: "total", apparentHp: "nearDown" }),
+      playerTurn({ playerId: "open", zone: "engaged" }),
+    ]);
+    const options = buildLegalOptions(reviewed, tracker.state, situation, tracker.settings.temperament);
+    const { candidates } = buildJevRequest(tracker, situation, options);
+    const action = { type: "choice" as const, choice: "act_curse", probabilities: { act_curse: 1 }, confidence: 1 };
+    const rec = interpret({ model: "test", answers: { action } }, options, candidates, tracker, situation);
+    expect(rec.action).toMatchObject({ key: "act_curse", targetIds: ["open"] });
+  });
+});
+
 describe("isLeveledSpell", () => {
   // Hand-made abilities: the extractor's spell levels are being fixed in parallel (F03/F04).
   const spell = (id: string, extra: Partial<Ability>) => ability({ id, name: id, source: "Spellcasting", singleTarget: false, ...extra });

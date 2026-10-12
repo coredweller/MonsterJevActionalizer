@@ -103,14 +103,16 @@ History sent to Jev = `log.slice(-3)`.
   "disengage"|"hide"|"help" } | { kind: "none" }`, each with `{ key, name, summary /*one line: to-hit/DC, damage, range,
   area*/, usesResource: boolean, leveledSpell?: { baseLevel, availableLevels: number[] }, concentration: boolean,
   singleTarget: boolean, area: boolean, range }`. `leveledSpell` is set on slot spells only.
-  `range` is `{ kind: "noTarget" }` (e.g. Dodge, never out of range) | `{ kind: "unknown" }` (unreadable, never treated as
-  out of range) | `{ kind: "ft", ft, inRangeNow: playerId[], inRangeAfterMove: playerId[] }` (after-move includes now).
+  `range` is `{ kind: "noTarget" }` (e.g. Dodge, never out of range) | `{ kind: "unknown", possibleTargetIds: playerId[] }`
+  (unreadable, never treated as out of range; any listed player may be in reach) | `{ kind: "ft", ft, inRangeNow:
+  playerId[], inRangeAfterMove: playerId[] }` (after-move includes now). A single-target option never lists a player
+  behind total cover; area options do. After-move uses the fastest speed, with ground modes halved on difficult terrain.
   Ability keys are the ability id; basic keys are `dash` etc.; no key contains `__`.
 - **Movement**: `"hold"|"closeIn"|"reachOther"|"retreat"|"takeCover"|"flyUp"`; speed 0, stunned, paralyzed,
-  petrified or unconscious → `["hold"]`; flyUp only with a fly speed and `terrain.flyingPossible`, and the fly
-  speed counts toward movement only then.
+  petrified or unconscious → `["hold"]`; reachOther only with at least 2 `targetableIds`; flyUp only with a fly
+  speed and `terrain.flyingPossible`, and the fly speed counts toward movement only then.
 - **Blocked**: `blocked = { reason, movementBy: "code"|"dm" }`. Stunned/paralyzed/petrified/unconscious →
-  `movementBy: "code"` (hold). Incapacitated alone → `movementBy: "dm"` (full movement list, DM picks by hand).
+  `movementBy: "code"` (hold). Incapacitated alone → `movementBy: "dm"` (the movement list it would have unblocked, DM picks by hand).
   Jev is never called when `blocked` is set.
 - **Cluster**: `{ id, playerIds }` (connected components of `clusteredWith`, plus singletons).
 - **Recommendation** [`lib/decide/types.ts`, zod]: `{ moveBefore, action: ActionPick, bonusAction: ActionPick, moveAfter,

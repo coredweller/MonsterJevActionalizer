@@ -7,6 +7,8 @@ import { loadMonsterFixtures } from "../helpers/fixtures";
 import { ability, extractedReviewed, handReviewed, playerTurn, situationWith, slots } from "../helpers/reviewed";
 
 const ALL_MOVES: Movement[] = ["hold", "closeIn", "reachOther", "retreat", "takeCover"];
+/** With a single targetable player there is no other target to reach (F30). */
+const ONE_TARGET_MOVES: Movement[] = ALL_MOVES.filter((m) => m !== "reachOther");
 const BASIC_KEYS = ["dash", "dodge", "disengage", "hide", "help"];
 
 const mace = ability({ id: "act_mace", name: "Mace", attack: { kind: "melee", bonus: 6, reach: 5 } });
@@ -20,6 +22,8 @@ const oneEngaged = situationWith([playerTurn({ playerId: "p1", zone: "engaged" }
 
 /** The DM ticked "Flying not possible" (a low ceiling, say). */
 const noFlying = (s: Situation): Situation => ({ ...s, terrain: { ...s.terrain, flyingPossible: false } });
+/** The DM ticked "Difficult terrain". */
+const difficult = (s: Situation): Situation => ({ ...s, terrain: { ...s.terrain, difficult: true } });
 
 /** Defaults to a genius monster, which may target anyone, so only the downed-player tests depend on temperament. */
 function build(reviewed: ReviewedMonster, situation: Situation = oneEngaged, edit: Partial<EncounterState> = {}, temperament: Temperament = "genius"): LegalOptions {
@@ -67,18 +71,18 @@ describe("hard blocks", () => {
   it("incapacitated alone → movementBy dm with the full movement list", () => {
     const opts = build(reviewed, oneEngaged, { conditions: ["incapacitated"] });
     expect(opts.blocked?.movementBy).toBe("dm");
-    expect(opts.movements).toEqual(ALL_MOVES);
+    expect(opts.movements).toEqual(ONE_TARGET_MOVES);
     const flier = build(handReviewed("TunnelWasp", [mace], { speed: { walk: 30, fly: 60 } }), oneEngaged, {
       conditions: ["incapacitated"],
     });
-    expect(flier.movements).toEqual([...ALL_MOVES, "flyUp"]);
+    expect(flier.movements).toEqual([...ONE_TARGET_MOVES, "flyUp"]);
   });
 
   it.each<Condition>(["poisoned", "frightened", "prone", "blinded"])("%s is context only: not blocked", (condition) => {
     const opts = build(reviewed, oneEngaged, { conditions: [condition] });
     expect(opts.blocked).toBeUndefined();
     expect(keys(opts.actions)).toContain("act_mace");
-    expect(opts.movements).toEqual(ALL_MOVES);
+    expect(opts.movements).toEqual(ONE_TARGET_MOVES);
   });
 });
 
@@ -98,7 +102,7 @@ describe("speed 0", () => {
 
   it("a fly-only monster (walk 0) can still move", () => {
     const opts = build(extractedReviewed("TollOfForgottenWatcher"));
-    expect(opts.movements).toEqual([...ALL_MOVES, "flyUp"]);
+    expect(opts.movements).toEqual([...ONE_TARGET_MOVES, "flyUp"]);
   });
 
   it("a fly-only monster holds when flying isn't possible (F29)", () => {
@@ -232,12 +236,41 @@ describe("bonus actions", () => {
 
 describe("movements", () => {
   it("flyUp only with a fly speed", () => {
-    expect(build(extractedReviewed("TunnelWasp")).movements).toEqual(ALL_MOVES);
-    expect(build(extractedReviewed("Zarielith")).movements).toEqual([...ALL_MOVES, "flyUp"]);
+    expect(build(extractedReviewed("TunnelWasp")).movements).toEqual(ONE_TARGET_MOVES);
+    expect(build(extractedReviewed("Zarielith")).movements).toEqual([...ONE_TARGET_MOVES, "flyUp"]);
   });
 
   it("no flyUp when flying isn't possible, even with a fly speed (F29)", () => {
-    expect(build(extractedReviewed("Zarielith"), noFlying(oneEngaged)).movements).toEqual(ALL_MOVES);
+    expect(build(extractedReviewed("Zarielith"), noFlying(oneEngaged)).movements).toEqual(ONE_TARGET_MOVES);
+  });
+
+  describe("reachOther needs at least 2 targetable players (F30)", () => {
+    const wasp = extractedReviewed("TunnelWasp");
+    const twoUp = situationWith([playerTurn({ playerId: "p1", zone: "engaged" }), playerTurn({ playerId: "p2", zone: "near" })]);
+    const oneDowned = situationWith([
+      playerTurn({ playerId: "downed", zone: "engaged", apparentHp: "down" }),
+      playerTurn({ playerId: "p2", zone: "near" }),
+    ]);
+
+    it("one player → no reachOther; two → reachOther", () => {
+      expect(build(wasp, oneEngaged).movements).toEqual(ONE_TARGET_MOVES);
+      expect(build(wasp, twoUp).movements).toEqual(ALL_MOVES);
+    });
+
+    it("a downed player counts only for a monster that may target them", () => {
+      expect(build(wasp, oneDowned, {}, "cunning").movements).toEqual(ONE_TARGET_MOVES);
+      expect(build(wasp, oneDowned, {}, "feral").movements).toEqual(ALL_MOVES);
+    });
+
+    it("no targetable player at all → no reachOther", () => {
+      const allDowned = situationWith([playerTurn({ playerId: "downed", zone: "engaged", apparentHp: "down" })]);
+      expect(build(wasp, allDowned, {}, "mindless").movements).toEqual(ONE_TARGET_MOVES);
+    });
+
+    it("an incapacitated monster's DM-picked list follows the same rule", () => {
+      expect(build(wasp, twoUp, { conditions: ["incapacitated"] }).movements).toEqual(ALL_MOVES);
+      expect(build(wasp, oneEngaged, { conditions: ["incapacitated"] }).movements).toEqual(ONE_TARGET_MOVES);
+    });
   });
 });
 
@@ -276,6 +309,20 @@ describe("range flags", () => {
   it("a fly speed doesn't count for after-move when flying isn't possible (F29)", () => {
     const opts = build(handReviewed("TunnelWasp", [mace], { speed: { walk: 30, fly: 60 } }), noFlying(players));
     expect(rangeOf(option(opts.actions, "act_mace")).inRangeAfterMove).toEqual(["engaged", "near", "engagedButExact20", "downed"]);
+  });
+
+  it("difficult terrain halves the movement for after-move (F32)", () => {
+    const opts = build(handReviewed("TunnelWasp", [mace], { speed: { walk: 30 } }), difficult(players));
+    // 15 ft. of movement + 5 ft. reach: near (30 ft.) is out, the exact 20 ft. player is in.
+    expect(rangeOf(option(opts.actions, "act_mace")).inRangeAfterMove).toEqual(["engaged", "engagedButExact20", "downed"]);
+  });
+
+  it("difficult terrain doesn't halve a fly speed while flying is possible (F32)", () => {
+    const at25 = situationWith([playerTurn({ playerId: "at25", zone: "near", distanceFt: 25 })]);
+    const reviewed = handReviewed("TunnelWasp", [mace], { speed: { walk: 30, fly: 20 } });
+    // Flying: 20 ft. (walk halved to 15) reaches 25 ft. with 5 ft. reach. No flying: walk halved to 15 doesn't.
+    expect(rangeOf(option(build(reviewed, difficult(at25)).actions, "act_mace")).inRangeAfterMove).toEqual(["at25"]);
+    expect(rangeOf(option(build(reviewed, noFlying(difficult(at25))).actions, "act_mace")).inRangeAfterMove).toEqual([]);
   });
 
   it("speed 0 means after-move equals now", () => {
@@ -350,6 +397,37 @@ describe("downed players (PLAN.md 'Legal options')", () => {
 
   it("a blocked monster still lists who could be targeted", () => {
     expect(build(reviewed, situation, { conditions: ["stunned"] }, "cunning").targetableIds).toEqual(["p2"]);
+  });
+});
+
+describe("total cover (F31)", () => {
+  const curse = ability({ id: "act_curse", name: "Curse", raw: "The monster curses one creature it can see." });
+  const burst = ability({ id: "act_burst", name: "Burst", singleTarget: false, area: { shape: "sphere", size: 30 } });
+  const mystery = ability({ id: "act_mystery", name: "Mystery", singleTarget: false, parsed: "none" });
+  const reviewed = handReviewed("TunnelWasp", [mace, curse, burst, mystery]);
+  const situation = situationWith([
+    playerTurn({ playerId: "hidden", zone: "engaged", cover: "total" }),
+    playerTurn({ playerId: "open", zone: "near", cover: "threeQuarters" }),
+  ]);
+
+  it("a single-target option leaves a player behind total cover out of both range lists", () => {
+    expect(rangeOf(option(build(reviewed, situation).actions, "act_mace"))).toMatchObject({ inRangeNow: [], inRangeAfterMove: ["open"] });
+  });
+
+  it("an area option still counts them", () => {
+    expect(rangeOf(option(build(reviewed, situation).actions, "act_burst"))).toMatchObject({ inRangeNow: ["hidden", "open"] });
+  });
+
+  it("an unknown range lists who it might target: total cover is ruled out only for a single-target option", () => {
+    const opts = build(reviewed, situation);
+    expect(option(opts.actions, "act_curse").range).toEqual({ kind: "unknown", possibleTargetIds: ["open"] });
+    expect(option(opts.actions, "act_mystery").range).toEqual({ kind: "unknown", possibleTargetIds: ["hidden", "open"] });
+    expect(opts.targetableIds).toEqual(["hidden", "open"]);
+  });
+
+  it("half and three-quarters cover change nothing", () => {
+    const partial = situationWith([playerTurn({ playerId: "half", cover: "half" }), playerTurn({ playerId: "most", cover: "threeQuarters" })]);
+    expect(rangeOf(option(build(reviewed, partial).actions, "act_mace")).inRangeNow).toEqual(["half", "most"]);
   });
 });
 
