@@ -137,18 +137,20 @@ describe("POST /api/decide: errors", () => {
     expect(json.error.message).toMatch(/situation/);
   });
 
+  // G07: the DM sees a fixed message per kind that never names Jev; JevError's own message stays in the server log.
   it.each([
-    ["config", 500],
-    ["upstream", 502],
-    ["timeout", 504],
-  ] as const satisfies readonly (readonly [JevErrorKind, number])[])("JevError %s → %i with a matching error.kind", async (kind, status) => {
+    ["config", 500, "The decision service isn't set up: its API key is missing from .env.local. Add it and restart the server."],
+    ["upstream", 502, "The decision service couldn't give an answer. Try again, or pick by hand."],
+    ["timeout", 504, "The decision service didn't answer within 20 s. Try again, or pick by hand."],
+  ] as const satisfies readonly (readonly [JevErrorKind, number, string])[])("JevError %s → %i with a matching error.kind and a message for the DM", async (kind, status, message) => {
     callJevMock.mockRejectedValue(new JevError(kind, `Jev failed (${kind}).`));
     const { tracker, situation } = buildScenario("lone-melee");
     const res = await post(body(tracker, situation));
     expect(res.status).toBe(status);
     expect(callJevMock).toHaveBeenCalledTimes(1);
     const { text, json } = await read(res);
-    expect(json).toEqual({ ok: false, error: { kind, message: `Jev failed (${kind}).` } });
+    expect(json).toEqual({ ok: false, error: { kind, message } });
+    expect(text).not.toMatch(/jev/i);
     expect(text).not.toContain(KEY);
   });
 

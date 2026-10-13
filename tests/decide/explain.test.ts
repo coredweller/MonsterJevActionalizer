@@ -66,7 +66,7 @@ describe("explain: the template", () => {
       [
         "Tactic: control (71%).",
         "Move before: hold (98%).",
-        "Action: Fear (62%), aimed at Lio and Sefa (catches 2; Jev 91%), level 3 slot (Jev 100%).",
+        "Action: Fear (62%), aimed at Lio and Sefa (catches 2; 91%), level 3 slot (100%).",
         "Bonus action: None (61%).",
         "Move after: hold (96%).",
       ].join("\n"),
@@ -126,7 +126,7 @@ describe("explain: the template", () => {
       options,
       roster,
     ).explanation;
-    expect(jevTarget.split("\n")[2]).toBe("Action: Multiattack (8%), targeting Brakka (Jev 84%).");
+    expect(jevTarget.split("\n")[2]).toBe("Action: Multiattack (8%), targeting Brakka (84%).");
   });
 
   it("marks the only legal value of an unasked question", () => {

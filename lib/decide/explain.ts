@@ -46,7 +46,8 @@ const pct = (p: number) => `${Math.round(p * 100)}%`;
 function sourceText(source: PickSource, kind: PickKind): string {
   switch (source.by) {
     case "jev":
-      return `Jev ${pct(source.p)}`;
+      // The DM sees the probability alone; the explanation never names the model (G07).
+      return pct(source.p);
     case "only":
       return ONLY_REASON[kind];
     case "code":

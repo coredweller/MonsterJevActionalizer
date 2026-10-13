@@ -8,11 +8,17 @@
 import { interpret, blockedRecommendation } from "@/lib/decide/interpret";
 import { buildJevRequest } from "@/lib/decide/questions";
 import { DecideRequestSchema, type DecideErrorKind, type DecideResponse } from "@/lib/decide/types";
-import { callJev, JevError, type JevErrorKind } from "@/lib/jev/client";
+import { callJev, JevError, type JevErrorKind, TIMEOUT_MS } from "@/lib/jev/client";
 import { errorText, log } from "@/lib/log";
 import { buildLegalOptions } from "@/lib/monster/options";
 
 const STATUS: Record<JevErrorKind, number> = { config: 500, upstream: 502, timeout: 504 };
+/** What the DM reads on a failed call (G07): never names Jev. JevError's own message is in the server log. */
+const DM_MESSAGE: Record<JevErrorKind, string> = {
+  config: "The decision service isn't set up: its API key is missing from .env.local. Add it and restart the server.",
+  upstream: "The decision service couldn't give an answer. Try again, or pick by hand.",
+  timeout: `The decision service didn't answer within ${TIMEOUT_MS / 1000} s. Try again, or pick by hand.`,
+};
 
 const reply = (body: DecideResponse, status = 200) => Response.json(body, { status });
 const failure = (kind: DecideErrorKind, message: string, status: number) => reply({ ok: false, error: { kind, message } }, status);
@@ -53,8 +59,8 @@ export async function POST(request: Request): Promise<Response> {
     const meta = { model: response.model, latencyMs, ...(response.usage ? { usage: response.usage } : {}) };
     return reply({ ok: true, recommendation, options, meta });
   } catch (e) {
-    // callJev has already logged the JevError's details; the client gets only its kind and message.
-    if (e instanceof JevError) return failure(e.kind, e.message, STATUS[e.kind]);
+    // callJev has already logged the JevError's details; the client gets only its kind and a message for the DM.
+    if (e instanceof JevError) return failure(e.kind, DM_MESSAGE[e.kind], STATUS[e.kind]);
     log.error("decide.failed", { cause: errorText(e) });
     throw e;
   }

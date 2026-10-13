@@ -95,6 +95,47 @@ export function updatePlayerTurn(situation: Situation, turn: PlayerTurn): Situat
   return { ...situation, players: withLinks(players, linked) };
 }
 
+function sameSet(a: readonly string[], b: readonly string[]): boolean {
+  const left = new Set(a);
+  const right = new Set(b);
+  return left.size === right.size && [...left].every((x) => right.has(x));
+}
+
+function samePlayerTurn(a: PlayerTurn, b: PlayerTurn): boolean {
+  return (
+    a.zone === b.zone &&
+    a.distanceFt === b.distanceFt &&
+    a.apparentHp === b.apparentHp &&
+    a.cover === b.cover &&
+    a.hitMonsterLastRound === b.hitMonsterLastRound &&
+    sameSet(a.conditions, b.conditions) &&
+    sameSet(a.clusteredWith, b.clusteredWith)
+  );
+}
+
+/**
+ * Whether two situations say the same thing: players matched by id, and conditions and cluster
+ * links compared as sets, since their order carries no meaning. Tells the recommendation card the
+ * DM edited the situation after pressing Recommend (G08).
+ */
+export function sameSituation(a: Situation, b: Situation): boolean {
+  const { allies, terrain } = a;
+  return (
+    a.notes === b.notes &&
+    allies.present === b.allies.present &&
+    allies.count === b.allies.count &&
+    terrain.difficult === b.terrain.difficult &&
+    terrain.chokepoint === b.terrain.chokepoint &&
+    terrain.escapeRoute === b.terrain.escapeRoute &&
+    terrain.flyingPossible === b.terrain.flyingPossible &&
+    a.players.length === b.players.length &&
+    a.players.every((p) => {
+      const other = b.players.find((o) => o.playerId === p.playerId);
+      return other !== undefined && samePlayerTurn(p, other);
+    })
+  );
+}
+
 export function legendaryActionMax(reviewed: ReviewedMonster): number {
   const { monster } = reviewed;
   return monster.kind === "legendary" ? Number(monster.body.LegendaryActions["Legendary Action Uses"]) : 0;

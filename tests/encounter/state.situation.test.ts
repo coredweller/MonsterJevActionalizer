@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { blankSituation, defaultPlayerTurn, mismatchedZone, syncSituation, updatePlayerTurn } from "@/lib/encounter/state";
+import { blankSituation, defaultPlayerTurn, mismatchedZone, sameSituation, syncSituation, updatePlayerTurn } from "@/lib/encounter/state";
 import { SituationSchema, type Player, type PlayerTurn, type Situation, type Zone } from "@/lib/encounter/types";
 
 const player = (id: string): Player => ({ id, name: id.toUpperCase(), role: "melee", class: "Fighter" });
@@ -142,5 +142,54 @@ describe("updatePlayerTurn", () => {
 
   it("throws for a player who is not in the situation", () => {
     expect(() => updatePlayerTurn(base, turn("ghost"))).toThrow(/ghost/);
+  });
+});
+
+describe("sameSituation (G08)", () => {
+  const decided: Situation = {
+    players: [turn("a", { zone: "engaged", distanceFt: 5, conditions: ["prone", "blinded"], clusteredWith: ["b"] }), turn("b", { clusteredWith: ["a"] })],
+    allies: { present: true, count: 2 },
+    terrain: { difficult: true, chokepoint: false, escapeRoute: false, flyingPossible: true },
+    notes: "Bridge over the chasm",
+  };
+  const copy = (): Situation => JSON.parse(JSON.stringify(decided)) as Situation;
+
+  it("is true for an equal situation built separately", () => {
+    expect(sameSituation(decided, copy())).toBe(true);
+  });
+
+  it("ignores the order of players, conditions and cluster links", () => {
+    const [a, b] = copy().players;
+    if (!a || !b) throw new Error("expected two players");
+    const reordered = { ...copy(), players: [b, { ...a, conditions: ["blinded", "prone"] }] };
+    expect(sameSituation(decided, reordered)).toBe(true);
+  });
+
+  it("compares conditions as sets, so a repeat doesn't stand in for a different condition", () => {
+    const twice = withPlayers([turn("c", { conditions: ["prone", "prone"] })]);
+    expect(sameSituation(twice, withPlayers([turn("c", { conditions: ["prone", "blinded"] })]))).toBe(false);
+    expect(sameSituation(twice, withPlayers([turn("c", { conditions: ["prone"] })]))).toBe(true);
+  });
+
+  it("treats an absent exact distance like an undefined one", () => {
+    const without = withPlayers([turn("c")]);
+    expect(sameSituation(without, withPlayers([{ ...turn("c"), distanceFt: undefined }]))).toBe(true);
+  });
+
+  it.each<[string, (s: Situation) => Situation]>([
+    ["zone", (s) => ({ ...s, players: s.players.map((p, i) => (i === 0 ? { ...p, zone: "near" } : p)) })],
+    ["exact distance", (s) => ({ ...s, players: s.players.map((p, i) => (i === 0 ? { ...p, distanceFt: 10 } : p)) })],
+    ["apparent HP", (s) => ({ ...s, players: s.players.map((p, i) => (i === 1 ? { ...p, apparentHp: "down" } : p)) })],
+    ["conditions", (s) => ({ ...s, players: s.players.map((p, i) => (i === 1 ? { ...p, conditions: ["prone"] } : p)) })],
+    ["cover", (s) => ({ ...s, players: s.players.map((p, i) => (i === 1 ? { ...p, cover: "half" } : p)) })],
+    ["hit last round", (s) => ({ ...s, players: s.players.map((p, i) => (i === 1 ? { ...p, hitMonsterLastRound: true } : p)) })],
+    ["cluster links", (s) => ({ ...s, players: s.players.map((p) => ({ ...p, clusteredWith: [] })) })],
+    ["players (one added)", (s) => ({ ...s, players: [...s.players, turn("c")] })],
+    ["players (one removed)", (s) => ({ ...s, players: s.players.slice(0, 1) })],
+    ["allies", (s) => ({ ...s, allies: { present: true, count: 3 } })],
+    ["terrain", (s) => ({ ...s, terrain: { ...s.terrain, chokepoint: true } })],
+    ["notes", (s) => ({ ...s, notes: "Bridge is burning" })],
+  ])("is false when it differs in %s", (_, edit) => {
+    expect(sameSituation(decided, edit(copy()))).toBe(false);
   });
 });

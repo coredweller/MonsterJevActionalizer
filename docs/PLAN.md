@@ -254,7 +254,7 @@ Code reads the `probabilities` distributions, not just `choice`, because the pro
 - **Shows:**
   - the top pick for move before → action (with target, cluster or slot) → bonus action → move after
   - a template explanation (tactic, why this target, the probabilities)
-  - a collapsed list of runners-up with their probabilities
+  - a list of runners-up with their probabilities, collapsed unless confidence is "DM's call" (low confidence must show the alternatives)
 - **Override:** every part can be switched to any legal option.
 - **Apply** takes what the DM *actually* chose. It:
   - spends the slot, recharge or use

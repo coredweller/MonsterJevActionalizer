@@ -148,7 +148,7 @@ export const ApplyChoiceSchema = z.object({
   /** null for no bonus action. */
   bonusAction: ChosenOptionSchema.nullable(),
   moveAfter: MovementSchema,
-  /** The situation this turn was decided on, carried forward to the next turn. */
+  /** The situation carried forward to the next turn: the DM's latest, which may differ from the one the turn was decided on (G08). */
   situation: SituationSchema,
   /** True when the DM applied the recommendation unchanged. */
   recommended: z.boolean(),
