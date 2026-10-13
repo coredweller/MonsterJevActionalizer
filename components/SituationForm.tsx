@@ -64,7 +64,7 @@ export function SituationForm({
   }
 
   return (
-    <Panel title="Situation">
+    <Panel title="Situation" accent="situation">
       <form className="space-y-4" onSubmit={submit}>
         {roster.length === 0 ? (
           <p className="text-sm text-stone-500">No players yet. Add them to the party to say where they are.</p>
@@ -87,7 +87,7 @@ export function SituationForm({
         )}
 
         <fieldset className="min-w-0">
-          <legend className="mb-1 font-medium">Allies</legend>
+          <legend className="mb-1 font-semibold text-(--accent-strong)">Allies</legend>
           <div className="flex flex-wrap items-end gap-3">
             <CheckboxField label="Allies present" checked={synced.allies.present} onChange={setAlliesPresent} />
             <NumberField
@@ -101,7 +101,7 @@ export function SituationForm({
         </fieldset>
 
         <fieldset className="min-w-0">
-          <legend className="mb-1 font-medium">Terrain</legend>
+          <legend className="mb-1 font-semibold text-(--accent-strong)">Terrain</legend>
           <div className="flex flex-wrap gap-x-4">
             {TERRAIN_FLAGS.map((flag) => (
               <CheckboxField

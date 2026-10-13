@@ -162,7 +162,7 @@ Filled or noticed during T056–T058, so they aren't in the task lines above. Ad
   - When the tracker's situation differs from that one, the card says "The situation changed since you pressed Recommend", so the DM can press it again.
   - Any `lib/` change is test-first.
 - [X] G09 *(T057, as built)* **Party and situation shown on the page.** *Kept 2026-10-11; noted on T057.* T053–T055 built `PartyRoster` and `SituationForm`, but no task put them on the page; T057 did (party under the monster summary, situation in its own column). Removing a player also re-syncs the saved situation (`syncSituation`)
-- [ ] G10 *(DM request)* **A more lively, fun colour scheme.** *Decided 2026-10-11: bright and colour-coded.* Today the page is stone grey with amber and red alerts. **To build:**
+- [ ] G10 *(DM request)* **A more lively, fun colour scheme.** *Decided 2026-10-11: bright and colour-coded. Built 2026-10-12: `--accent*` CSS variables per column in `app/globals.css` (`accent-monster` is also the root default, so the trackers list and load screens are crimson); `Panel` takes an `accent`, and `Button`, `ToggleChip` and the Panel frame read the variables; solid badges; a crimson-violet-blue gradient header. Every new text/background pair is AA (lowest 4.94:1, white on green-700); alerts are unchanged. Not yet checked in a browser.* Today the page is stone grey with amber and red alerts. **To build:**
   - Each column gets its own saturated accent: monster crimson, party blue, situation green, recommendation violet.
   - The background is a warm off-white, with bolder badges and buttons.
   - Keep text and alert contrast readable (WCAG AA).
@@ -305,6 +305,8 @@ Each item states the **current behaviour**, the **recommendation** and what a ch
 - [ ] T073 Confirm `lib/monster`, `lib/encounter` and `lib/decide` contain no `react`, `fetch(` or `localStorage` (grep), and that every `localStorage` call is in `app/useTrackers.ts` inside try/catch
 - [ ] T074 Run the quality gates: `npm test`, `npm run typecheck`, `npm run check:monsters` (zero changes); report any failure verbatim
 - [ ] T075 Run the quickstart.md manual validation (steps 1–7), including the five scenarios: confirm exactly one `jev …` log line per recommended turn and none for a stunned monster, and time one turn from Start turn to Apply (under 60 s, SC-001)
+- [ ] T076 "Ensure all generated user interfaces, components, and text styles strictly comply with WCAG 2.2 (fallback to 2.1 if needed) Level AA contrast standards (specifically SC 1.4.3 and SC 1.4.11), maintaining a minimum 4.5:1 ratio for normal text and 3:1 for UI elements."
+
 
 ---
 

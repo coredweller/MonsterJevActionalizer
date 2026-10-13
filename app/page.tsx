@@ -7,7 +7,7 @@ import { PartyRoster } from "@/components/PartyRoster";
 import { RecommendationCard } from "@/components/RecommendationCard";
 import { ReviewScreen } from "@/components/ReviewScreen";
 import { SituationForm } from "@/components/SituationForm";
-import { Button, Panel } from "@/components/ui";
+import { Button, Panel, panelFrame } from "@/components/ui";
 import { type BlockedRecommendation, type DecideRequest, DecideResponseSchema, type Recommendation } from "@/lib/decide/types";
 import { createTracker, syncSituation } from "@/lib/encounter/state";
 import type { Situation, Tracker } from "@/lib/encounter/types";
@@ -107,8 +107,8 @@ export default function Home() {
 
   return (
     <div className="flex min-h-screen flex-col">
-      <header className="flex items-center justify-between border-b border-stone-200 bg-white px-4 py-3">
-        <h1 className="text-lg font-semibold">Monster Turn Advisor</h1>
+      <header className="flex items-center justify-between bg-linear-to-r from-rose-700 via-violet-700 to-blue-700 px-4 py-3 text-white shadow">
+        <h1 className="text-lg font-bold tracking-wide">Monster Turn Advisor</h1>
       </header>
 
       {storageWarning && (
@@ -121,9 +121,9 @@ export default function Home() {
       )}
 
       <div className="grid flex-1 grid-cols-1 gap-4 p-4 md:grid-cols-[14rem_1fr] xl:grid-cols-[14rem_1fr_1fr_1fr]">
-        <aside aria-label="Trackers" className="rounded border border-stone-200 bg-white p-3">
+        <aside aria-label="Trackers" className={`accent-monster ${panelFrame} p-3`}>
           <div className="mb-2 flex items-center justify-between gap-2">
-            <h2 className="font-semibold">Trackers</h2>
+            <h2 className="font-semibold text-(--accent-strong)">Trackers</h2>
             <Button onClick={() => setFlow({ step: "load" })}>Add monster</Button>
           </div>
           {!loaded ? (
@@ -135,7 +135,7 @@ export default function Home() {
               {trackers.map((t) => (
                 <li key={t.id}>
                   <button
-                    className={`min-h-11 w-full rounded px-2 text-left ${t.id === selected?.id && !flow ? "bg-stone-200" : "hover:bg-stone-100"}`}
+                    className={`min-h-11 w-full rounded px-2 text-left ${t.id === selected?.id && !flow ? "bg-(--accent) font-semibold text-white" : "hover:bg-(--accent-soft)"}`}
                     onClick={() => {
                       setFlow(null);
                       select(t.id);
@@ -172,8 +172,8 @@ export default function Home() {
         ) : (
           <>
             <div className="min-w-0 space-y-4">
-              <section aria-label="Monster and tracker" className="rounded border border-stone-200 bg-white p-3">
-                <h2 className="font-semibold">{selected ? selected.name : "Monster"}</h2>
+              <section aria-label="Monster and tracker" className={`accent-monster ${panelFrame} p-3`}>
+                <h2 className="font-semibold text-(--accent-strong)">{selected ? selected.name : "Monster"}</h2>
                 {selected ? (
                   <p className="text-sm text-stone-600">
                     HP {selected.state.hp}/{selected.state.hpMax} · round {selected.state.round} · {selected.reviewed.abilities.length} abilities
@@ -197,7 +197,7 @@ export default function Home() {
                   pending={shown !== null && shown.outcome === null}
                 />
               ) : (
-                <Panel title="Situation">
+                <Panel title="Situation" accent="situation">
                   <p className="text-sm text-stone-500">Select a tracker.</p>
                 </Panel>
               )}
@@ -219,7 +219,7 @@ export default function Home() {
                   />
                 </>
               ) : (
-                <Panel title="Recommendation">
+                <Panel title="Recommendation" accent="recommendation">
                   <p className="text-sm text-stone-500">
                     {shown ? "Recommending…" : selected ? "Fill in the situation and press Recommend." : "Select a tracker."}
                   </p>

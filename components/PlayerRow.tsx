@@ -58,8 +58,8 @@ export function PlayerRow({
   }
 
   return (
-    <fieldset className="min-w-0 rounded border border-stone-200 p-3">
-      <legend className="px-1 font-medium">
+    <fieldset className="min-w-0 rounded-md border border-(--accent-line) p-3">
+      <legend className="px-1 font-semibold text-(--accent-strong)">
         {player.name || "Unnamed player"}
         <span className="ml-2 text-sm font-normal text-stone-600">
           {player.role}

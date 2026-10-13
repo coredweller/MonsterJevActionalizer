@@ -348,7 +348,7 @@ export function RecommendationCard({
   }
 
   return (
-    <Panel title={usable ? "Recommendation" : "Pick by hand"} actions={full && <Badge tone={CONFIDENCE[full.confidence].tone}>{CONFIDENCE[full.confidence].label}</Badge>}>
+    <Panel title={usable ? "Recommendation" : "Pick by hand"} accent="recommendation" actions={full && <Badge tone={CONFIDENCE[full.confidence].tone}>{CONFIDENCE[full.confidence].label}</Badge>}>
       <div className="space-y-4">
         {problem !== null && (
           <p role="alert" className="rounded bg-red-50 p-2 text-sm text-red-800">
@@ -427,7 +427,7 @@ export function RecommendationCard({
 
         {full && (
           <div>
-            <h3 className="text-sm font-medium">Why</h3>
+            <h3 className="text-sm font-semibold text-(--accent-strong)">Why</h3>
             <p className="whitespace-pre-line text-sm text-stone-700">{full.explanation}</p>
           </div>
         )}

@@ -35,6 +35,7 @@ export function PartyRoster({ roster, onChange }: { roster: readonly Player[]; o
   return (
     <Panel
       title="Party"
+      accent="party"
       actions={
         <Button variant="primary" onClick={add}>
           Add player
@@ -46,7 +47,7 @@ export function PartyRoster({ roster, onChange }: { roster: readonly Player[]; o
       ) : (
         <ul className="@container space-y-3">
           {roster.map((p) => (
-            <li key={p.id} className="rounded border border-stone-200 p-3">
+            <li key={p.id} className="rounded-md border border-(--accent-line) p-3">
               {/* One column below md, or whenever the roster's own column is narrow (the page's xl grid). */}
               <div className="grid grid-cols-1 items-start gap-3 md:@xl:grid-cols-[minmax(0,1fr)_8rem_minmax(0,1fr)_5rem_auto]">
                 <label className={labelClass}>
