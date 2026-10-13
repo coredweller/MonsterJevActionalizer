@@ -224,8 +224,8 @@ describe("bonus actions", () => {
     expect(keys(build(extractedReviewed("TunnelWasp")).bonusActions)).toEqual(["none"]);
   });
 
-  it("Fiddlebits' 'uses your bonus action to command' is not a bonus action", () => {
-    expect(keys(build(extractedReviewed("Fiddlebits")).bonusActions)).toEqual(["none"]);
+  it("Fiddlebits' 'uses your bonus action to command' is a bonus action", () => {
+    expect(keys(build(extractedReviewed("Fiddlebits")).bonusActions)).toEqual(["trt_steel_defender", "none"]);
   });
 
   it("an exhausted X/day bonus action is excluded", () => {

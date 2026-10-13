@@ -88,10 +88,11 @@ type inferred from it (`z.infer`), because a `ReviewedMonster` is read back from
 | `create(reviewed)` | fresh state, default settings, empty roster/log |
 | `duplicate(t)` | same `reviewed`, `roster`, `settings`; fresh state; blank situation; empty log; name `"<base> <n+1>"` |
 | `delete` | removes the tracker from the store (UI confirms first; not a state reducer) |
-| `startTurn(t, rng)` | `round+1`; auto mode: d6 per spent recharge, `available` if roll ≥ `min`; returns rolls shown to DM |
+| `startTurn(t, rng)` | `round+1`; legendary actions refill to max (any mode; Legendary Resistance doesn't); auto mode: d6 per spent recharge, `available` if roll ≥ `min`; returns rolls shown to DM |
 | `apply(t, choice)` | spend slot/per-day/recharge actually chosen; set/replace concentration; push log entry; keep situation |
-| `recordResult(t, i, result)` | sets result on log entry `i` |
-| `setHp / setCondition / setSlots …` | manual DM edits, clamped to [0, max] |
+| `recordResult(t, i, result, note?)` | sets (or, with `undefined`, clears) the result on log entry `i`; an empty note removes it and an omitted one keeps it; throws if there's no entry `i` |
+| `setHp / setSlots / setPerDay / setLegendary` | manual DM edits, clamped to [0, max]; a slot level or ability the monster lacks throws |
+| `setRecharge / setConditions / setConcentration` | manual DM edits; conditions de-duplicated; an ability the monster lacks throws |
 
 History sent to Jev = `log.slice(-3)`.
 

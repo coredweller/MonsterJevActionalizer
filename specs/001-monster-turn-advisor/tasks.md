@@ -24,8 +24,8 @@ description: "Task list for Monster Turn Advisor (v1)"
   `Dexterity Saving Throw: DC 15 … Failure/Success`, a 30-foot Cone, `Recharge 5–6` (en dash), Spellcasting as an
   **action** with `At Will` and `1/Day Each` lists and no slots, `Misty Step (2/Day)` bonus action, a Trigger/Response
   reaction, `Legendary Resistance (3/Day, or 4/Day in Lair)`, and the non-SRD spell "Thornward Hex".
-- `Fiddlebits` mentions "uses your bonus action to command" (a companion), which is **not** the "as a bonus action"
-  pattern. It must not be extracted as a bonus action.
+- `Fiddlebits` mentions "uses your bonus action to command" (a companion). Since G11 (2026-10-12) that wording counts,
+  so its Steel Defender trait is extracted as a bonus action.
 - Jev wire types: `F:\Projects\AI\typesafe-assist\smart-assistant\prototype\src\types.ts` lines 10–76.
 - Monster zod schemas: `F:\Projects\AI\DandDTemplateParserTypeScript\src\routes\monsters.ts` lines 24–76.
 - `lib/monster`, `lib/encounter` and `lib/decide` MUST NOT import React, call `fetch` or touch `localStorage`.
@@ -162,12 +162,12 @@ Filled or noticed during T056–T058, so they aren't in the task lines above. Ad
   - When the tracker's situation differs from that one, the card says "The situation changed since you pressed Recommend", so the DM can press it again.
   - Any `lib/` change is test-first.
 - [X] G09 *(T057, as built)* **Party and situation shown on the page.** *Kept 2026-10-11; noted on T057.* T053–T055 built `PartyRoster` and `SituationForm`, but no task put them on the page; T057 did (party under the monster summary, situation in its own column). Removing a player also re-syncs the saved situation (`syncSituation`)
-- [ ] G10 *(DM request)* **A more lively, fun colour scheme.** *Decided 2026-10-11: bright and colour-coded. Built 2026-10-12: `--accent*` CSS variables per column in `app/globals.css` (`accent-monster` is also the root default, so the trackers list and load screens are crimson); `Panel` takes an `accent`, and `Button`, `ToggleChip` and the Panel frame read the variables; solid badges; a crimson-violet-blue gradient header. Every new text/background pair is AA (lowest 4.94:1, white on green-700); alerts are unchanged. Not yet checked in a browser.* Today the page is stone grey with amber and red alerts. **To build:**
+- [X] G10 *(DM request)* **A more lively, fun colour scheme.** *Decided 2026-10-11: bright and colour-coded. Built 2026-10-12: `--accent*` CSS variables per column in `app/globals.css` (`accent-monster` is also the root default, so the trackers list and load screens are crimson); `Panel` takes an `accent`, and `Button`, `ToggleChip` and the Panel frame read the variables; solid badges; a crimson-violet-blue gradient header. Every new text/background pair is AA (lowest 4.94:1, white on green-700); alerts are unchanged. Checked in the browser by the DM 2026-10-12.* Today the page is stone grey with amber and red alerts. **To build:**
   - Each column gets its own saturated accent: monster crimson, party blue, situation green, recommendation violet.
   - The background is a warm off-white, with bolder badges and buttons.
   - Keep text and alert contrast readable (WCAG AA).
   - UI only, so no tests; check in the browser.
-- [ ] G11 *(found 2026-10-11, US1)* **A trait's bonus action isn't detected from "uses your bonus action".** Fiddlebits' Steel Defender trait says it "uses your bonus action to command", but `BONUS_ACTION` in `lib/monster/extract.ts` only matches "as a bonus action", so the monster gets no bonus actions. The DM can recategorise it in review, so nothing is blocked. *Decided 2026-10-11: yes.* **To build: widen the pattern to "uses (your|its) bonus action" and similar, test-first.** This changes extraction, and so the legal options, for any recorded scenario whose monster uses that wording; check the fixture guards
+- [X] G11 *(found 2026-10-11, US1)* **A trait's bonus action isn't detected from "uses your bonus action".** Fiddlebits' Steel Defender trait says it "uses your bonus action to command", but `BONUS_ACTION` in `lib/monster/extract.ts` only matches "as a bonus action", so the monster gets no bonus actions. The DM can recategorise it in review, so nothing is blocked. *Decided 2026-10-11: yes. Built 2026-10-12: `BONUS_ACTION` also matches "use/uses/using a/its/your/their bonus action", but not after "can't"/"cannot"/"can not" (tests in `tests/monster/extract.test.ts` and `tests/monster/options.test.ts`, seen failing first). No recorded scenario uses Fiddlebits, so the fixture guards pass and nothing was re-recorded. The normalizer's legendary-upgrade move (`lib/monster/normalize.ts` step 6) still matches only "as a bonus action".* **To build: widen the pattern to "uses (your|its) bonus action" and similar, test-first.** This changes extraction, and so the legal options, for any recorded scenario whose monster uses that wording; check the fixture guards
 
 ### Review fixes (2026-10-08, before T056)
 
@@ -246,11 +246,11 @@ Each item states the **current behaviour**, the **recommendation** and what a ch
 
 ### Tests for User Story 3 ⚠️
 
-- [ ] T059 [P] [US3] Write `tests/encounter/state.turn.test.ts`: `startTurn(tracker, rng)` increments the round; in auto mode it rolls `1 + floor(rng()*6)` per spent recharge ability and marks it available when the roll ≥ `min`, returning `{ tracker, rolls }`; in manual mode it makes no rolls; `recordResult(tracker, i, result, note?)` sets the result; manual edits (`setHp`, `setSlots`, `setPerDay`, `setRecharge`, `setConditions`, `setConcentration`, `setLegendary`) clamp to [0, max]; `log.slice(-HISTORY_TURNS)` is what questions use
+- [X] T059 [P] [US3] *(2026-10-12: 33 tests, all seen failing on the missing functions. Decided with the DM: `startTurn` also refills legendary actions in both modes, Legendary Resistance not; rolls are `{ abilityId, name, roll, min, recharged }` in ability order; `recordResult(t, i, undefined)` clears the result and an empty note is removed; a slot level or ability the monster lacks throws. The history check is already `tests/decide/questions.test.ts` "history", so it isn't repeated here)* Write `tests/encounter/state.turn.test.ts`: `startTurn(tracker, rng)` increments the round; in auto mode it rolls `1 + floor(rng()*6)` per spent recharge ability and marks it available when the roll ≥ `min`, returning `{ tracker, rolls }`; in manual mode it makes no rolls; `recordResult(tracker, i, result, note?)` sets the result; manual edits (`setHp`, `setSlots`, `setPerDay`, `setRecharge`, `setConditions`, `setConcentration`, `setLegendary`) clamp to [0, max]; `log.slice(-HISTORY_TURNS)` is what questions use
 
 ### Implementation for User Story 3
 
-- [ ] T060 [US3] Implement `startTurn`, `recordResult` and the manual-edit reducers in `lib/encounter/state.ts`; pass T059
+- [X] T060 [US3] *(2026-10-12; 34/34 pass. Added while building: leaving the note out of `recordResult` keeps the current one, with its test written after the code and then seen failing against a version that always replaced the note)* Implement `startTurn`, `recordResult` and the manual-edit reducers in `lib/encounter/state.ts`; pass T059
 - [ ] T061 [P] [US3] Build `components/EncounterTracker.tsx`: HP current/max, slots per level, X/day uses, recharge available/spent toggles, legendary actions and Legendary Resistance counters, conditions, concentration, round; a "Start turn" button that calls `startTurn(tracker, Math.random)` and shows the rolls
 - [ ] T062 [P] [US3] Build `components/TurnLog.tsx`: entries newest first, showing action, target, move, slot and a recommended/overridden marker; a hit/miss/downed/effect result picker and an optional note per entry
 - [ ] T063 [US3] Wire EncounterTracker and TurnLog into `app/page.tsx`; confirm the state survives a page reload and that a corrupt stored blob shows the storage warning and an empty app

@@ -143,10 +143,37 @@ describe("2014 wording", () => {
     });
   });
 
-  it('Fiddlebits has no bonus-action ability ("uses your bonus action to command" is not the pattern)', () => {
+  it('Fiddlebits: Steel Defender is a bonus ability ("uses your bonus action to command")', () => {
     const d = draft("Fiddlebits");
-    expect(d.abilities.filter((a) => a.category === "bonus")).toEqual([]);
-    expect(byName(d, "Steel Defender").category).toBe("passive");
+    expect(d.abilities.filter((a) => a.category === "bonus").map((a) => a.name)).toEqual(["Steel Defender"]);
+  });
+
+  describe("a trait's bonus action in its text", () => {
+    /** TunnelWasp with its traits replaced by one trait with this text. */
+    function traitCategory(text: string): Ability["category"] {
+      const parsed = parseMonster(loadMonsterFixture("TunnelWasp").raw);
+      if (!parsed.success || parsed.data.kind !== "general") throw new Error("TunnelWasp does not parse as a general monster");
+      const d = extractAbilities({ kind: "general", body: { ...parsed.data.body, SpecialTraits: { "Test Trait": text } } });
+      return byName(d, "Test Trait").category;
+    }
+
+    it.each([
+      "As a bonus action, the wasp burrows 10 feet.",
+      "The wasp uses its bonus action to burrow.",
+      "Construct companion that uses your bonus action to command.",
+      "Using its bonus action, the wasp burrows.",
+      "On each of its turns, the wasp can use a bonus action to take the Dash, Disengage, or Hide action.",
+    ])("bonus: %s", (text) => {
+      expect(traitCategory(text)).toBe("bonus");
+    });
+
+    it.each([
+      "The wasp can't use its bonus action while grappled.",
+      "The wasp cannot use a bonus action on a turn it burrows.",
+      "The wasp uses its reaction to burrow.",
+    ])("passive: %s", (text) => {
+      expect(traitCategory(text)).toBe("passive");
+    });
   });
 
   it("keeps unparseable text with parsed: none and the raw text", () => {

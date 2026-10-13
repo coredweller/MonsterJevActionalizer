@@ -172,7 +172,9 @@ class Ids {
   }
 }
 
-const BONUS_ACTION = /\bas a bonus action\b/i;
+// "As a bonus action, …", "uses its/your bonus action to …", "can use a bonus action to …" (Cunning Action),
+// but not "can't use its bonus action".
+const BONUS_ACTION = /\bas a bonus action\b|(?<!\b(?:can't|cannot|can not) )\bus(?:e|es|ing) (?:a|its|your|their) bonus action\b/i;
 const DEPENDS_ON_ATTACK = /\btakes? the Attack action\b/i;
 const SINGLE_TARGET = /\b(?:one|a|the) (?:target|creature)\b|\btarget(?:s)? (?:a|one) creature\b|\bchoose a creature\b|\bone creature\b/i;
 

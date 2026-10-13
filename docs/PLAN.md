@@ -129,7 +129,7 @@ It also extracts:
 - area (`60-foot cone`)
 - `Recharge 5–6` and `(X/Day)`
 - the Multiattack composition
-- `"as a bonus action"` in trait text
+- a bonus action in trait text: `"as a bonus action"`, `"uses its/your bonus action"`, `"can use a bonus action"` (Cunning Action), but not `"can't use its bonus action"`
 - `parseHp`, which takes the leading integer
 - `parseSpeed`, which builds a map of movement modes
 
@@ -172,7 +172,7 @@ A tracker belongs to one monster. It holds:
 - **Morale:** a slider from cowardly to fanatical, starting in the middle.
 - **Recharge mode:** auto or manual, defaulting to auto.
 
-**Start turn** moves the round on, rolls a d6 for each spent recharge ability (auto mode) and shows the roll, and shows the reminder cards.
+**Start turn** moves the round on, refills legendary actions (5e: they come back at the start of the monster's turn; Legendary Resistance is per day and doesn't), rolls a d6 for each spent recharge ability (auto mode) and shows the roll, and shows the reminder cards.
 
 **Turn log:** each turn records the action, target, move and slot actually used, plus a result the DM notes (hit / miss / downed / effect). The **last 3 turns** go into Jev's state.
 

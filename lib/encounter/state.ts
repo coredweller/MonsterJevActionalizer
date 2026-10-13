@@ -5,6 +5,7 @@ import type { ReviewedMonster } from "../monster/types";
 import {
   type ApplyChoice,
   type ChosenOption,
+  type Condition,
   type EncounterState,
   type Player,
   type PlayerTurn,
@@ -13,6 +14,7 @@ import {
   type Temperament,
   type Tracker,
   type TurnLogEntry,
+  type TurnResult,
   ZONE_DEFAULT_FT,
   type Zone,
 } from "./types";
@@ -284,4 +286,105 @@ export function apply(tracker: Tracker, choice: ApplyChoice): Tracker {
   if (bonusAction?.slotLevel !== undefined) entry.bonusSlotLevel = bonusAction.slotLevel;
 
   return { ...tracker, state, situation: choice.situation, log: [...tracker.log, entry] };
+}
+
+/** One recharge roll made by `startTurn`, shown to the DM. */
+export interface RechargeRoll {
+  readonly abilityId: string;
+  readonly name: string;
+  readonly roll: number;
+  readonly min: number;
+  readonly recharged: boolean;
+}
+
+/**
+ * Starts the monster's next turn: moves the round on and refills legendary actions (5e: they come
+ * back at the start of its turn; Legendary Resistance is per day, so it doesn't). In auto mode it
+ * rolls a d6 for each spent recharge ability, in ability order; manual mode leaves recharge to the DM.
+ */
+export function startTurn(tracker: Tracker, rng: () => number): { tracker: Tracker; rolls: RechargeRoll[] } {
+  const { reviewed, state } = tracker;
+  const recharge = { ...state.recharge };
+  const rolls: RechargeRoll[] = [];
+  if (tracker.settings.rechargeMode === "auto") {
+    for (const a of reviewed.abilities) {
+      if (a.uses.kind !== "recharge" || recharge[a.id] !== "spent") continue;
+      const roll = 1 + Math.floor(rng() * 6);
+      const recharged = roll >= a.uses.min;
+      if (recharged) recharge[a.id] = "available";
+      rolls.push({ abilityId: a.id, name: a.name, roll, min: a.uses.min, recharged });
+    }
+  }
+  const next = withState(tracker, { round: state.round + 1, recharge, legendaryActionsLeft: legendaryActionMax(reviewed) });
+  return { tracker: next, rolls };
+}
+
+/**
+ * Sets the result of log entry `i`; `undefined` clears it. A note replaces the entry's note, an
+ * empty one removes it, and leaving it out keeps the current one.
+ */
+export function recordResult(tracker: Tracker, i: number, result: TurnResult | undefined, note?: string): Tracker {
+  const entry = tracker.log[i];
+  if (entry === undefined) throw new Error(`recordResult: there is no log entry ${i}`);
+  // A fresh copy, so deleting optional fields doesn't touch the stored entry.
+  const next: TurnLogEntry = { ...entry };
+  delete next.result;
+  if (result !== undefined) next.result = result;
+  if (note !== undefined) {
+    delete next.note;
+    if (note !== "") next.note = note;
+  }
+  return { ...tracker, log: tracker.log.map((e, j) => (j === i ? next : e)) };
+}
+
+// Manual DM edits. Counters are clamped to [0, max]; a slot level or ability the monster doesn't
+// have throws, since the tracker must never gain a resource the statblock doesn't give.
+
+const clamp = (n: number, max: number) => Math.min(max, Math.max(0, n));
+
+function withState(tracker: Tracker, patch: Partial<EncounterState>): Tracker {
+  return { ...tracker, state: { ...tracker.state, ...patch } };
+}
+
+export function setHp(tracker: Tracker, hp: number): Tracker {
+  return withState(tracker, { hp: clamp(hp, tracker.state.hpMax) });
+}
+
+export function setSlots(tracker: Tracker, level: number, remaining: number): Tracker {
+  const max = slotMax(tracker.reviewed)[String(level)];
+  if (max === undefined) throw new Error(`setSlots: the monster has no level ${level} spell slots`);
+  return withState(tracker, { slots: { ...tracker.state.slots, [String(level)]: clamp(remaining, max) } });
+}
+
+export function setPerDay(tracker: Tracker, abilityId: string, remaining: number): Tracker {
+  const max = perDayMax(tracker.reviewed)[abilityId];
+  if (max === undefined) throw new Error(`setPerDay: "${abilityId}" has no daily uses`);
+  return withState(tracker, { perDay: { ...tracker.state.perDay, [abilityId]: clamp(remaining, max) } });
+}
+
+export function setRecharge(tracker: Tracker, abilityId: string, value: "available" | "spent"): Tracker {
+  if (!tracker.reviewed.abilities.some((a) => a.id === abilityId && a.uses.kind === "recharge")) {
+    throw new Error(`setRecharge: "${abilityId}" has no recharge`);
+  }
+  return withState(tracker, { recharge: { ...tracker.state.recharge, [abilityId]: value } });
+}
+
+export function setConditions(tracker: Tracker, conditions: readonly Condition[]): Tracker {
+  return withState(tracker, { conditions: [...new Set(conditions)] });
+}
+
+export function setConcentration(tracker: Tracker, concentration: EncounterState["concentration"]): Tracker {
+  if (concentration !== null && !tracker.reviewed.abilities.some((a) => a.id === concentration.abilityId)) {
+    throw new Error(`setConcentration: the monster has no ability "${concentration.abilityId}"`);
+  }
+  return withState(tracker, { concentration });
+}
+
+/** Sets whichever legendary counters are given; the other keeps its value. */
+export function setLegendary(tracker: Tracker, counters: { readonly actions?: number; readonly resistance?: number }): Tracker {
+  const { reviewed, state } = tracker;
+  return withState(tracker, {
+    legendaryActionsLeft: counters.actions === undefined ? state.legendaryActionsLeft : clamp(counters.actions, legendaryActionMax(reviewed)),
+    legendaryResistanceLeft: counters.resistance === undefined ? state.legendaryResistanceLeft : clamp(counters.resistance, legendaryResistanceMax(reviewed)),
+  });
 }
