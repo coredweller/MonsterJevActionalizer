@@ -28,7 +28,7 @@ Reference implementation for calling Jev: `F:\Projects\AI\typesafe-assist\smart-
   - exporting a session
 
 ## Stack
-Next.js (App Router), TypeScript, npm, Tailwind and hand-rolled components. The API key is used only in a server route. All state is kept in `localStorage`, with no database. Tests use Vitest.
+Next.js (App Router), TypeScript, npm, Tailwind and hand-rolled components. The API key is used only in a server route. All state is kept in `localStorage`, with no database. Tests use Vitest; behaviour only a browser shows (saving, what the page displays) uses Playwright in `e2e/`.
 
 **Why this stack:** the app is mostly UI, and its backend is one route (`/api/decide`) that exists to keep `TYPESAFE_API_KEY` out of the browser. Next.js puts the UI and that route in one project, with one `npm run dev`, and the UI and server share types and zod schemas without a separate package. A standalone API server such as Fastify would only pay off with several clients or a real backend, and v1 has neither. If that changes (for example, the DandDTemplateParser integration grows), the fallback is Vite + React with a small separate API.
 
@@ -298,7 +298,9 @@ Copy these from `F:\Projects\AI\ClaudeCore\.claude\` into this repo's `.claude/`
    - `state.ts`: Apply spends what was chosen, Duplicate resets state, the log keeps the last 3 turns, and recharge rolls work.
    - `normalize.ts`: one case per known drift. That covers an empty Equipment block, a string `Level`, the `"Legendary Actions"` alias, `Weapon` → `Weapons`, and a general-to-legendary upgrade with CR and proficiency bonus filled in. A fixed monster must then pass zod, and normalizing an already-valid monster must produce zero changes.
    - Fixtures: every `fixtures/monsters/*.json` passes strict zod validation with zero normalizer changes.
-2. **Manual test:** run `npm run dev` and upload a deliberately broken monster. Check that the fix screen lists the changes, that reverting a change works, and that the review screen loads. Then load a fixture monster and go through the review screen. Then play these scenarios:
+2. **Browser tests (Playwright, `npm run test:e2e`):** the real app in Chromium. Monsters are loaded through the loader UI, and no test calls Jev.
+   - `encounter.spec.ts`: encounter edits and turn results survive a reload, and an unreadable save shows the storage warning and an empty app.
+3. **Manual test:** run `npm run dev` and upload a deliberately broken monster. Check that the fix screen lists the changes, that reverting a change works, and that the review screen loads. Then load a fixture monster and go through the review screen. Then play these scenarios:
    - a lone player engaged in melee
    - a spread-out party with a downed caster and two clustered players (expect a cluster pick for an area effect)
    - the monster at low HP with a cowardly morale and an escape route (expect a retreat)
@@ -306,7 +308,7 @@ Copy these from `F:\Projects\AI\ClaudeCore\.claude\` into this repo's `.claude/`
    - the Ashen Warpriest with leveled spells available as both its action and its bonus action (expect at most one leveled spell, and the War Priest bonus attack only when the action is an attack)
 
    In each, check that the recommendations make sense, that an override followed by Apply updates the tracker, and that the log feeds the next turn.
-3. **Cost and speed:** log token usage and latency from each response, and confirm there's exactly one Jev request per recommended turn, and none when the monster is hard-blocked.
+4. **Cost and speed:** log token usage and latency from each response, and confirm there's exactly one Jev request per recommended turn, and none when the monster is hard-blocked.
 
 ## Follow-ups
 - Load monsters from the DandDTemplateParser database. This needs a `GET /monsters/:id/json` endpoint added there.

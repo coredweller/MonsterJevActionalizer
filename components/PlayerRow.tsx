@@ -12,7 +12,7 @@ import {
   type PlayerTurn,
   type Zone,
 } from "@/lib/encounter/types";
-import { CheckboxField, NumberField, ToggleChip, inputClass, labelClass } from "./ui";
+import { CheckboxField, NumberField, ToggleChip, inputClass, labelClass, toggled } from "./ui";
 
 const CoverSchema = PlayerTurnSchema.shape.cover;
 type Cover = PlayerTurn["cover"];
@@ -25,11 +25,6 @@ const ZONE_LABEL: Record<Zone, string> = {
 };
 const HP_LABEL: Record<ApparentHp, string> = { healthy: "Healthy", bloodied: "Bloodied", nearDown: "Near down", down: "Down" };
 const COVER_LABEL: Record<Cover, string> = { none: "None", half: "Half", threeQuarters: "Three-quarters", total: "Total" };
-
-/** Adds or removes one value, keeping the list's order. */
-function toggled(list: readonly string[], value: string, on: boolean): string[] {
-  return on ? (list.includes(value) ? [...list] : [...list, value]) : list.filter((v) => v !== value);
-}
 
 /**
  * One player's turn details. Emits the whole updated turn; the caller keeps "clustered with"

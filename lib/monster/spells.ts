@@ -1,6 +1,7 @@
 /** SRD spell table lookup. A spell that isn't in the table is unknown, never guessed. */
 import { z } from "zod";
-import data from "../../data/srd-spells.json";
+// The attribute lets Node's own ESM loader (Playwright's e2e tests) import it; bundlers accept it too.
+import data from "../../data/srd-spells.json" with { type: "json" };
 import { SrdSpellSchema, type SrdSpell } from "./types";
 
 const SPELLS = z.array(SrdSpellSchema).parse(data);

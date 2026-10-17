@@ -63,6 +63,11 @@ export function CheckboxField({
   );
 }
 
+/** Adds or removes one value, keeping the list's order. For ToggleChip lists. */
+export function toggled<T extends string>(list: readonly T[], value: T, on: boolean): T[] {
+  return on ? (list.includes(value) ? [...list] : [...list, value]) : list.filter((v) => v !== value);
+}
+
 /** A pressed/unpressed button for multi-select lists (conditions, clustered with). */
 export function ToggleChip({ pressed, onToggle, children }: { pressed: boolean; onToggle: (pressed: boolean) => void; children: ReactNode }) {
   return (

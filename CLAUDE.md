@@ -12,6 +12,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 npm run dev
 npm test                                  # Vitest
 npx vitest run -t "<test name>"           # single test
+npm run test:e2e                          # Playwright, e2e/ (starts its own dev server on :3100)
 npm run check:monsters [-- --fix]         # fixtures must report zero changes
 ```
 

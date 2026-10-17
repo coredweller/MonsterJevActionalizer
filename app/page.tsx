@@ -1,12 +1,14 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { EncounterTracker } from "@/components/EncounterTracker";
 import { FixScreen } from "@/components/FixScreen";
 import { MonsterLoader } from "@/components/MonsterLoader";
 import { PartyRoster } from "@/components/PartyRoster";
 import { RecommendationCard } from "@/components/RecommendationCard";
 import { ReviewScreen } from "@/components/ReviewScreen";
 import { SituationForm } from "@/components/SituationForm";
+import { TurnLog } from "@/components/TurnLog";
 import { Button, Panel, panelFrame } from "@/components/ui";
 import { type BlockedRecommendation, type DecideRequest, DecideResponseSchema, type Recommendation } from "@/lib/decide/types";
 import { createTracker, syncSituation } from "@/lib/encounter/state";
@@ -100,9 +102,21 @@ export default function Home() {
     setDecision({ trackerId: tracker.id, situation, outcome });
   }
 
+  /** Drops the shown recommendation, and any answer still on its way. */
+  function clearDecision() {
+    latestRequest.current++;
+    setDecision(null);
+  }
+
   function onApplied(next: Tracker) {
     upsert(next);
-    setDecision(null);
+    clearDecision();
+  }
+
+  function onTrackerEdited(previous: Tracker, next: Tracker) {
+    upsert(next);
+    // A new round means Start turn was pressed: the recommendation on screen was for the last turn.
+    if (next.state.round !== previous.state.round) clearDecision();
   }
 
   return (
@@ -172,16 +186,13 @@ export default function Home() {
         ) : (
           <>
             <div className="min-w-0 space-y-4">
-              <section aria-label="Monster and tracker" className={`accent-monster ${panelFrame} p-3`}>
-                <h2 className="font-semibold text-(--accent-strong)">{selected ? selected.name : "Monster"}</h2>
-                {selected ? (
-                  <p className="text-sm text-stone-600">
-                    HP {selected.state.hp}/{selected.state.hpMax} · round {selected.state.round} · {selected.reviewed.abilities.length} abilities
-                  </p>
-                ) : (
+              {selected ? (
+                <EncounterTracker tracker={selected} onChange={(next) => onTrackerEdited(selected, next)} />
+              ) : (
+                <Panel title="Monster" accent="monster">
                   <p className="text-sm text-stone-500">Select a tracker.</p>
-                )}
-              </section>
+                </Panel>
+              )}
               {selected && (
                 <PartyRoster roster={selected.roster} onChange={(roster) => upsert({ ...selected, roster, situation: syncSituation(selected.situation, roster) })} />
               )}
@@ -225,6 +236,7 @@ export default function Home() {
                   </p>
                 </Panel>
               )}
+              {selected && <TurnLog tracker={selected} onChange={upsert} />}
             </div>
           </>
         )}
