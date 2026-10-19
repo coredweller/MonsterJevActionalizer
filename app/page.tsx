@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useId, useRef, useState } from "react";
 import { EncounterTracker } from "@/components/EncounterTracker";
 import { FixScreen } from "@/components/FixScreen";
 import { MonsterLoader } from "@/components/MonsterLoader";
@@ -8,10 +8,11 @@ import { PartyRoster } from "@/components/PartyRoster";
 import { RecommendationCard } from "@/components/RecommendationCard";
 import { ReviewScreen } from "@/components/ReviewScreen";
 import { SituationForm } from "@/components/SituationForm";
+import { TrackerSidebar } from "@/components/TrackerSidebar";
 import { TurnLog } from "@/components/TurnLog";
-import { Button, Panel, panelFrame } from "@/components/ui";
+import { Panel } from "@/components/ui";
 import { type BlockedRecommendation, type DecideRequest, DecideResponseSchema, type Recommendation } from "@/lib/decide/types";
-import { createTracker, syncSituation } from "@/lib/encounter/state";
+import { createTracker, duplicate, syncSituation } from "@/lib/encounter/state";
 import type { Situation, Tracker } from "@/lib/encounter/types";
 import { errorText, log } from "@/lib/log";
 import { extractAbilities, type ReviewDraft } from "@/lib/monster/extract";
@@ -78,8 +79,11 @@ async function requestDecision(tracker: Tracker, situation: Situation): Promise<
 }
 
 export default function Home() {
-  const { loaded, trackers, selected, select, upsert, storageWarning, dismissWarning } = useTrackers();
+  const { loaded, trackers, selected, select, upsert, remove, storageWarning, dismissWarning } = useTrackers();
   const [flow, setFlow] = useState<LoadFlow | null>(null);
+  // The tracker drawer below the xl breakpoint; from xl up the sidebar is always shown.
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const sidebarId = useId();
   const [decision, setDecision] = useState<Decision | null>(null);
   // Only the latest Recommend press may set the decision; an older answer that arrives late is dropped.
   const latestRequest = useRef(0);
@@ -92,6 +96,17 @@ export default function Home() {
     upsert(tracker);
     select(tracker.id);
     setFlow(null);
+  }
+
+  function onSelected(id: string) {
+    setFlow(null);
+    select(id);
+  }
+
+  function onDuplicated(tracker: Tracker) {
+    const copy = duplicate(tracker, trackers.map((t) => t.name), crypto.randomUUID(), new Date().toISOString());
+    upsert(copy);
+    onSelected(copy.id);
   }
 
   async function recommend(tracker: Tracker, situation: Situation) {
@@ -123,6 +138,15 @@ export default function Home() {
     <div className="flex min-h-screen flex-col">
       <header className="flex items-center justify-between bg-linear-to-r from-rose-700 via-violet-700 to-blue-700 px-4 py-3 text-white shadow">
         <h1 className="text-lg font-bold tracking-wide">Monster Turn Advisor</h1>
+        <button
+          type="button"
+          className="min-h-11 rounded-md border border-white/60 px-3 text-sm font-semibold hover:bg-white/10 xl:hidden"
+          aria-expanded={drawerOpen}
+          aria-controls={sidebarId}
+          onClick={() => setDrawerOpen((open) => !open)}
+        >
+          Trackers
+        </button>
       </header>
 
       {storageWarning && (
@@ -134,37 +158,23 @@ export default function Home() {
         </div>
       )}
 
-      <div className="grid flex-1 grid-cols-1 gap-4 p-4 md:grid-cols-[14rem_1fr] xl:grid-cols-[14rem_1fr_1fr_1fr]">
-        <aside aria-label="Trackers" className={`accent-monster ${panelFrame} p-3`}>
-          <div className="mb-2 flex items-center justify-between gap-2">
-            <h2 className="font-semibold text-(--accent-strong)">Trackers</h2>
-            <Button onClick={() => setFlow({ step: "load" })}>Add monster</Button>
-          </div>
-          {!loaded ? (
-            <p className="text-sm text-stone-500">Loading…</p>
-          ) : trackers.length === 0 ? (
-            <p className="text-sm text-stone-500">No trackers yet.</p>
-          ) : (
-            <ul className="space-y-1">
-              {trackers.map((t) => (
-                <li key={t.id}>
-                  <button
-                    className={`min-h-11 w-full rounded px-2 text-left ${t.id === selected?.id && !flow ? "bg-(--accent) font-semibold text-white" : "hover:bg-(--accent-soft)"}`}
-                    onClick={() => {
-                      setFlow(null);
-                      select(t.id);
-                    }}
-                  >
-                    {t.name}
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
-        </aside>
+      {/* Below xl the sidebar is a drawer outside the grid's flow, so the content columns get the full width. */}
+      <div className="grid flex-1 grid-cols-1 gap-4 p-4 md:grid-cols-2 xl:grid-cols-[14rem_1fr_1fr_1fr]">
+        <TrackerSidebar
+          id={sidebarId}
+          open={drawerOpen}
+          onClose={() => setDrawerOpen(false)}
+          loaded={loaded}
+          trackers={trackers}
+          selectedId={flow ? null : (selected?.id ?? null)}
+          onSelect={onSelected}
+          onAdd={() => setFlow({ step: "load" })}
+          onDuplicate={onDuplicated}
+          onDelete={remove}
+        />
 
         {loaded && loading ? (
-          <div className="xl:col-span-3">
+          <div className="md:col-span-2 xl:col-span-3">
             {current.step === "load" && (
               <MonsterLoader
                 onLoaded={(result) => setFlow({ step: "fix", result })}

@@ -86,7 +86,7 @@ type inferred from it (`z.infer`), because a `ReviewedMonster` is read back from
 | Event | Effect |
 |---|---|
 | `create(reviewed)` | fresh state, default settings, empty roster/log |
-| `duplicate(t)` | same `reviewed`, `roster`, `settings`; fresh state; blank situation; empty log; name `"<base> <n+1>"` |
+| `duplicate(t, existingNames, id, now)` | same `reviewed`, `roster`, `settings`; fresh state; blank situation with one default row per roster player; empty log; name `"<base> n"` for the lowest n ≥ 2 not in `existingNames` (case-sensitive), where base drops a trailing space and number (`"Goblin 2"` → `"Goblin"`) |
 | `delete` | removes the tracker from the store (UI confirms first; not a state reducer) |
 | `startTurn(t, rng)` | `round+1`; legendary actions refill to max (any mode; Legendary Resistance doesn't); auto mode: d6 per spent recharge, `available` if roll ≥ `min`; returns rolls shown to DM |
 | `apply(t, choice)` | spend slot/per-day/recharge actually chosen; set/replace concentration; push log entry; keep situation |
@@ -95,6 +95,17 @@ type inferred from it (`z.infer`), because a `ReviewedMonster` is read back from
 | `setRecharge / setConditions / setConcentration` | manual DM edits; conditions de-duplicated; an ability the monster lacks throws |
 
 History sent to Jev = `log.slice(-3)`.
+
+### Reminders [`lib/encounter/reminders.ts`]
+
+`buildReminders(t)` returns read-only cards, never decided, in the order legendary, reactions, lair. A card with
+nothing to list is left out, so a general monster with no reactions gets `[]`.
+
+- **ReminderEntry**: `{ name, text }`, copied verbatim.
+- **Reminder**: `{ kind: "legendary", left, max, options: ReminderEntry[] }` (from `LegendaryActions.Options`; `left` =
+  `state.legendaryActionsLeft`, and the card stays at 0 left) | `{ kind: "reactions", entries }` (abilities with source
+  `Reactions` or category `reaction`, each once, `text` = `raw`) | `{ kind: "lair", initiative: 20, entries }` (from
+  `LairActions`).
 
 ## Decision [`lib/decide`]
 

@@ -267,12 +267,12 @@ Each item states the **current behaviour**, the **recommendation** and what a ch
 
 ### Tests for User Story 4 ⚠️
 
-- [ ] T064 [P] [US4] Write `tests/encounter/state.duplicate.test.ts`: `duplicate(tracker, existingNames, id, now)` keeps `reviewed`, `roster` and `settings`, and resets state, log and situation; names it `"<base> 2"`, `"<base> 3"`, … avoiding names in `existingNames` (base strips a trailing number)
+- [X] T064 [P] [US4] *(2026-10-17: 17 tests, 16 seen failing on the missing `duplicate`; the one that passes checks the mid-fight source fixture. Decided: the situation resets to `syncSituation(blankSituation(), roster)`, one default row per kept player; the name is the lowest free `"<base> n"` with n ≥ 2, matched case-sensitively, and only a trailing space-and-digits is stripped for the base)* Write `tests/encounter/state.duplicate.test.ts`: `duplicate(tracker, existingNames, id, now)` keeps `reviewed`, `roster` and `settings`, and resets state, log and situation; names it `"<base> 2"`, `"<base> 3"`, … avoiding names in `existingNames` (base strips a trailing number)
 
 ### Implementation for User Story 4
 
-- [ ] T065 [US4] Implement `duplicate` in `lib/encounter/state.ts`; pass T064
-- [ ] T066 [US4] Build `components/TrackerSidebar.tsx`: lists trackers (name, HP, round), selects, adds a new monster (opens MonsterLoader), and offers Duplicate and Delete (with confirm); collapses to a drawer on tablet width; wire it in `app/page.tsx`
+- [X] T065 [US4] *(2026-10-17; 17/17 pass, 573/573 in the suite)* Implement `duplicate` in `lib/encounter/state.ts`; pass T064
+- [X] T066 [US4] *(2026-10-18: below `xl` the sidebar is a drawer opened by a header "Trackers" button, closed by Escape, the backdrop, ✕ or any action in it; from `xl` up it's a column. Delete asks with `window.confirm`, as PartyRoster does. Duplicate selects the copy. Checked by `e2e/trackers.spec.ts`, 4 tests seen failing on the missing sidebar first; `loadMonster`/`stored` moved to `e2e/helpers.ts`)* Build `components/TrackerSidebar.tsx`: lists trackers (name, HP, round), selects, adds a new monster (opens MonsterLoader), and offers Duplicate and Delete (with confirm); collapses to a drawer on tablet width; wire it in `app/page.tsx`
 
 **Checkpoint**: Several monsters can be run side by side.
 
@@ -286,11 +286,11 @@ Each item states the **current behaviour**, the **recommendation** and what a ch
 
 ### Tests for User Story 5 ⚠️
 
-- [ ] T067 [P] [US5] Write `tests/encounter/reminders.test.ts`: `buildReminders(tracker)` returns legendary actions left with options from `LegendaryActions.Options`, reactions from `Reactions` and reaction-category abilities, and lair actions flagged "initiative 20"; it returns an empty list for a general monster with no reactions; settings temperament and morale appear in the Jev state built by `buildJevRequest` (extend `tests/decide/questions.test.ts`)
+- [X] T067 [P] [US5] *(2026-10-18: 9 tests; the file fails to load on the missing `lib/encounter/reminders` module, so none ran on their own yet. Card shape in data-model.md "Reminders": legendary → reactions → lair, empty cards left out, the legendary card kept at 0 left, reactions = source `Reactions` or category `reaction` once each, text verbatim. The temperament/morale part was already covered by `tests/decide/questions.test.ts` "includes temperament and morale…", so that file wasn't extended)* Write `tests/encounter/reminders.test.ts`: `buildReminders(tracker)` returns legendary actions left with options from `LegendaryActions.Options`, reactions from `Reactions` and reaction-category abilities, and lair actions flagged "initiative 20"; it returns an empty list for a general monster with no reactions; settings temperament and morale appear in the Jev state built by `buildJevRequest` (extend `tests/decide/questions.test.ts`)
 
 ### Implementation for User Story 5
 
-- [ ] T068 [US5] Implement `buildReminders` in `lib/encounter/reminders.ts`; pass T067
+- [X] T068 [US5] *(2026-10-18; 9/9 pass, 582/582 in the suite. The reminder types are plain TS in `reminders.ts`, not zod, since they're never parsed)* Implement `buildReminders` in `lib/encounter/reminders.ts`; pass T067
 - [ ] T069 [P] [US5] Build the settings panel in `components/EncounterTracker.tsx`: temperament select showing the INT-based suggestion, a morale slider (cowardly ↔ fanatical, 0–100, default 50), and an auto/manual recharge-mode toggle
 - [ ] T070 [P] [US5] Build `components/ReminderCards.tsx` showing the `buildReminders` output after Start turn, read-only with no decide buttons; wire it in `app/page.tsx`
 

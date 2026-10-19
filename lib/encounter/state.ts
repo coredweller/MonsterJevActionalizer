@@ -209,6 +209,30 @@ export function createTracker(reviewed: ReviewedMonster, id: string, now: string
   };
 }
 
+/** "<base> n" for the lowest n ≥ 2 not taken, where base drops a trailing number ("Goblin 2" → "Goblin"). Case-sensitive. */
+function copyName(name: string, existingNames: readonly string[]): string {
+  const base = name.replace(/\s+\d+$/, "");
+  const taken = new Set(existingNames);
+  let n = 2;
+  while (taken.has(`${base} ${n}`)) n++;
+  return `${base} ${n}`;
+}
+
+/**
+ * A fresh tracker for the same monster, roster and settings: full resources, round 1, an empty log
+ * and a default situation row per roster player. Named "<base> n" so it doesn't clash with `existingNames`.
+ */
+export function duplicate(tracker: Tracker, existingNames: readonly string[], id: string, now: string): Tracker {
+  const { roster } = tracker;
+  return {
+    ...createTracker(tracker.reviewed, id, now),
+    name: copyName(tracker.name, existingNames),
+    roster,
+    situation: syncSituation(blankSituation(), roster),
+    settings: tracker.settings,
+  };
+}
+
 /**
  * State after using one chosen action or bonus action: spends its slot (at the level the DM
  * chose), daily use or recharge, never below 0, and sets concentration for a concentration spell
