@@ -1,0 +1,34 @@
+{
+  "CharacterName": "",
+  "Level": 0,
+  "Race": "",
+  "Class": "",
+  "Alignment": "",
+  "HP": "",
+  "AC": 0,
+  "Speed": "",
+  "AbilityScores": {
+    "Strength": { "Score": 0, "Modifier": "+0" },
+    "Dexterity": { "Score": 0, "Modifier": "+0" },
+    "Constitution": { "Score": 0, "Modifier": "+0" },
+    "Intelligence": { "Score": 0, "Modifier": "+0" },
+    "Wisdom": { "Score": 0, "Modifier": "+0" },
+    "Charisma": { "Score": 0, "Modifier": "+0" }
+  },
+  "SavingThrows": {
+  },
+  "Skills": {
+  },
+  "Senses": "",
+  "Languages": "",
+  "SpecialTraits": {
+  },
+  "Actions": {
+  },
+  "Equipment": {
+    "Armor": "",
+    "Weapons": "",
+    "Other": ""
+  },
+  "Notes": ""
+}

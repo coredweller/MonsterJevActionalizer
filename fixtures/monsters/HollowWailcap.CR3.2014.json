@@ -1,0 +1,38 @@
+{
+  "CharacterName": "Hollow Wailcap",
+  "Level": 3,
+  "Race": "Fungus",
+  "Class": "Plant Creature",
+  "Alignment": "Unaligned",
+  "HP": "52 (7d8 + 21)",
+  "AC": 12,
+  "Speed": "10 ft., fly 20 ft. (hover)",
+  "AbilityScores": {
+    "Strength": { "Score": 5, "Modifier": "-3" },
+    "Dexterity": { "Score": 14, "Modifier": "+2" },
+    "Constitution": { "Score": 16, "Modifier": "+3" },
+    "Intelligence": { "Score": 2, "Modifier": "-4" },
+    "Wisdom": { "Score": 12, "Modifier": "+1" },
+    "Charisma": { "Score": 6, "Modifier": "-2" }
+  },
+  "SavingThrows": {
+    "Constitution": "+5"
+  },
+  "Skills": {},
+  "Senses": "Blindsight 60 ft. (blind beyond), Passive Perception 11",
+  "Languages": "—",
+  "SpecialTraits": {
+    "Floating Dread (Aura)": "Emits soft, mournful moans in a 30-ft radius. Creatures starting their turn in the aura must make a DC 14 Wisdom saving throw or suffer disadvantage on Insight and Perception checks for 1 hour. Immunity on a successful save for 24 hours.",
+    "Neurosporic Burst (1/Day)": "When reduced to 0 HP, explodes in a 10-ft radius cloud of spores. Creatures must make a DC 15 Constitution saving throw or be stunned for 1 round and affected by hallucinatory terrain (self-targeted) for 1 minute (save ends each turn). On a success, take 2d6 psychic damage and no further effect.",
+    "False Memory Infection (Optional)": "Failed saves to Neurosporic Burst may embed fragmented foreign memories. These may provide lore clues, false visions, or strange prophecies."
+  },
+  "Actions": {
+    "Lashing Tendril": "Melee Weapon Attack: +4 to hit, reach 10 ft., one target. Hit: 9 (2d6 + 2) bludgeoning damage. Target must succeed on a DC 13 Wisdom save or be frightened until the end of its next turn."
+  },
+  "Equipment": {
+    "Armor": "",
+    "Weapons": "",
+    "Other": ""
+  },
+  "Notes": "The Hollow Wailcap is a spectral, floating fungus found in cursed forests, crypts, or deep caves. It feeds on emotion, regret, and latent psychic trauma, emitting empathic moans and hallucination-inducing spores. Its presence often heralds the remnants of sorrowful or long-forgotten events."
+}

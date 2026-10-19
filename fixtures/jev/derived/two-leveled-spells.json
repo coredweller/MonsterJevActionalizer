@@ -1,0 +1,861 @@
+{
+  "derivedFrom": "warpriest-dual-spells.json",
+  "purpose": "Action Guiding Bolt (0.55) and bonus Spiritual Weapon (0.70) are both leveled spells: the lower-probability action is replaced.",
+  "request": {
+    "state": {
+      "monster": {
+        "name": "Ashen Warpriest",
+        "kind": "general",
+        "hp": {
+          "current": 75,
+          "max": 75
+        },
+        "ac": 18,
+        "speed": {
+          "walk": 30
+        },
+        "abilities": [
+          {
+            "id": "act_multiattack",
+            "name": "Multiattack",
+            "category": "action",
+            "summary": "2× Mace (at will)"
+          },
+          {
+            "id": "act_mace",
+            "name": "Mace",
+            "category": "action",
+            "summary": "melee +6 to hit, reach 5 ft.; 6 (1d6 + 3) bludgeoning + 4 (1d8) fire (at will)"
+          },
+          {
+            "id": "act_light_crossbow",
+            "name": "Light Crossbow",
+            "category": "action",
+            "summary": "ranged +5 to hit, range 80/320 ft.; 6 (1d8 + 2) piercing (at will)"
+          },
+          {
+            "id": "spell_sacred_flame",
+            "name": "Sacred Flame",
+            "category": "action",
+            "summary": "DC 15 Dexterity save; 4 (1d8) radiant; range 60 ft. (at will)"
+          },
+          {
+            "id": "spell_thaumaturgy",
+            "name": "Thaumaturgy",
+            "category": "action",
+            "summary": "range 30 ft. (at will)"
+          },
+          {
+            "id": "spell_guiding_bolt",
+            "name": "Guiding Bolt",
+            "category": "action",
+            "summary": "ranged +7 to hit, range 120 ft.; 14 (4d6) radiant; level 1 slot"
+          },
+          {
+            "id": "spell_healing_word",
+            "name": "Healing Word",
+            "category": "bonus",
+            "summary": "range 60 ft.; level 1 slot"
+          },
+          {
+            "id": "spell_shield_of_faith",
+            "name": "Shield of Faith",
+            "category": "bonus",
+            "summary": "range 60 ft.; concentration; level 1 slot"
+          },
+          {
+            "id": "spell_hold_person",
+            "name": "Hold Person",
+            "category": "action",
+            "summary": "DC 15 Wisdom save; range 60 ft.; concentration; level 2 slot"
+          },
+          {
+            "id": "spell_spiritual_weapon",
+            "name": "Spiritual Weapon",
+            "category": "bonus",
+            "summary": "melee +7 to hit, reach 60 ft.; level 2 slot"
+          },
+          {
+            "id": "spell_mass_healing_word",
+            "name": "Mass Healing Word",
+            "category": "bonus",
+            "summary": "range 60 ft.; level 3 slot"
+          },
+          {
+            "id": "spell_spirit_guardians",
+            "name": "Spirit Guardians",
+            "category": "action",
+            "summary": "DC 15 Wisdom save; 15-ft. emanation; self; concentration; level 3 slot"
+          },
+          {
+            "id": "trt_war_priest",
+            "name": "War Priest",
+            "category": "bonus",
+            "summary": "1× Mace (at will)"
+          },
+          {
+            "id": "trt_ash_step",
+            "name": "Ash Step",
+            "category": "bonus",
+            "summary": "The Ashen Warpriest can take the Disengage action as a bonus action. (at will)"
+          }
+        ],
+        "rawUnparsed": []
+      },
+      "encounter": {
+        "hp": 75,
+        "hpMax": 75,
+        "slots": {
+          "1": 4,
+          "2": 3,
+          "3": 2
+        },
+        "perDay": {},
+        "recharge": {},
+        "legendaryActionsLeft": 0,
+        "legendaryResistanceLeft": 0,
+        "conditions": [],
+        "concentration": null,
+        "round": 1
+      },
+      "temperament": "cunning",
+      "morale": {
+        "value": 50,
+        "words": "steady"
+      },
+      "situation": {
+        "players": [
+          {
+            "key": "player__0",
+            "label": "player 0: Brakka (melee, Fighter, AC 18)",
+            "zone": "engaged",
+            "distanceFt": 5,
+            "apparentHp": "healthy",
+            "conditions": [],
+            "cover": "none",
+            "hitMonsterLastRound": false,
+            "clusteredWith": []
+          },
+          {
+            "key": "player__1",
+            "label": "player 1: Sefa (melee, Rogue, AC 15)",
+            "zone": "engaged",
+            "distanceFt": 5,
+            "apparentHp": "healthy",
+            "conditions": [],
+            "cover": "none",
+            "hitMonsterLastRound": false,
+            "clusteredWith": []
+          },
+          {
+            "key": "player__2",
+            "label": "player 2: Lio (caster, Sorcerer, AC 13)",
+            "zone": "near",
+            "distanceFt": 30,
+            "apparentHp": "healthy",
+            "conditions": [],
+            "cover": "none",
+            "hitMonsterLastRound": false,
+            "clusteredWith": []
+          }
+        ],
+        "allies": {
+          "present": false,
+          "count": 0
+        },
+        "terrain": {
+          "difficult": false,
+          "chokepoint": false,
+          "escapeRoute": false,
+          "flyingPossible": false
+        },
+        "notes": ""
+      },
+      "options": {
+        "actions": [
+          {
+            "key": "act_multiattack",
+            "summary": "Multiattack: 2× Mace",
+            "usesResource": false,
+            "concentration": false,
+            "singleTarget": true,
+            "area": false,
+            "range": {
+              "ft": 5,
+              "inRangeNow": [
+                "player__0",
+                "player__1"
+              ],
+              "inRangeAfterMove": [
+                "player__0",
+                "player__1",
+                "player__2"
+              ]
+            }
+          },
+          {
+            "key": "act_mace",
+            "summary": "Mace: melee +6 to hit, reach 5 ft.; 6 (1d6 + 3) bludgeoning + 4 (1d8) fire",
+            "usesResource": false,
+            "concentration": false,
+            "singleTarget": true,
+            "area": false,
+            "range": {
+              "ft": 5,
+              "inRangeNow": [
+                "player__0",
+                "player__1"
+              ],
+              "inRangeAfterMove": [
+                "player__0",
+                "player__1",
+                "player__2"
+              ]
+            }
+          },
+          {
+            "key": "act_light_crossbow",
+            "summary": "Light Crossbow: ranged +5 to hit, range 80/320 ft.; 6 (1d8 + 2) piercing",
+            "usesResource": false,
+            "concentration": false,
+            "singleTarget": true,
+            "area": false,
+            "range": {
+              "ft": 320,
+              "inRangeNow": [
+                "player__0",
+                "player__1",
+                "player__2"
+              ],
+              "inRangeAfterMove": [
+                "player__0",
+                "player__1",
+                "player__2"
+              ]
+            }
+          },
+          {
+            "key": "spell_sacred_flame",
+            "summary": "Sacred Flame: DC 15 Dexterity save; 4 (1d8) radiant; range 60 ft.",
+            "usesResource": false,
+            "concentration": false,
+            "singleTarget": true,
+            "area": false,
+            "range": {
+              "ft": 60,
+              "inRangeNow": [
+                "player__0",
+                "player__1",
+                "player__2"
+              ],
+              "inRangeAfterMove": [
+                "player__0",
+                "player__1",
+                "player__2"
+              ]
+            }
+          },
+          {
+            "key": "spell_thaumaturgy",
+            "summary": "Thaumaturgy: range 30 ft.",
+            "usesResource": false,
+            "concentration": false,
+            "singleTarget": false,
+            "area": false,
+            "range": "no target"
+          },
+          {
+            "key": "spell_guiding_bolt",
+            "summary": "Guiding Bolt: ranged +7 to hit, range 120 ft.; 14 (4d6) radiant; level 1 slot",
+            "usesResource": true,
+            "concentration": false,
+            "singleTarget": true,
+            "area": false,
+            "slotLevels": [
+              1,
+              2,
+              3
+            ],
+            "range": {
+              "ft": 120,
+              "inRangeNow": [
+                "player__0",
+                "player__1",
+                "player__2"
+              ],
+              "inRangeAfterMove": [
+                "player__0",
+                "player__1",
+                "player__2"
+              ]
+            }
+          },
+          {
+            "key": "spell_hold_person",
+            "summary": "Hold Person: DC 15 Wisdom save; range 60 ft.; concentration; level 2 slot",
+            "usesResource": true,
+            "concentration": true,
+            "singleTarget": true,
+            "area": false,
+            "slotLevels": [
+              2,
+              3
+            ],
+            "range": {
+              "ft": 60,
+              "inRangeNow": [
+                "player__0",
+                "player__1",
+                "player__2"
+              ],
+              "inRangeAfterMove": [
+                "player__0",
+                "player__1",
+                "player__2"
+              ]
+            }
+          },
+          {
+            "key": "spell_spirit_guardians",
+            "summary": "Spirit Guardians: DC 15 Wisdom save; 15-ft. emanation; self; concentration; level 3 slot",
+            "usesResource": true,
+            "concentration": true,
+            "singleTarget": false,
+            "area": true,
+            "slotLevels": [
+              3
+            ],
+            "range": {
+              "ft": 15,
+              "inRangeNow": [
+                "player__0",
+                "player__1"
+              ],
+              "inRangeAfterMove": [
+                "player__0",
+                "player__1",
+                "player__2"
+              ]
+            }
+          },
+          {
+            "key": "dash",
+            "summary": "Dash: extra movement equal to its speed this turn",
+            "usesResource": false,
+            "concentration": false,
+            "singleTarget": false,
+            "area": false,
+            "range": "no target"
+          },
+          {
+            "key": "dodge",
+            "summary": "Dodge: attacks against it have disadvantage and it has advantage on Dexterity saves until its next turn",
+            "usesResource": false,
+            "concentration": false,
+            "singleTarget": false,
+            "area": false,
+            "range": "no target"
+          },
+          {
+            "key": "disengage",
+            "summary": "Disengage: its movement doesn't provoke opportunity attacks this turn",
+            "usesResource": false,
+            "concentration": false,
+            "singleTarget": false,
+            "area": false,
+            "range": "no target"
+          },
+          {
+            "key": "hide",
+            "summary": "Hide: makes a Dexterity (Stealth) check to hide",
+            "usesResource": false,
+            "concentration": false,
+            "singleTarget": false,
+            "area": false,
+            "range": "no target"
+          },
+          {
+            "key": "help",
+            "summary": "Help: gives an ally advantage on its next ability check or attack roll",
+            "usesResource": false,
+            "concentration": false,
+            "singleTarget": false,
+            "area": false,
+            "range": "no target"
+          }
+        ],
+        "bonusActions": [
+          {
+            "key": "spell_healing_word",
+            "summary": "Healing Word: range 60 ft.; level 1 slot",
+            "usesResource": true,
+            "concentration": false,
+            "singleTarget": false,
+            "area": false,
+            "slotLevels": [
+              1,
+              2,
+              3
+            ],
+            "range": "no target"
+          },
+          {
+            "key": "spell_shield_of_faith",
+            "summary": "Shield of Faith: range 60 ft.; concentration; level 1 slot",
+            "usesResource": true,
+            "concentration": true,
+            "singleTarget": false,
+            "area": false,
+            "slotLevels": [
+              1,
+              2,
+              3
+            ],
+            "range": "no target"
+          },
+          {
+            "key": "spell_spiritual_weapon",
+            "summary": "Spiritual Weapon: melee +7 to hit, reach 60 ft.; level 2 slot",
+            "usesResource": true,
+            "concentration": false,
+            "singleTarget": true,
+            "area": false,
+            "slotLevels": [
+              2,
+              3
+            ],
+            "range": {
+              "ft": 60,
+              "inRangeNow": [
+                "player__0",
+                "player__1",
+                "player__2"
+              ],
+              "inRangeAfterMove": [
+                "player__0",
+                "player__1",
+                "player__2"
+              ]
+            }
+          },
+          {
+            "key": "spell_mass_healing_word",
+            "summary": "Mass Healing Word: range 60 ft.; level 3 slot",
+            "usesResource": true,
+            "concentration": false,
+            "singleTarget": false,
+            "area": false,
+            "slotLevels": [
+              3
+            ],
+            "range": "no target"
+          },
+          {
+            "key": "trt_war_priest",
+            "summary": "War Priest: 1× Mace; only when it takes the Attack action",
+            "usesResource": false,
+            "concentration": false,
+            "singleTarget": true,
+            "area": false,
+            "range": {
+              "ft": 5,
+              "inRangeNow": [
+                "player__0",
+                "player__1"
+              ],
+              "inRangeAfterMove": [
+                "player__0",
+                "player__1",
+                "player__2"
+              ]
+            }
+          },
+          {
+            "key": "trt_ash_step",
+            "summary": "Ash Step: The Ashen Warpriest can take the Disengage action as a bonus action.",
+            "usesResource": false,
+            "concentration": false,
+            "singleTarget": false,
+            "area": false,
+            "range": "no target"
+          },
+          {
+            "key": "none",
+            "summary": "None: take no bonus action",
+            "usesResource": false,
+            "concentration": false,
+            "singleTarget": false,
+            "area": false,
+            "range": "no target"
+          }
+        ],
+        "movements": [
+          "hold",
+          "closeIn",
+          "reachOther",
+          "retreat",
+          "takeCover"
+        ]
+      },
+      "clusters": [
+        {
+          "id": "cluster__0",
+          "players": [
+            "player__0"
+          ],
+          "size": 1
+        },
+        {
+          "id": "cluster__1",
+          "players": [
+            "player__1"
+          ],
+          "size": 1
+        },
+        {
+          "id": "cluster__2",
+          "players": [
+            "player__2"
+          ],
+          "size": 1
+        }
+      ],
+      "history": []
+    },
+    "questions": {
+      "tactic": {
+        "type": "choice",
+        "instructions": "What is the monster's overall plan this turn, given its temperament, morale and the situation?",
+        "criteria": {
+          "aggressive": "Deal as much damage as it can this turn",
+          "focus_weakest": "Finish off or pressure the most wounded or vulnerable player",
+          "focus_threat": "Go after the player who is the biggest threat to it",
+          "control": "Disable, hinder or split up the party rather than deal damage",
+          "defensive": "Protect itself: reposition, buff or avoid damage",
+          "flee": "Get away from the fight"
+        }
+      },
+      "move_before": {
+        "type": "choice",
+        "instructions": "Before its action, how does the monster move?",
+        "criteria": {
+          "hold": "Stay where it is",
+          "closeIn": "Move toward its target",
+          "reachOther": "Move to reach a different target",
+          "retreat": "Move away from the party",
+          "takeCover": "Move behind cover"
+        }
+      },
+      "action": {
+        "type": "choice",
+        "instructions": "Which action does the monster take this turn? Range flags assume the targets in the state.",
+        "criteria": {
+          "act_multiattack": "Multiattack: 2× Mace [in range now]",
+          "act_mace": "Mace: melee +6 to hit, reach 5 ft.; 6 (1d6 + 3) bludgeoning + 4 (1d8) fire [in range now]",
+          "act_light_crossbow": "Light Crossbow: ranged +5 to hit, range 80/320 ft.; 6 (1d8 + 2) piercing [in range now]",
+          "spell_sacred_flame": "Sacred Flame: DC 15 Dexterity save; 4 (1d8) radiant; range 60 ft. [in range now]",
+          "spell_thaumaturgy": "Thaumaturgy: range 30 ft.",
+          "spell_guiding_bolt": "Guiding Bolt: ranged +7 to hit, range 120 ft.; 14 (4d6) radiant; level 1 slot [in range now]",
+          "spell_hold_person": "Hold Person: DC 15 Wisdom save; range 60 ft.; concentration; level 2 slot [in range now]",
+          "spell_spirit_guardians": "Spirit Guardians: DC 15 Wisdom save; 15-ft. emanation; self; concentration; level 3 slot [in range now]",
+          "dash": "Dash: extra movement equal to its speed this turn",
+          "dodge": "Dodge: attacks against it have disadvantage and it has advantage on Dexterity saves until its next turn",
+          "disengage": "Disengage: its movement doesn't provoke opportunity attacks this turn",
+          "hide": "Hide: makes a Dexterity (Stealth) check to hide",
+          "help": "Help: gives an ally advantage on its next ability check or attack roll"
+        }
+      },
+      "bonus_action": {
+        "type": "choice",
+        "instructions": "Which bonus action does the monster take this turn, if any?",
+        "criteria": {
+          "spell_healing_word": "Healing Word: range 60 ft.; level 1 slot",
+          "spell_shield_of_faith": "Shield of Faith: range 60 ft.; concentration; level 1 slot",
+          "spell_spiritual_weapon": "Spiritual Weapon: melee +7 to hit, reach 60 ft.; level 2 slot [in range now]",
+          "spell_mass_healing_word": "Mass Healing Word: range 60 ft.; level 3 slot",
+          "trt_war_priest": "War Priest: 1× Mace; only when it takes the Attack action [in range now]",
+          "trt_ash_step": "Ash Step: The Ashen Warpriest can take the Disengage action as a bonus action.",
+          "none": "None: take no bonus action"
+        }
+      },
+      "move_after": {
+        "type": "choice",
+        "instructions": "After its action, how does the monster move?",
+        "criteria": {
+          "hold": "Stay where it is",
+          "closeIn": "Move toward its target",
+          "reachOther": "Move to reach a different target",
+          "retreat": "Move away from the party",
+          "takeCover": "Move behind cover"
+        }
+      },
+      "target__0": {
+        "type": "choice",
+        "instructions": "Who should \"Multiattack\" target?",
+        "criteria": {
+          "player__0": "player 0: Brakka (melee, Fighter, AC 18); healthy; 5 ft. away; cover: none",
+          "player__1": "player 1: Sefa (melee, Rogue, AC 15); healthy; 5 ft. away; cover: none",
+          "player__2": "player 2: Lio (caster, Sorcerer, AC 13); healthy; 30 ft. away; cover: none"
+        }
+      },
+      "target__1": {
+        "type": "choice",
+        "instructions": "Who should \"Mace\" target?",
+        "criteria": {
+          "player__0": "player 0: Brakka (melee, Fighter, AC 18); healthy; 5 ft. away; cover: none",
+          "player__1": "player 1: Sefa (melee, Rogue, AC 15); healthy; 5 ft. away; cover: none",
+          "player__2": "player 2: Lio (caster, Sorcerer, AC 13); healthy; 30 ft. away; cover: none"
+        }
+      },
+      "target__2": {
+        "type": "choice",
+        "instructions": "Who should \"War Priest\" target?",
+        "criteria": {
+          "player__0": "player 0: Brakka (melee, Fighter, AC 18); healthy; 5 ft. away; cover: none",
+          "player__1": "player 1: Sefa (melee, Rogue, AC 15); healthy; 5 ft. away; cover: none",
+          "player__2": "player 2: Lio (caster, Sorcerer, AC 13); healthy; 30 ft. away; cover: none"
+        }
+      },
+      "target__3": {
+        "type": "choice",
+        "instructions": "Who should \"Light Crossbow\" target?",
+        "criteria": {
+          "player__0": "player 0: Brakka (melee, Fighter, AC 18); healthy; 5 ft. away; cover: none",
+          "player__1": "player 1: Sefa (melee, Rogue, AC 15); healthy; 5 ft. away; cover: none",
+          "player__2": "player 2: Lio (caster, Sorcerer, AC 13); healthy; 30 ft. away; cover: none"
+        }
+      },
+      "cluster__0": {
+        "type": "choice",
+        "instructions": "Which group of players should \"Spirit Guardians\" be aimed at?",
+        "criteria": {
+          "cluster__0": "player 0: Brakka (melee, Fighter, AC 18): catches 1",
+          "cluster__1": "player 1: Sefa (melee, Rogue, AC 15): catches 1",
+          "cluster__2": "player 2: Lio (caster, Sorcerer, AC 13): catches 1"
+        }
+      },
+      "slot_level__0": {
+        "type": "choice",
+        "instructions": "If it casts \"Guiding Bolt\", which spell slot level should it use?",
+        "criteria": {
+          "level__1": "Cast with a level 1 slot (4 left)",
+          "level__2": "Cast with a level 2 slot (3 left)",
+          "level__3": "Cast with a level 3 slot (2 left)"
+        }
+      },
+      "slot_level__1": {
+        "type": "choice",
+        "instructions": "If it casts \"Hold Person\", which spell slot level should it use?",
+        "criteria": {
+          "level__2": "Cast with a level 2 slot (3 left)",
+          "level__3": "Cast with a level 3 slot (2 left)"
+        }
+      },
+      "slot_level__3": {
+        "type": "choice",
+        "instructions": "If it casts \"Healing Word\", which spell slot level should it use?",
+        "criteria": {
+          "level__1": "Cast with a level 1 slot (4 left)",
+          "level__2": "Cast with a level 2 slot (3 left)",
+          "level__3": "Cast with a level 3 slot (2 left)"
+        }
+      },
+      "multiattack_fallback": {
+        "type": "noul",
+        "instructions": "If it uses Multiattack and its first target drops partway through, should it switch its remaining attacks to another adjacent target?",
+        "criteria": {
+          "true": "Yes: keep attacking whoever else is in reach.",
+          "false": "No: stop, or save the remaining attacks' movement for something else."
+        }
+      },
+      "should_retreat": {
+        "type": "noul",
+        "instructions": "Given its HP, morale, temperament and the situation, should the monster break off from this fight now?",
+        "criteria": {
+          "true": "Yes: it should get away this turn.",
+          "false": "No: it should keep fighting."
+        }
+      },
+      "spend_resource": {
+        "type": "noul",
+        "instructions": "Is this moment worth spending a limited resource (a spell slot, a recharge ability or a daily use)?",
+        "criteria": {
+          "true": "Yes: spend it now.",
+          "false": "No: save it for later."
+        }
+      }
+    },
+    "model": "jev-latest"
+  },
+  "response": {
+    "model": "jev-1.13.0",
+    "answers": {
+      "tactic": {
+        "type": "choice",
+        "choice": "control",
+        "probabilities": {
+          "aggressive": 0.19,
+          "focus_weakest": 0.03,
+          "focus_threat": 0.29,
+          "control": 0.47000000000000003,
+          "defensive": 0.02,
+          "flee": 0
+        },
+        "confidence": 0.36
+      },
+      "move_before": {
+        "type": "choice",
+        "choice": "hold",
+        "probabilities": {
+          "hold": 0.38,
+          "closeIn": 0.26,
+          "reachOther": 0.33,
+          "retreat": 0.02,
+          "takeCover": 0.01
+        },
+        "confidence": 0.22
+      },
+      "action": {
+        "type": "choice",
+        "choice": "spell_guiding_bolt",
+        "probabilities": {
+          "act_multiattack": 0.3,
+          "act_mace": 0.02,
+          "act_light_crossbow": 0,
+          "spell_sacred_flame": 0.03,
+          "spell_thaumaturgy": 0,
+          "spell_guiding_bolt": 0.55,
+          "spell_hold_person": 0.05,
+          "spell_spirit_guardians": 0.05,
+          "dash": 0,
+          "dodge": 0,
+          "disengage": 0,
+          "hide": 0,
+          "help": 0
+        },
+        "confidence": 0.52
+      },
+      "bonus_action": {
+        "type": "choice",
+        "choice": "spell_spiritual_weapon",
+        "probabilities": {
+          "spell_healing_word": 0,
+          "spell_shield_of_faith": 0.01,
+          "spell_spiritual_weapon": 0.7,
+          "spell_mass_healing_word": 0,
+          "trt_war_priest": 0.15,
+          "trt_ash_step": 0.02,
+          "none": 0.12
+        },
+        "confidence": 0.52
+      },
+      "move_after": {
+        "type": "choice",
+        "choice": "hold",
+        "probabilities": {
+          "hold": 0.44,
+          "closeIn": 0.13,
+          "reachOther": 0.38,
+          "retreat": 0.04,
+          "takeCover": 0.01
+        },
+        "confidence": 0.3
+      },
+      "target__0": {
+        "type": "choice",
+        "choice": "player__1",
+        "probabilities": {
+          "player__0": 0.35,
+          "player__1": 0.41,
+          "player__2": 0.24
+        },
+        "confidence": 0.11
+      },
+      "target__1": {
+        "type": "choice",
+        "choice": "player__1",
+        "probabilities": {
+          "player__0": 0.38,
+          "player__1": 0.52,
+          "player__2": 0.1
+        },
+        "confidence": 0.28
+      },
+      "target__2": {
+        "type": "choice",
+        "choice": "player__1",
+        "probabilities": {
+          "player__0": 0.37,
+          "player__1": 0.59,
+          "player__2": 0.04
+        },
+        "confidence": 0.38
+      },
+      "target__3": {
+        "type": "choice",
+        "choice": "player__2",
+        "probabilities": {
+          "player__0": 0.03,
+          "player__1": 0.03,
+          "player__2": 0.94
+        },
+        "confidence": 0.91
+      },
+      "cluster__0": {
+        "type": "choice",
+        "choice": "cluster__0",
+        "probabilities": {
+          "cluster__0": 0.6,
+          "cluster__1": 0.14,
+          "cluster__2": 0.26
+        },
+        "confidence": 0.4
+      },
+      "slot_level__0": {
+        "type": "choice",
+        "choice": "level__1",
+        "probabilities": {
+          "level__1": 1,
+          "level__2": 0,
+          "level__3": 0
+        },
+        "confidence": 1
+      },
+      "slot_level__1": {
+        "type": "choice",
+        "choice": "level__2",
+        "probabilities": {
+          "level__2": 1,
+          "level__3": 0
+        },
+        "confidence": 1
+      },
+      "slot_level__3": {
+        "type": "choice",
+        "choice": "level__1",
+        "probabilities": {
+          "level__1": 0.99,
+          "level__2": 0,
+          "level__3": 0.01
+        },
+        "confidence": 0.98
+      },
+      "multiattack_fallback": {
+        "type": "noul",
+        "noul": 0.79
+      },
+      "should_retreat": {
+        "type": "noul",
+        "noul": 0.18
+      },
+      "spend_resource": {
+        "type": "noul",
+        "noul": 0.61
+      }
+    },
+    "usage": {
+      "input_tokens": 6415,
+      "output_tokens": 828
+    }
+  }
+}

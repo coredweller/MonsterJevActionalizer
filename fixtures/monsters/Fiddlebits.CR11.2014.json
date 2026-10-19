@@ -1,0 +1,49 @@
+{
+  "CharacterName": "Fiddlebits",
+  "Level": 11,
+  "Race": "Rock Gnome",
+  "Class": "Artificer (Battle Smith)",
+  "Alignment": "Chaotic Good",
+  "HP": "88 (11d8 + 33)",
+  "AC": 18,
+  "Speed": "25 ft.",
+  "AbilityScores": {
+    "Strength": { "Score": 10, "Modifier": "+0" },
+    "Dexterity": { "Score": 14, "Modifier": "+2" },
+    "Constitution": { "Score": 16, "Modifier": "+3" },
+    "Intelligence": { "Score": 20, "Modifier": "+5" },
+    "Wisdom": { "Score": 12, "Modifier": "+1" },
+    "Charisma": { "Score": 10, "Modifier": "+0" }
+  },
+  "SavingThrows": {
+    "Constitution": "+6",
+    "Intelligence": "+8"
+  },
+  "Skills": {
+    "Arcana": "+8",
+    "Investigation": "+8",
+    "Perception": "+4",
+    "Sleight of Hand": "+5",
+    "Tinker’s Tools": "+10"
+  },
+  "Senses": "Darkvision 60 ft., Passive Perception 14",
+  "Languages": "Common, Gnomish, Dwarvish, Draconic",
+  "SpecialTraits": {
+    "Gnome Cunning": "Advantage on all Intelligence, Wisdom, and Charisma saving throws against magic.",
+    "Artificer Infusions": "Can infuse up to 6 non-magical items with magical properties. Maintains up to 4 infusions active at once.",
+    "Steel Defender": "Construct companion with AC 17, HP 40, uses your bonus action to command, adds your proficiency bonus to attack and damage.",
+    "Arcane Jolt": "Once per turn, when you hit with a magic weapon or Steel Defender hits, deal extra 2d6 force damage or heal a creature within 30 ft. for the same amount."
+  },
+  "Actions": {
+    "Multiattack": "Can attack twice with infused weapon or use a weapon and command the Steel Defender in the same turn.",
+    "Infused Rapier": "Melee Weapon Attack: +8 to hit, reach 5 ft., one target. Hit: 8 (1d8 + 4) piercing damage + 2d6 force (Arcane Jolt once per turn).",
+    "Lightning Launcher": "Ranged Spell Attack: +8 to hit, range 90 ft., one target. Hit: 11 (2d6 + 4) lightning damage.",
+    "Steel Defender – Force-Empowered Rend": "Melee Weapon Attack: +6 to hit, reach 5 ft., one target. Hit: 9 (1d8 + 2 + PB) force damage."
+  },
+  "Equipment": {
+    "Armor": "Enhanced Defense Half Plate (Infused, AC +1)",
+    "Weapons": "Infused Rapier, Lightning Launcher (arm-mounted), Handaxe, Dagger",
+    "Other": "Bag of Holding, Tinker’s Tools, Alchemist’s Supplies, Clockwork bird familiar, Goggles of Night (Infused)"
+  },
+  "Notes": "Fiddlebits is a hyperactive rock gnome with wild, curly copper hair and permanently soot-stained fingers. His inventions whir, chirp, and occasionally explode, but his brilliance is undeniable. Known for turning scraps into wonders, Fiddlebits built his Steel Defender, 'Clank,' from salvaged armor and a kettle helm. He’s fiercely protective of his companions and believes that every problem can be solved with the right combination of gears, gumption, and a little bit of chaos."
+}

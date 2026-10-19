@@ -1,0 +1,44 @@
+{
+  "CharacterName": "Tunnel Wasp",
+  "Level": 5,
+  "Race": "Monstrosity",
+  "Class": "Predatory Insect",
+  "Alignment": "Unaligned",
+  "HP": "50",
+  "AC": 14,
+  "Speed": "40 ft., burrow 20 ft., climb 30 ft.",
+  "AbilityScores": {
+    "Strength": { "Score": 16, "Modifier": "+3" },
+    "Dexterity": { "Score": 15, "Modifier": "+2" },
+    "Constitution": { "Score": 18, "Modifier": "+4" },
+    "Intelligence": { "Score": 3, "Modifier": "-4" },
+    "Wisdom": { "Score": 12, "Modifier": "+1" },
+    "Charisma": { "Score": 5, "Modifier": "-3" }
+  },
+  "SavingThrows": {
+    "Constitution": "+7",
+    "Dexterity": "+5"
+  },
+  "Skills": {
+    "Perception": "+4",
+    "Stealth": "+5"
+  },
+  "Senses": "Darkvision 60 ft., Tremorsense 30 ft., Passive Perception 14",
+  "Languages": "—",
+  "SpecialTraits": {
+    "Burrow Ambusher": "If the Tunnel Wasp moves at least 10 feet straight toward a creature immediately after emerging from underground, it has advantage on its first attack roll against that target.",
+    "Hive Alert": "If another Tunnel Wasp is within 60 feet, this creature has advantage on saving throws against being blinded, charmed, deafened, frightened, or stunned.",
+    "Chitinous Plating": "When the Tunnel Wasp takes slashing or piercing damage, it reduces the damage taken by 3 (to a minimum of 1)."
+  },
+  "Actions": {
+    "Multiattack": "The Tunnel Wasp makes two attacks: one with its Mandibles and one with its Sting.",
+    "Mandibles": "Melee Weapon Attack: +6 to hit, reach 5 ft., one target. Hit: 12 (2d6 + 3) slashing damage.",
+    "Sting": "Melee Weapon Attack: +6 to hit, reach 5 ft., one target. Hit: 9 (1d10 + 3) piercing damage, and the target must make a DC 12 Constitution saving throw, taking 10 poison damage and movement speed lessens by 5 feet per round on a failed save, or half as much on a successful one"
+  },
+  "Equipment": {
+    "Armor": "",
+    "Weapons": "",
+    "Other": ""
+  },
+  "Notes": "Tunnel Wasps are territorial subterranean predators, dwelling in hive networks that stretch beneath hills, jungles, or shattered battlefields. Their coordinated ambushes and poisonous stingers make them feared even by seasoned adventurers. Though unintelligent, they follow pheromone-driven instincts that mimic tactical cooperation."
+}

@@ -1,0 +1,44 @@
+{
+  "CharacterName": "Ashen Warpriest",
+  "Level": 5,
+  "Race": "Humanoid (Human)",
+  "Class": "Cleric",
+  "Alignment": "Lawful Neutral",
+  "HP": "75 (10d8 + 30)",
+  "AC": 18,
+  "Speed": "30 ft.",
+  "AbilityScores": {
+    "Strength": { "Score": 16, "Modifier": "+3" },
+    "Dexterity": { "Score": 14, "Modifier": "+2" },
+    "Constitution": { "Score": 16, "Modifier": "+3" },
+    "Intelligence": { "Score": 10, "Modifier": "+0" },
+    "Wisdom": { "Score": 18, "Modifier": "+4" },
+    "Charisma": { "Score": 12, "Modifier": "+1" }
+  },
+  "SavingThrows": {
+    "Wisdom": "+7",
+    "Charisma": "+4"
+  },
+  "Skills": {
+    "Medicine": "+7",
+    "Religion": "+3"
+  },
+  "Senses": "Passive Perception 14",
+  "Languages": "Common, Celestial",
+  "SpecialTraits": {
+    "Spellcasting": "The Ashen Warpriest is a 5th-level spellcaster. Its spellcasting ability is Wisdom (spell save DC 15, +7 to hit with spell attacks). It has the following cleric spells prepared:\n\nCantrips (at will): Sacred Flame, Thaumaturgy\n1st level (4 slots): Guiding Bolt, Healing Word, Shield of Faith\n2nd level (3 slots): Hold Person, Spiritual Weapon\n3rd level (2 slots): Mass Healing Word, Spirit Guardians",
+    "War Priest": "When the Ashen Warpriest takes the Attack action on its turn, it can make one Mace attack as a bonus action.",
+    "Ash Step": "The Ashen Warpriest can take the Disengage action as a bonus action."
+  },
+  "Actions": {
+    "Multiattack": "The Ashen Warpriest makes two Mace attacks.",
+    "Mace": "Melee Weapon Attack: +6 to hit, reach 5 ft., one target. Hit: 6 (1d6 + 3) bludgeoning damage plus 4 (1d8) fire damage.",
+    "Light Crossbow": "Ranged Weapon Attack: +5 to hit, range 80/320 ft., one target. Hit: 6 (1d8 + 2) piercing damage."
+  },
+  "Equipment": {
+    "Armor": "Chain Mail, Shield",
+    "Weapons": "Mace, Light Crossbow",
+    "Other": "Holy symbol (a soot-blackened sunburst)"
+  },
+  "Notes": "Authored test fixture (not from a published book). Built to exercise: leveled bonus-action spells (Healing Word, Spiritual Weapon, Shield of Faith, Mass Healing Word) alongside leveled action spells (one leveled spell per turn); a bonus attack that depends on taking the Attack action (War Priest); a trait-granted bonus action (Ash Step); concentration (Shield of Faith, Hold Person, Spirit Guardians); spell slots per level; and a ranged attack with normal/long range."
+}

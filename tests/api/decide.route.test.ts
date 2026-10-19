@@ -1,0 +1,179 @@
+/**
+ * POST /api/decide (contracts/decide-api.md). `callJev` is mocked, keeping the real `JevError`
+ * class, so the test counts Jev requests without a live call: exactly one when the monster can act,
+ * none when it is hard-blocked (constitution Principle I).
+ */
+import { readFileSync } from "node:fs";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { z } from "zod";
+import { POST } from "@/app/api/decide/route";
+import { buildScenario } from "@/fixtures/jev/scenarios";
+import { type DecideResponse, DecideResponseSchema } from "@/lib/decide/types";
+import type { Condition, Situation, Tracker } from "@/lib/encounter/types";
+import { callJev, JevError, type JevErrorKind } from "@/lib/jev/client";
+import { SystemOneResponseSchema } from "@/lib/jev/types";
+import { buildLegalOptions } from "@/lib/monster/options";
+import { loadJevFixture } from "../helpers/fixtures";
+
+vi.mock("@/lib/jev/client", async (importActual) => {
+  const actual = await importActual<typeof import("@/lib/jev/client")>();
+  return { ...actual, callJev: vi.fn<typeof actual.callJev>() };
+});
+
+const callJevMock = vi.mocked(callJev);
+const KEY = "sk-route-test-SECRET-0987654321";
+// The recording's `response` half; the scenario rebuilds the matching tracker and situation.
+const RECORDED = SystemOneResponseSchema.parse(z.object({ response: z.unknown() }).parse(loadJevFixture("lone-melee")).response);
+
+function body(tracker: Tracker, situation: Situation): Record<string, unknown> {
+  const { reviewed, state, settings, roster, log } = tracker;
+  return { tracker: { reviewed, state, settings, roster, log }, situation };
+}
+
+function withConditions(conditions: Condition[]) {
+  const { tracker, situation } = buildScenario("lone-melee");
+  return { tracker: { ...tracker, state: { ...tracker.state, conditions } }, situation };
+}
+
+const post = (payload: unknown) =>
+  POST(new Request("http://localhost/api/decide", { method: "POST", headers: { "content-type": "application/json" }, body: typeof payload === "string" ? payload : JSON.stringify(payload) }));
+
+async function read(res: Response): Promise<{ text: string; json: DecideResponse }> {
+  const text = await res.text();
+  return { text, json: DecideResponseSchema.parse(JSON.parse(text)) };
+}
+
+beforeEach(() => {
+  vi.stubEnv("TYPESAFE_API_KEY", KEY);
+  callJevMock.mockReset();
+  callJevMock.mockResolvedValue({ response: RECORDED, latencyMs: 1234 });
+  // Silence the route's log lines; logging itself is not tested (CLAUDE.md "Test-first").
+  for (const method of ["info", "error", "warn"] as const) vi.spyOn(console, method).mockImplementation(() => undefined);
+});
+
+afterEach(() => {
+  vi.unstubAllEnvs();
+  vi.restoreAllMocks();
+});
+
+describe("POST /api/decide: a monster that can act", () => {
+  it("calls Jev exactly once and returns 200 with the recommendation, recomputed options and meta", async () => {
+    const { tracker, situation } = buildScenario("lone-melee");
+    const res = await post(body(tracker, situation));
+    expect(res.status).toBe(200);
+    expect(callJevMock).toHaveBeenCalledTimes(1);
+
+    const { text, json } = await read(res);
+    if (!json.ok || !("action" in json.recommendation) || !("model" in json.meta)) throw new Error(`unexpected body: ${text}`);
+    expect(json.recommendation.action.key).toBe("act_multiattack");
+    expect(json.options).toEqual(buildLegalOptions(tracker.reviewed, tracker.state, situation, tracker.settings.temperament));
+    expect(json.meta).toEqual({ model: RECORDED.model, latencyMs: 1234, usage: RECORDED.usage });
+  });
+
+  it("sends the built question set with process.env, never a key of its own", async () => {
+    const { tracker, situation } = buildScenario("lone-melee");
+    await post(body(tracker, situation));
+    const [request, deps] = callJevMock.mock.calls[0] ?? [];
+    expect(Object.keys(request ?? {}).sort()).toEqual(["questions", "state"]);
+    expect(Object.keys(request?.questions ?? {})).toContain("action");
+    expect(deps?.env).toBe(process.env);
+  });
+
+  it("ignores client-supplied options and recomputes them", async () => {
+    const { tracker, situation } = buildScenario("lone-melee");
+    const smuggled = { ...body(tracker, situation), options: { actions: [{ key: "act_wish" }], bonusActions: [], movements: ["flyUp"] } };
+    const { json } = await read(await post(smuggled));
+    if (!json.ok) throw new Error("expected ok");
+    expect(json.options).toEqual(buildLegalOptions(tracker.reviewed, tracker.state, situation, tracker.settings.temperament));
+    const sent = JSON.stringify(callJevMock.mock.calls[0]?.[0]);
+    expect(sent).not.toContain("act_wish");
+  });
+});
+
+describe("POST /api/decide: a hard-blocked monster", () => {
+  it("stunned → Jev not called, movement hold", async () => {
+    const { tracker, situation } = withConditions(["stunned"]);
+    const res = await post(body(tracker, situation));
+    expect(res.status).toBe(200);
+    expect(callJevMock).not.toHaveBeenCalled();
+    const { json } = await read(res);
+    if (!json.ok) throw new Error("expected ok");
+    expect(json.meta).toEqual({ jevCalled: false });
+    expect(json.recommendation).toEqual({ blocked: { reason: expect.stringMatching(/Stunned/), movementBy: "code" }, moveBefore: "hold", moveAfter: "hold" });
+  });
+
+  it("incapacitated only → Jev not called, movement null (the DM picks)", async () => {
+    const { tracker, situation } = withConditions(["incapacitated"]);
+    const res = await post(body(tracker, situation));
+    expect(callJevMock).not.toHaveBeenCalled();
+    const { json } = await read(res);
+    if (!json.ok) throw new Error("expected ok");
+    expect(json.meta).toEqual({ jevCalled: false });
+    expect(json.recommendation).toEqual({ blocked: { reason: expect.stringMatching(/Incapacitated/), movementBy: "dm" }, moveBefore: null, moveAfter: null });
+    expect(json.options.movements.length).toBeGreaterThan(1);
+  });
+});
+
+describe("POST /api/decide: errors", () => {
+  it.each([
+    ["not JSON", "{not json"],
+    ["missing situation", { tracker: body(buildScenario("lone-melee").tracker, buildScenario("lone-melee").situation).tracker }],
+    ["a tracker that fails the schema", { ...body(buildScenario("lone-melee").tracker, buildScenario("lone-melee").situation), tracker: { reviewed: {} } }],
+  ])("invalid body (%s) → 400 invalid-request, Jev not called", async (_label, payload) => {
+    const res = await post(payload);
+    expect(res.status).toBe(400);
+    expect(callJevMock).not.toHaveBeenCalled();
+    const { json } = await read(res);
+    expect(json.ok).toBe(false);
+    if (json.ok) return;
+    expect(json.error.kind).toBe("invalid-request");
+    expect(json.error.message.length).toBeGreaterThan(0);
+  });
+
+  it("names the failing field in a 400 message", async () => {
+    const { tracker } = buildScenario("lone-melee");
+    const { json } = await read(await post({ tracker: body(tracker, buildScenario("lone-melee").situation).tracker }));
+    if (json.ok) throw new Error("expected an error");
+    expect(json.error.message).toMatch(/situation/);
+  });
+
+  // G07: the DM sees a fixed message per kind that never names Jev; JevError's own message stays in the server log.
+  it.each([
+    ["config", 500, "The decision service isn't set up: its API key is missing from .env.local. Add it and restart the server."],
+    ["upstream", 502, "The decision service couldn't give an answer. Try again, or pick by hand."],
+    ["timeout", 504, "The decision service didn't answer within 20 s. Try again, or pick by hand."],
+  ] as const satisfies readonly (readonly [JevErrorKind, number, string])[])("JevError %s → %i with a matching error.kind and a message for the DM", async (kind, status, message) => {
+    callJevMock.mockRejectedValue(new JevError(kind, `Jev failed (${kind}).`));
+    const { tracker, situation } = buildScenario("lone-melee");
+    const res = await post(body(tracker, situation));
+    expect(res.status).toBe(status);
+    expect(callJevMock).toHaveBeenCalledTimes(1);
+    const { text, json } = await read(res);
+    expect(json).toEqual({ ok: false, error: { kind, message } });
+    expect(text).not.toMatch(/jev/i);
+    expect(text).not.toContain(KEY);
+  });
+
+  it("rethrows an unexpected error", async () => {
+    callJevMock.mockRejectedValue(new TypeError("boom"));
+    const { tracker, situation } = buildScenario("lone-melee");
+    await expect(post(body(tracker, situation))).rejects.toThrow("boom");
+  });
+});
+
+describe("POST /api/decide: secret safety", () => {
+  it("no response body contains the key", async () => {
+    const lone = buildScenario("lone-melee");
+    const stunned = withConditions(["stunned"]);
+    const bodies = [await (await post(body(lone.tracker, lone.situation))).text(), await (await post(body(stunned.tracker, stunned.situation))).text()];
+    callJevMock.mockRejectedValue(new JevError("upstream", "Jev returned HTTP 500.", 500));
+    bodies.push(await (await post(body(lone.tracker, lone.situation))).text());
+    bodies.push(await (await post("{bad")).text());
+    for (const text of bodies) expect(text).not.toContain(KEY);
+  });
+
+  it("the route never reads TYPESAFE_API_KEY itself", () => {
+    const source = readFileSync(new URL("../../app/api/decide/route.ts", import.meta.url), "utf8");
+    expect(source).not.toContain("TYPESAFE_API_KEY");
+  });
+});

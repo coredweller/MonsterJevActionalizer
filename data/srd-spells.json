@@ -1,0 +1,2794 @@
+[
+  {
+    "name": "Acid Arrow",
+    "level": 2,
+    "castingTime": "action",
+    "range": "90 feet",
+    "attack": "ranged",
+    "damage": "4d4 acid",
+    "concentration": false
+  },
+  {
+    "name": "Acid Splash",
+    "level": 0,
+    "castingTime": "action",
+    "range": "60 feet",
+    "save": "Dexterity",
+    "damage": "1d6 acid",
+    "concentration": false
+  },
+  {
+    "name": "Aid",
+    "level": 2,
+    "castingTime": "action",
+    "range": "30 feet",
+    "concentration": false
+  },
+  {
+    "name": "Alarm",
+    "level": 1,
+    "castingTime": "other",
+    "range": "30 feet",
+    "area": {
+      "shape": "cube",
+      "size": 20
+    },
+    "concentration": false
+  },
+  {
+    "name": "Alter Self",
+    "level": 2,
+    "castingTime": "action",
+    "range": "Self",
+    "concentration": true
+  },
+  {
+    "name": "Animal Friendship",
+    "level": 1,
+    "castingTime": "action",
+    "range": "30 feet",
+    "save": "Wisdom",
+    "concentration": false
+  },
+  {
+    "name": "Animal Messenger",
+    "level": 2,
+    "castingTime": "action",
+    "range": "30 feet",
+    "concentration": false
+  },
+  {
+    "name": "Animal Shapes",
+    "level": 8,
+    "castingTime": "action",
+    "range": "30 feet",
+    "concentration": true
+  },
+  {
+    "name": "Animate Dead",
+    "level": 3,
+    "castingTime": "other",
+    "range": "10 feet",
+    "concentration": false
+  },
+  {
+    "name": "Animate Objects",
+    "level": 5,
+    "castingTime": "action",
+    "range": "120 feet",
+    "concentration": true
+  },
+  {
+    "name": "Antilife Shell",
+    "level": 5,
+    "castingTime": "action",
+    "range": "Self",
+    "area": {
+      "shape": "sphere",
+      "size": 10
+    },
+    "concentration": true
+  },
+  {
+    "name": "Antimagic Field",
+    "level": 8,
+    "castingTime": "action",
+    "range": "Self",
+    "area": {
+      "shape": "sphere",
+      "size": 10
+    },
+    "concentration": true
+  },
+  {
+    "name": "Antipathy/Sympathy",
+    "level": 8,
+    "castingTime": "other",
+    "range": "60 feet",
+    "area": {
+      "shape": "cube",
+      "size": 200
+    },
+    "save": "Wisdom",
+    "concentration": false
+  },
+  {
+    "name": "Arcane Eye",
+    "level": 4,
+    "castingTime": "action",
+    "range": "30 feet",
+    "area": {
+      "shape": "sphere",
+      "size": 30
+    },
+    "concentration": true
+  },
+  {
+    "name": "Arcane Hand",
+    "level": 5,
+    "castingTime": "action",
+    "range": "120 feet",
+    "concentration": true
+  },
+  {
+    "name": "Arcane Lock",
+    "level": 2,
+    "castingTime": "action",
+    "range": "Touch",
+    "concentration": false
+  },
+  {
+    "name": "Arcane Sword",
+    "level": 7,
+    "castingTime": "action",
+    "range": "60 feet",
+    "attack": "melee",
+    "damage": "3d10 force",
+    "concentration": true
+  },
+  {
+    "name": "Arcanist's Magic Aura",
+    "level": 2,
+    "castingTime": "action",
+    "range": "Touch",
+    "concentration": false
+  },
+  {
+    "name": "Astral Projection",
+    "level": 9,
+    "castingTime": "other",
+    "range": "10 feet",
+    "concentration": false
+  },
+  {
+    "name": "Augury",
+    "level": 2,
+    "castingTime": "other",
+    "range": "Self",
+    "concentration": false
+  },
+  {
+    "name": "Awaken",
+    "level": 5,
+    "castingTime": "other",
+    "range": "Touch",
+    "concentration": false
+  },
+  {
+    "name": "Bane",
+    "level": 1,
+    "castingTime": "action",
+    "range": "30 feet",
+    "save": "Charisma",
+    "concentration": true
+  },
+  {
+    "name": "Banishment",
+    "level": 4,
+    "castingTime": "action",
+    "range": "60 feet",
+    "save": "Charisma",
+    "concentration": true
+  },
+  {
+    "name": "Barkskin",
+    "level": 2,
+    "castingTime": "action",
+    "range": "Touch",
+    "concentration": true
+  },
+  {
+    "name": "Beacon of Hope",
+    "level": 3,
+    "castingTime": "action",
+    "range": "30 feet",
+    "concentration": true
+  },
+  {
+    "name": "Bestow Curse",
+    "level": 3,
+    "castingTime": "action",
+    "range": "Touch",
+    "save": "Wisdom",
+    "concentration": true
+  },
+  {
+    "name": "Black Tentacles",
+    "level": 4,
+    "castingTime": "action",
+    "range": "90 feet",
+    "area": {
+      "shape": "cube",
+      "size": 20
+    },
+    "save": "Dexterity",
+    "damage": "3d6 bludgeoning",
+    "concentration": true
+  },
+  {
+    "name": "Blade Barrier",
+    "level": 6,
+    "castingTime": "action",
+    "range": "90 feet",
+    "area": {
+      "shape": "line",
+      "size": 100
+    },
+    "save": "Dexterity",
+    "damage": "6d10 slashing",
+    "concentration": true
+  },
+  {
+    "name": "Bless",
+    "level": 1,
+    "castingTime": "action",
+    "range": "30 feet",
+    "concentration": true
+  },
+  {
+    "name": "Blight",
+    "level": 4,
+    "castingTime": "action",
+    "range": "30 feet",
+    "save": "Constitution",
+    "damage": "8d8 necrotic",
+    "concentration": false
+  },
+  {
+    "name": "Blindness/Deafness",
+    "level": 2,
+    "castingTime": "action",
+    "range": "30 feet",
+    "save": "Constitution",
+    "concentration": false
+  },
+  {
+    "name": "Blink",
+    "level": 3,
+    "castingTime": "action",
+    "range": "Self",
+    "concentration": false
+  },
+  {
+    "name": "Blur",
+    "level": 2,
+    "castingTime": "action",
+    "range": "Self",
+    "concentration": true
+  },
+  {
+    "name": "Branding Smite",
+    "level": 2,
+    "castingTime": "bonus",
+    "range": "Self",
+    "damage": "2d6 radiant",
+    "concentration": true
+  },
+  {
+    "name": "Burning Hands",
+    "level": 1,
+    "castingTime": "action",
+    "range": "Self",
+    "area": {
+      "shape": "cone",
+      "size": 15
+    },
+    "save": "Dexterity",
+    "damage": "3d6 fire",
+    "concentration": false
+  },
+  {
+    "name": "Call Lightning",
+    "level": 3,
+    "castingTime": "action",
+    "range": "120 feet",
+    "area": {
+      "shape": "sphere",
+      "size": 5
+    },
+    "save": "Dexterity",
+    "damage": "3d10 lightning",
+    "concentration": true
+  },
+  {
+    "name": "Calm Emotions",
+    "level": 2,
+    "castingTime": "action",
+    "range": "60 feet",
+    "area": {
+      "shape": "sphere",
+      "size": 20
+    },
+    "save": "Charisma",
+    "concentration": true
+  },
+  {
+    "name": "Chain Lightning",
+    "level": 6,
+    "castingTime": "action",
+    "range": "150 feet",
+    "save": "Dexterity",
+    "damage": "10d8 lightning",
+    "concentration": false
+  },
+  {
+    "name": "Charm Person",
+    "level": 1,
+    "castingTime": "action",
+    "range": "30 feet",
+    "save": "Wisdom",
+    "concentration": false
+  },
+  {
+    "name": "Chill Touch",
+    "level": 0,
+    "castingTime": "action",
+    "range": "120 feet",
+    "attack": "ranged",
+    "damage": "1d8 necrotic",
+    "concentration": false
+  },
+  {
+    "name": "Circle of Death",
+    "level": 6,
+    "castingTime": "action",
+    "range": "150 feet",
+    "area": {
+      "shape": "sphere",
+      "size": 60
+    },
+    "save": "Constitution",
+    "damage": "8d6 necrotic",
+    "concentration": false
+  },
+  {
+    "name": "Clairvoyance",
+    "level": 3,
+    "castingTime": "other",
+    "range": "1 mile",
+    "concentration": true
+  },
+  {
+    "name": "Clone",
+    "level": 8,
+    "castingTime": "other",
+    "range": "Touch",
+    "concentration": false
+  },
+  {
+    "name": "Cloudkill",
+    "level": 5,
+    "castingTime": "action",
+    "range": "120 feet",
+    "area": {
+      "shape": "sphere",
+      "size": 20
+    },
+    "save": "Constitution",
+    "damage": "5d8 poison",
+    "concentration": true
+  },
+  {
+    "name": "Color Spray",
+    "level": 1,
+    "castingTime": "action",
+    "range": "Self",
+    "area": {
+      "shape": "cone",
+      "size": 15
+    },
+    "concentration": false
+  },
+  {
+    "name": "Command",
+    "level": 1,
+    "castingTime": "action",
+    "range": "60 feet",
+    "save": "Wisdom",
+    "concentration": false
+  },
+  {
+    "name": "Commune",
+    "level": 5,
+    "castingTime": "other",
+    "range": "Self",
+    "concentration": false
+  },
+  {
+    "name": "Commune With Nature",
+    "level": 5,
+    "castingTime": "other",
+    "range": "Self",
+    "concentration": false
+  },
+  {
+    "name": "Comprehend Languages",
+    "level": 1,
+    "castingTime": "action",
+    "range": "Self",
+    "concentration": false
+  },
+  {
+    "name": "Compulsion",
+    "level": 4,
+    "castingTime": "action",
+    "range": "30 feet",
+    "save": "Wisdom",
+    "concentration": true
+  },
+  {
+    "name": "Cone of Cold",
+    "level": 5,
+    "castingTime": "action",
+    "range": "Self",
+    "area": {
+      "shape": "cone",
+      "size": 60
+    },
+    "save": "Constitution",
+    "damage": "8d8 cold",
+    "concentration": false
+  },
+  {
+    "name": "Confusion",
+    "level": 4,
+    "castingTime": "action",
+    "range": "90 feet",
+    "area": {
+      "shape": "sphere",
+      "size": 10
+    },
+    "save": "Wisdom",
+    "concentration": true
+  },
+  {
+    "name": "Conjure Animals",
+    "level": 3,
+    "castingTime": "action",
+    "range": "60 feet",
+    "concentration": true
+  },
+  {
+    "name": "Conjure Celestial",
+    "level": 7,
+    "castingTime": "other",
+    "range": "90 feet",
+    "concentration": true
+  },
+  {
+    "name": "Conjure Elemental",
+    "level": 5,
+    "castingTime": "other",
+    "range": "90 feet",
+    "area": {
+      "shape": "cube",
+      "size": 10
+    },
+    "concentration": true
+  },
+  {
+    "name": "Conjure Fey",
+    "level": 6,
+    "castingTime": "other",
+    "range": "90 feet",
+    "concentration": true
+  },
+  {
+    "name": "Conjure Minor Elementals",
+    "level": 4,
+    "castingTime": "other",
+    "range": "90 feet",
+    "concentration": true
+  },
+  {
+    "name": "Conjure Woodland Beings",
+    "level": 4,
+    "castingTime": "action",
+    "range": "60 feet",
+    "concentration": true
+  },
+  {
+    "name": "Contact Other Plane",
+    "level": 5,
+    "castingTime": "other",
+    "range": "Self",
+    "save": "Intelligence",
+    "concentration": false
+  },
+  {
+    "name": "Contagion",
+    "level": 5,
+    "castingTime": "action",
+    "range": "Touch",
+    "save": "Constitution",
+    "attack": "melee",
+    "concentration": false
+  },
+  {
+    "name": "Contingency",
+    "level": 6,
+    "castingTime": "other",
+    "range": "Self",
+    "concentration": false
+  },
+  {
+    "name": "Continual Flame",
+    "level": 2,
+    "castingTime": "action",
+    "range": "Touch",
+    "concentration": false
+  },
+  {
+    "name": "Control Water",
+    "level": 4,
+    "castingTime": "action",
+    "range": "300 feet",
+    "area": {
+      "shape": "cube",
+      "size": 100
+    },
+    "save": "Strength",
+    "damage": "2d8 bludgeoning",
+    "concentration": true
+  },
+  {
+    "name": "Control Weather",
+    "level": 8,
+    "castingTime": "other",
+    "range": "Self",
+    "concentration": true
+  },
+  {
+    "name": "Counterspell",
+    "level": 3,
+    "castingTime": "reaction",
+    "range": "60 feet",
+    "concentration": false
+  },
+  {
+    "name": "Create Food and Water",
+    "level": 3,
+    "castingTime": "action",
+    "range": "30 feet",
+    "concentration": false
+  },
+  {
+    "name": "Create or Destroy Water",
+    "level": 1,
+    "castingTime": "action",
+    "range": "30 feet",
+    "area": {
+      "shape": "cube",
+      "size": 30
+    },
+    "concentration": false
+  },
+  {
+    "name": "Create Undead",
+    "level": 6,
+    "castingTime": "other",
+    "range": "10 feet",
+    "concentration": false
+  },
+  {
+    "name": "Creation",
+    "level": 5,
+    "castingTime": "other",
+    "range": "30 feet",
+    "area": {
+      "shape": "cube",
+      "size": 5
+    },
+    "concentration": false
+  },
+  {
+    "name": "Cure Wounds",
+    "level": 1,
+    "castingTime": "action",
+    "range": "Touch",
+    "concentration": false
+  },
+  {
+    "name": "Dancing Lights",
+    "level": 0,
+    "castingTime": "action",
+    "range": "120 feet",
+    "concentration": true
+  },
+  {
+    "name": "Darkness",
+    "level": 2,
+    "castingTime": "action",
+    "range": "60 feet",
+    "area": {
+      "shape": "sphere",
+      "size": 15
+    },
+    "concentration": true
+  },
+  {
+    "name": "Darkvision",
+    "level": 2,
+    "castingTime": "action",
+    "range": "Touch",
+    "concentration": false
+  },
+  {
+    "name": "Daylight",
+    "level": 3,
+    "castingTime": "action",
+    "range": "60 feet",
+    "area": {
+      "shape": "sphere",
+      "size": 60
+    },
+    "concentration": false
+  },
+  {
+    "name": "Death Ward",
+    "level": 4,
+    "castingTime": "action",
+    "range": "Touch",
+    "concentration": false
+  },
+  {
+    "name": "Delayed Blast Fireball",
+    "level": 7,
+    "castingTime": "action",
+    "range": "150 feet",
+    "area": {
+      "shape": "sphere",
+      "size": 20
+    },
+    "save": "Dexterity",
+    "damage": "12d6 fire",
+    "concentration": true
+  },
+  {
+    "name": "Demiplane",
+    "level": 8,
+    "castingTime": "action",
+    "range": "60 feet",
+    "concentration": false
+  },
+  {
+    "name": "Detect Evil and Good",
+    "level": 1,
+    "castingTime": "action",
+    "range": "Self",
+    "area": {
+      "shape": "sphere",
+      "size": 30
+    },
+    "concentration": true
+  },
+  {
+    "name": "Detect Magic",
+    "level": 1,
+    "castingTime": "action",
+    "range": "Self",
+    "area": {
+      "shape": "sphere",
+      "size": 30
+    },
+    "concentration": true
+  },
+  {
+    "name": "Detect Poison and Disease",
+    "level": 1,
+    "castingTime": "action",
+    "range": "Self",
+    "area": {
+      "shape": "sphere",
+      "size": 30
+    },
+    "concentration": true
+  },
+  {
+    "name": "Detect Thoughts",
+    "level": 2,
+    "castingTime": "action",
+    "range": "Self",
+    "save": "Wisdom",
+    "concentration": true
+  },
+  {
+    "name": "Dimension Door",
+    "level": 4,
+    "castingTime": "action",
+    "range": "500 feet",
+    "damage": "4d6 force",
+    "concentration": false
+  },
+  {
+    "name": "Disguise Self",
+    "level": 1,
+    "castingTime": "action",
+    "range": "Self",
+    "concentration": false
+  },
+  {
+    "name": "Disintegrate",
+    "level": 6,
+    "castingTime": "action",
+    "range": "60 feet",
+    "area": {
+      "shape": "cube",
+      "size": 10
+    },
+    "save": "Dexterity",
+    "damage": "10d6 + 40 force",
+    "concentration": false
+  },
+  {
+    "name": "Dispel Evil and Good",
+    "level": 5,
+    "castingTime": "action",
+    "range": "Self",
+    "save": "Charisma",
+    "concentration": true
+  },
+  {
+    "name": "Dispel Magic",
+    "level": 3,
+    "castingTime": "action",
+    "range": "120 feet",
+    "concentration": false
+  },
+  {
+    "name": "Divination",
+    "level": 4,
+    "castingTime": "action",
+    "range": "Self",
+    "concentration": false
+  },
+  {
+    "name": "Divine Favor",
+    "level": 1,
+    "castingTime": "bonus",
+    "range": "Self",
+    "damage": "1d4 radiant",
+    "concentration": true
+  },
+  {
+    "name": "Divine Word",
+    "level": 7,
+    "castingTime": "bonus",
+    "range": "30 feet",
+    "save": "Charisma",
+    "concentration": false
+  },
+  {
+    "name": "Dominate Beast",
+    "level": 4,
+    "castingTime": "action",
+    "range": "60 feet",
+    "save": "Wisdom",
+    "concentration": true
+  },
+  {
+    "name": "Dominate Monster",
+    "level": 8,
+    "castingTime": "action",
+    "range": "60 feet",
+    "save": "Wisdom",
+    "concentration": true
+  },
+  {
+    "name": "Dominate Person",
+    "level": 5,
+    "castingTime": "action",
+    "range": "60 feet",
+    "save": "Wisdom",
+    "concentration": true
+  },
+  {
+    "name": "Dream",
+    "level": 5,
+    "castingTime": "other",
+    "range": "Special",
+    "save": "Wisdom",
+    "damage": "3d6 psychic",
+    "concentration": false
+  },
+  {
+    "name": "Druidcraft",
+    "level": 0,
+    "castingTime": "action",
+    "range": "30 feet",
+    "concentration": false
+  },
+  {
+    "name": "Earthquake",
+    "level": 8,
+    "castingTime": "action",
+    "range": "500 feet",
+    "area": {
+      "shape": "sphere",
+      "size": 100
+    },
+    "save": "Constitution",
+    "concentration": true
+  },
+  {
+    "name": "Eldritch Blast",
+    "level": 0,
+    "castingTime": "action",
+    "range": "120 feet",
+    "attack": "ranged",
+    "damage": "1d10 force",
+    "concentration": false
+  },
+  {
+    "name": "Enhance Ability",
+    "level": 2,
+    "castingTime": "action",
+    "range": "Touch",
+    "concentration": true
+  },
+  {
+    "name": "Enlarge/Reduce",
+    "level": 2,
+    "castingTime": "action",
+    "range": "30 feet",
+    "save": "Constitution",
+    "concentration": true
+  },
+  {
+    "name": "Entangle",
+    "level": 1,
+    "castingTime": "action",
+    "range": "90 feet",
+    "area": {
+      "shape": "cube",
+      "size": 20
+    },
+    "save": "Strength",
+    "concentration": true
+  },
+  {
+    "name": "Enthrall",
+    "level": 2,
+    "castingTime": "action",
+    "range": "60 feet",
+    "save": "Wisdom",
+    "concentration": false
+  },
+  {
+    "name": "Etherealness",
+    "level": 7,
+    "castingTime": "action",
+    "range": "Self",
+    "concentration": false
+  },
+  {
+    "name": "Expeditious Retreat",
+    "level": 1,
+    "castingTime": "bonus",
+    "range": "Self",
+    "concentration": true
+  },
+  {
+    "name": "Eyebite",
+    "level": 6,
+    "castingTime": "action",
+    "range": "Self",
+    "save": "Wisdom",
+    "concentration": true
+  },
+  {
+    "name": "Fabricate",
+    "level": 4,
+    "castingTime": "other",
+    "range": "120 feet",
+    "concentration": false
+  },
+  {
+    "name": "Faerie Fire",
+    "level": 1,
+    "castingTime": "action",
+    "range": "60 feet",
+    "area": {
+      "shape": "cube",
+      "size": 20
+    },
+    "save": "Dexterity",
+    "concentration": true
+  },
+  {
+    "name": "Faithful Hound",
+    "level": 4,
+    "castingTime": "action",
+    "range": "30 feet",
+    "attack": "melee",
+    "damage": "4d8 piercing",
+    "concentration": false
+  },
+  {
+    "name": "False Life",
+    "level": 1,
+    "castingTime": "action",
+    "range": "Self",
+    "concentration": false
+  },
+  {
+    "name": "Fear",
+    "level": 3,
+    "castingTime": "action",
+    "range": "Self",
+    "area": {
+      "shape": "cone",
+      "size": 30
+    },
+    "save": "Wisdom",
+    "concentration": true
+  },
+  {
+    "name": "Feather Fall",
+    "level": 1,
+    "castingTime": "reaction",
+    "range": "60 feet",
+    "concentration": false
+  },
+  {
+    "name": "Feeblemind",
+    "level": 8,
+    "castingTime": "action",
+    "range": "150 feet",
+    "save": "Intelligence",
+    "damage": "4d6 psychic",
+    "concentration": false
+  },
+  {
+    "name": "Find Familiar",
+    "level": 1,
+    "castingTime": "other",
+    "range": "10 feet",
+    "concentration": false
+  },
+  {
+    "name": "Find Steed",
+    "level": 2,
+    "castingTime": "other",
+    "range": "30 feet",
+    "concentration": false
+  },
+  {
+    "name": "Find the Path",
+    "level": 6,
+    "castingTime": "other",
+    "range": "Self",
+    "concentration": true
+  },
+  {
+    "name": "Find Traps",
+    "level": 2,
+    "castingTime": "action",
+    "range": "120 feet",
+    "concentration": false
+  },
+  {
+    "name": "Finger of Death",
+    "level": 7,
+    "castingTime": "action",
+    "range": "60 feet",
+    "save": "Constitution",
+    "damage": "7d8 + 30 necrotic",
+    "concentration": false
+  },
+  {
+    "name": "Fire Bolt",
+    "level": 0,
+    "castingTime": "action",
+    "range": "120 feet",
+    "attack": "ranged",
+    "damage": "1d10 fire",
+    "concentration": false
+  },
+  {
+    "name": "Fire Shield",
+    "level": 4,
+    "castingTime": "action",
+    "range": "Self",
+    "area": {
+      "shape": "sphere",
+      "size": 5
+    },
+    "damage": "2d8 fire",
+    "concentration": false
+  },
+  {
+    "name": "Fire Storm",
+    "level": 7,
+    "castingTime": "action",
+    "range": "150 feet",
+    "area": {
+      "shape": "cube",
+      "size": 100
+    },
+    "save": "Dexterity",
+    "damage": "7d10 fire",
+    "concentration": false
+  },
+  {
+    "name": "Fireball",
+    "level": 3,
+    "castingTime": "action",
+    "range": "150 feet",
+    "area": {
+      "shape": "sphere",
+      "size": 20
+    },
+    "save": "Dexterity",
+    "damage": "8d6 fire",
+    "concentration": false
+  },
+  {
+    "name": "Flame Blade",
+    "level": 2,
+    "castingTime": "bonus",
+    "range": "Self",
+    "damage": "3d6 fire",
+    "concentration": true
+  },
+  {
+    "name": "Flame Strike",
+    "level": 5,
+    "castingTime": "action",
+    "range": "60 feet",
+    "area": {
+      "shape": "cylinder",
+      "size": 40
+    },
+    "save": "Dexterity",
+    "damage": "4d6 fire",
+    "concentration": false
+  },
+  {
+    "name": "Flaming Sphere",
+    "level": 2,
+    "castingTime": "action",
+    "range": "60 feet",
+    "save": "Dexterity",
+    "damage": "2d6 fire",
+    "concentration": true
+  },
+  {
+    "name": "Flesh to Stone",
+    "level": 6,
+    "castingTime": "action",
+    "range": "60 feet",
+    "save": "Constitution",
+    "concentration": true
+  },
+  {
+    "name": "Floating Disk",
+    "level": 1,
+    "castingTime": "action",
+    "range": "30 feet",
+    "concentration": false
+  },
+  {
+    "name": "Fly",
+    "level": 3,
+    "castingTime": "action",
+    "range": "Touch",
+    "concentration": true
+  },
+  {
+    "name": "Fog Cloud",
+    "level": 1,
+    "castingTime": "action",
+    "range": "120 feet",
+    "area": {
+      "shape": "sphere",
+      "size": 20
+    },
+    "concentration": true
+  },
+  {
+    "name": "Forbiddance",
+    "level": 6,
+    "castingTime": "other",
+    "range": "Touch",
+    "area": {
+      "shape": "cube",
+      "size": 40000
+    },
+    "concentration": false
+  },
+  {
+    "name": "Forcecage",
+    "level": 7,
+    "castingTime": "action",
+    "range": "100 feet",
+    "area": {
+      "shape": "cube",
+      "size": 20
+    },
+    "save": "Charisma",
+    "concentration": false
+  },
+  {
+    "name": "Foresight",
+    "level": 9,
+    "castingTime": "other",
+    "range": "Touch",
+    "concentration": false
+  },
+  {
+    "name": "Freedom of Movement",
+    "level": 4,
+    "castingTime": "action",
+    "range": "Touch",
+    "concentration": false
+  },
+  {
+    "name": "Freezing Sphere",
+    "level": 6,
+    "castingTime": "action",
+    "range": "300 feet",
+    "area": {
+      "shape": "sphere",
+      "size": 60
+    },
+    "save": "Constitution",
+    "damage": "10d6 cold",
+    "concentration": false
+  },
+  {
+    "name": "Gaseous Form",
+    "level": 3,
+    "castingTime": "action",
+    "range": "Touch",
+    "concentration": true
+  },
+  {
+    "name": "Gate",
+    "level": 9,
+    "castingTime": "action",
+    "range": "60 feet",
+    "concentration": true
+  },
+  {
+    "name": "Geas",
+    "level": 5,
+    "castingTime": "other",
+    "range": "60 feet",
+    "save": "Wisdom",
+    "concentration": false
+  },
+  {
+    "name": "Gentle Repose",
+    "level": 2,
+    "castingTime": "action",
+    "range": "Touch",
+    "concentration": false
+  },
+  {
+    "name": "Giant Insect",
+    "level": 4,
+    "castingTime": "action",
+    "range": "30 feet",
+    "concentration": true
+  },
+  {
+    "name": "Glibness",
+    "level": 8,
+    "castingTime": "action",
+    "range": "Self",
+    "concentration": false
+  },
+  {
+    "name": "Globe of Invulnerability",
+    "level": 6,
+    "castingTime": "action",
+    "range": "Self",
+    "area": {
+      "shape": "sphere",
+      "size": 10
+    },
+    "concentration": true
+  },
+  {
+    "name": "Glyph of Warding",
+    "level": 3,
+    "castingTime": "other",
+    "range": "Touch",
+    "area": {
+      "shape": "sphere",
+      "size": 20
+    },
+    "save": "Dexterity",
+    "concentration": false
+  },
+  {
+    "name": "Goodberry",
+    "level": 1,
+    "castingTime": "action",
+    "range": "Touch",
+    "concentration": false
+  },
+  {
+    "name": "Grease",
+    "level": 1,
+    "castingTime": "action",
+    "range": "60 feet",
+    "area": {
+      "shape": "cube",
+      "size": 10
+    },
+    "save": "Dexterity",
+    "concentration": false
+  },
+  {
+    "name": "Greater Invisibility",
+    "level": 4,
+    "castingTime": "action",
+    "range": "Touch",
+    "concentration": true
+  },
+  {
+    "name": "Greater Restoration",
+    "level": 5,
+    "castingTime": "action",
+    "range": "Touch",
+    "concentration": false
+  },
+  {
+    "name": "Guardian of Faith",
+    "level": 4,
+    "castingTime": "action",
+    "range": "30 feet",
+    "area": {
+      "shape": "cylinder",
+      "size": 10
+    },
+    "save": "Dexterity",
+    "damage": "20 radiant",
+    "concentration": false
+  },
+  {
+    "name": "Guards and Wards",
+    "level": 6,
+    "castingTime": "other",
+    "range": "Touch",
+    "area": {
+      "shape": "cube",
+      "size": 2500
+    },
+    "concentration": false
+  },
+  {
+    "name": "Guidance",
+    "level": 0,
+    "castingTime": "action",
+    "range": "Touch",
+    "concentration": true
+  },
+  {
+    "name": "Guiding Bolt",
+    "level": 1,
+    "castingTime": "action",
+    "range": "120 feet",
+    "attack": "ranged",
+    "damage": "4d6 radiant",
+    "concentration": false
+  },
+  {
+    "name": "Gust of Wind",
+    "level": 2,
+    "castingTime": "action",
+    "range": "Self",
+    "area": {
+      "shape": "line",
+      "size": 60
+    },
+    "save": "Strength",
+    "concentration": true
+  },
+  {
+    "name": "Hallow",
+    "level": 5,
+    "castingTime": "other",
+    "range": "Touch",
+    "area": {
+      "shape": "sphere",
+      "size": 60
+    },
+    "save": "Charisma",
+    "concentration": false
+  },
+  {
+    "name": "Hallucinatory Terrain",
+    "level": 4,
+    "castingTime": "other",
+    "range": "300 feet",
+    "area": {
+      "shape": "cube",
+      "size": 150
+    },
+    "concentration": false
+  },
+  {
+    "name": "Harm",
+    "level": 6,
+    "castingTime": "action",
+    "range": "60 feet",
+    "save": "Constitution",
+    "damage": "14d6 necrotic",
+    "concentration": false
+  },
+  {
+    "name": "Haste",
+    "level": 3,
+    "castingTime": "action",
+    "range": "30 feet",
+    "concentration": true
+  },
+  {
+    "name": "Heal",
+    "level": 6,
+    "castingTime": "action",
+    "range": "60 feet",
+    "concentration": false
+  },
+  {
+    "name": "Healing Word",
+    "level": 1,
+    "castingTime": "bonus",
+    "range": "60 feet",
+    "concentration": false
+  },
+  {
+    "name": "Heat Metal",
+    "level": 2,
+    "castingTime": "action",
+    "range": "60 feet",
+    "save": "Constitution",
+    "damage": "2d8 fire",
+    "concentration": true
+  },
+  {
+    "name": "Hellish Rebuke",
+    "level": 1,
+    "castingTime": "reaction",
+    "range": "60 feet",
+    "save": "Dexterity",
+    "damage": "2d10 fire",
+    "concentration": false
+  },
+  {
+    "name": "Heroes' Feast",
+    "level": 6,
+    "castingTime": "other",
+    "range": "30 feet",
+    "concentration": false
+  },
+  {
+    "name": "Heroism",
+    "level": 1,
+    "castingTime": "action",
+    "range": "Touch",
+    "concentration": true
+  },
+  {
+    "name": "Hideous Laughter",
+    "level": 1,
+    "castingTime": "action",
+    "range": "30 feet",
+    "save": "Wisdom",
+    "concentration": true
+  },
+  {
+    "name": "Hold Monster",
+    "level": 5,
+    "castingTime": "action",
+    "range": "90 feet",
+    "save": "Wisdom",
+    "concentration": true
+  },
+  {
+    "name": "Hold Person",
+    "level": 2,
+    "castingTime": "action",
+    "range": "60 feet",
+    "save": "Wisdom",
+    "concentration": true
+  },
+  {
+    "name": "Holy Aura",
+    "level": 8,
+    "castingTime": "action",
+    "range": "Self",
+    "area": {
+      "shape": "sphere",
+      "size": 30
+    },
+    "save": "Constitution",
+    "concentration": true
+  },
+  {
+    "name": "Hunter's Mark",
+    "level": 1,
+    "castingTime": "bonus",
+    "range": "90 feet",
+    "concentration": true
+  },
+  {
+    "name": "Hypnotic Pattern",
+    "level": 3,
+    "castingTime": "action",
+    "range": "120 feet",
+    "area": {
+      "shape": "cube",
+      "size": 30
+    },
+    "save": "Wisdom",
+    "concentration": true
+  },
+  {
+    "name": "Ice Storm",
+    "level": 4,
+    "castingTime": "action",
+    "range": "300 feet",
+    "area": {
+      "shape": "cylinder",
+      "size": 20
+    },
+    "save": "Dexterity",
+    "damage": "2d8 bludgeoning",
+    "concentration": false
+  },
+  {
+    "name": "Identify",
+    "level": 1,
+    "castingTime": "other",
+    "range": "Touch",
+    "concentration": false
+  },
+  {
+    "name": "Illusory Script",
+    "level": 1,
+    "castingTime": "other",
+    "range": "Touch",
+    "concentration": false
+  },
+  {
+    "name": "Imprisonment",
+    "level": 9,
+    "castingTime": "other",
+    "range": "30 feet",
+    "save": "Wisdom",
+    "concentration": false
+  },
+  {
+    "name": "Incendiary Cloud",
+    "level": 8,
+    "castingTime": "action",
+    "range": "150 feet",
+    "area": {
+      "shape": "sphere",
+      "size": 20
+    },
+    "save": "Dexterity",
+    "damage": "10d8 fire",
+    "concentration": true
+  },
+  {
+    "name": "Inflict Wounds",
+    "level": 1,
+    "castingTime": "action",
+    "range": "Touch",
+    "attack": "melee",
+    "damage": "3d10 necrotic",
+    "concentration": false
+  },
+  {
+    "name": "Insect Plague",
+    "level": 5,
+    "castingTime": "action",
+    "range": "300 feet",
+    "area": {
+      "shape": "sphere",
+      "size": 20
+    },
+    "save": "Constitution",
+    "damage": "4d10 piercing",
+    "concentration": true
+  },
+  {
+    "name": "Instant Summons",
+    "level": 6,
+    "castingTime": "other",
+    "range": "Touch",
+    "concentration": false
+  },
+  {
+    "name": "Invisibility",
+    "level": 2,
+    "castingTime": "action",
+    "range": "Touch",
+    "concentration": true
+  },
+  {
+    "name": "Irresistible Dance",
+    "level": 6,
+    "castingTime": "action",
+    "range": "30 feet",
+    "save": "Wisdom",
+    "concentration": true
+  },
+  {
+    "name": "Jump",
+    "level": 1,
+    "castingTime": "action",
+    "range": "Touch",
+    "concentration": false
+  },
+  {
+    "name": "Knock",
+    "level": 2,
+    "castingTime": "action",
+    "range": "60 feet",
+    "concentration": false
+  },
+  {
+    "name": "Legend Lore",
+    "level": 5,
+    "castingTime": "other",
+    "range": "Self",
+    "concentration": false
+  },
+  {
+    "name": "Lesser Restoration",
+    "level": 2,
+    "castingTime": "action",
+    "range": "Touch",
+    "concentration": false
+  },
+  {
+    "name": "Levitate",
+    "level": 2,
+    "castingTime": "action",
+    "range": "60 feet",
+    "save": "Constitution",
+    "concentration": true
+  },
+  {
+    "name": "Light",
+    "level": 0,
+    "castingTime": "action",
+    "range": "Touch",
+    "save": "Dexterity",
+    "concentration": false
+  },
+  {
+    "name": "Lightning Bolt",
+    "level": 3,
+    "castingTime": "action",
+    "range": "Self",
+    "area": {
+      "shape": "line",
+      "size": 100
+    },
+    "save": "Dexterity",
+    "damage": "8d6 lightning",
+    "concentration": false
+  },
+  {
+    "name": "Locate Animals or Plants",
+    "level": 2,
+    "castingTime": "action",
+    "range": "Self",
+    "concentration": false
+  },
+  {
+    "name": "Locate Creature",
+    "level": 4,
+    "castingTime": "action",
+    "range": "Self",
+    "concentration": true
+  },
+  {
+    "name": "Locate Object",
+    "level": 2,
+    "castingTime": "action",
+    "range": "Self",
+    "concentration": true
+  },
+  {
+    "name": "Longstrider",
+    "level": 1,
+    "castingTime": "action",
+    "range": "Touch",
+    "concentration": false
+  },
+  {
+    "name": "Mage Armor",
+    "level": 1,
+    "castingTime": "action",
+    "range": "Touch",
+    "concentration": false
+  },
+  {
+    "name": "Mage Hand",
+    "level": 0,
+    "castingTime": "action",
+    "range": "30 feet",
+    "concentration": false
+  },
+  {
+    "name": "Magic Circle",
+    "level": 3,
+    "castingTime": "other",
+    "range": "10 feet",
+    "area": {
+      "shape": "cylinder",
+      "size": 10
+    },
+    "save": "Charisma",
+    "concentration": false
+  },
+  {
+    "name": "Magic Jar",
+    "level": 6,
+    "castingTime": "other",
+    "range": "Self",
+    "save": "Charisma",
+    "concentration": false
+  },
+  {
+    "name": "Magic Missile",
+    "level": 1,
+    "castingTime": "action",
+    "range": "120 feet",
+    "damage": "3d4 + 3 force",
+    "concentration": false
+  },
+  {
+    "name": "Magic Mouth",
+    "level": 2,
+    "castingTime": "other",
+    "range": "30 feet",
+    "concentration": false
+  },
+  {
+    "name": "Magic Weapon",
+    "level": 2,
+    "castingTime": "bonus",
+    "range": "Touch",
+    "concentration": true
+  },
+  {
+    "name": "Magnificent Mansion",
+    "level": 7,
+    "castingTime": "other",
+    "range": "300 feet",
+    "area": {
+      "shape": "cube",
+      "size": 5
+    },
+    "concentration": false
+  },
+  {
+    "name": "Major Image",
+    "level": 3,
+    "castingTime": "action",
+    "range": "120 feet",
+    "concentration": true
+  },
+  {
+    "name": "Mass Cure Wounds",
+    "level": 5,
+    "castingTime": "action",
+    "range": "60 feet",
+    "area": {
+      "shape": "sphere",
+      "size": 30
+    },
+    "concentration": false
+  },
+  {
+    "name": "Mass Heal",
+    "level": 9,
+    "castingTime": "action",
+    "range": "60 feet",
+    "concentration": false
+  },
+  {
+    "name": "Mass Healing Word",
+    "level": 3,
+    "castingTime": "bonus",
+    "range": "60 feet",
+    "concentration": false
+  },
+  {
+    "name": "Mass Suggestion",
+    "level": 6,
+    "castingTime": "action",
+    "range": "60 feet",
+    "save": "Wisdom",
+    "concentration": false
+  },
+  {
+    "name": "Maze",
+    "level": 8,
+    "castingTime": "action",
+    "range": "60 feet",
+    "concentration": true
+  },
+  {
+    "name": "Meld Into Stone",
+    "level": 3,
+    "castingTime": "action",
+    "range": "Touch",
+    "concentration": false
+  },
+  {
+    "name": "Mending",
+    "level": 0,
+    "castingTime": "other",
+    "range": "Touch",
+    "concentration": false
+  },
+  {
+    "name": "Message",
+    "level": 0,
+    "castingTime": "action",
+    "range": "120 feet",
+    "concentration": false
+  },
+  {
+    "name": "Meteor Swarm",
+    "level": 9,
+    "castingTime": "action",
+    "range": "1 mile",
+    "area": {
+      "shape": "sphere",
+      "size": 40
+    },
+    "save": "Dexterity",
+    "damage": "20d6 fire",
+    "concentration": false
+  },
+  {
+    "name": "Mind Blank",
+    "level": 8,
+    "castingTime": "action",
+    "range": "Touch",
+    "concentration": false
+  },
+  {
+    "name": "Minor Illusion",
+    "level": 0,
+    "castingTime": "action",
+    "range": "30 feet",
+    "concentration": false
+  },
+  {
+    "name": "Mirage Arcane",
+    "level": 7,
+    "castingTime": "other",
+    "range": "Sight",
+    "area": {
+      "shape": "cube",
+      "size": 5280
+    },
+    "concentration": false
+  },
+  {
+    "name": "Mirror Image",
+    "level": 2,
+    "castingTime": "action",
+    "range": "Self",
+    "concentration": false
+  },
+  {
+    "name": "Mislead",
+    "level": 5,
+    "castingTime": "action",
+    "range": "Self",
+    "concentration": true
+  },
+  {
+    "name": "Misty Step",
+    "level": 2,
+    "castingTime": "bonus",
+    "range": "Self",
+    "concentration": false
+  },
+  {
+    "name": "Modify Memory",
+    "level": 5,
+    "castingTime": "action",
+    "range": "30 feet",
+    "save": "Wisdom",
+    "concentration": true
+  },
+  {
+    "name": "Moonbeam",
+    "level": 2,
+    "castingTime": "action",
+    "range": "120 feet",
+    "area": {
+      "shape": "cylinder",
+      "size": 5
+    },
+    "save": "Constitution",
+    "damage": "2d10 radiant",
+    "concentration": true
+  },
+  {
+    "name": "Move Earth",
+    "level": 6,
+    "castingTime": "action",
+    "range": "120 feet",
+    "area": {
+      "shape": "cone",
+      "size": 40
+    },
+    "concentration": true
+  },
+  {
+    "name": "Nondetection",
+    "level": 3,
+    "castingTime": "action",
+    "range": "Touch",
+    "concentration": false
+  },
+  {
+    "name": "Pass Without Trace",
+    "level": 2,
+    "castingTime": "action",
+    "range": "Self",
+    "concentration": true
+  },
+  {
+    "name": "Passwall",
+    "level": 5,
+    "castingTime": "action",
+    "range": "30 feet",
+    "concentration": false
+  },
+  {
+    "name": "Phantasmal Killer",
+    "level": 4,
+    "castingTime": "action",
+    "range": "120 feet",
+    "save": "Wisdom",
+    "damage": "4d10 psychic",
+    "concentration": true
+  },
+  {
+    "name": "Phantom Steed",
+    "level": 3,
+    "castingTime": "other",
+    "range": "30 feet",
+    "concentration": false
+  },
+  {
+    "name": "Planar Ally",
+    "level": 6,
+    "castingTime": "other",
+    "range": "60 feet",
+    "concentration": false
+  },
+  {
+    "name": "Planar Binding",
+    "level": 5,
+    "castingTime": "other",
+    "range": "60 feet",
+    "save": "Charisma",
+    "concentration": false
+  },
+  {
+    "name": "Plane Shift",
+    "level": 7,
+    "castingTime": "action",
+    "range": "Touch",
+    "save": "Charisma",
+    "attack": "melee",
+    "concentration": false
+  },
+  {
+    "name": "Plant Growth",
+    "level": 3,
+    "castingTime": "action",
+    "range": "150 feet",
+    "concentration": false
+  },
+  {
+    "name": "Poison Spray",
+    "level": 0,
+    "castingTime": "action",
+    "range": "10 feet",
+    "save": "Constitution",
+    "damage": "1d12 poison",
+    "concentration": false
+  },
+  {
+    "name": "Polymorph",
+    "level": 4,
+    "castingTime": "action",
+    "range": "60 feet",
+    "save": "Wisdom",
+    "concentration": true
+  },
+  {
+    "name": "Power Word Kill",
+    "level": 9,
+    "castingTime": "action",
+    "range": "60 feet",
+    "concentration": false
+  },
+  {
+    "name": "Power Word Stun",
+    "level": 8,
+    "castingTime": "action",
+    "range": "60 feet",
+    "save": "Constitution",
+    "concentration": false
+  },
+  {
+    "name": "Prayer of Healing",
+    "level": 2,
+    "castingTime": "other",
+    "range": "30 feet",
+    "concentration": false
+  },
+  {
+    "name": "Prestidigitation",
+    "level": 0,
+    "castingTime": "action",
+    "range": "10 feet",
+    "concentration": false
+  },
+  {
+    "name": "Prismatic Spray",
+    "level": 7,
+    "castingTime": "action",
+    "range": "Self",
+    "area": {
+      "shape": "cone",
+      "size": 60
+    },
+    "save": "Dexterity",
+    "damage": "10d6",
+    "concentration": false
+  },
+  {
+    "name": "Prismatic Wall",
+    "level": 9,
+    "castingTime": "action",
+    "range": "60 feet",
+    "area": {
+      "shape": "line",
+      "size": 90
+    },
+    "save": "Constitution",
+    "concentration": false
+  },
+  {
+    "name": "Private Sanctum",
+    "level": 4,
+    "castingTime": "other",
+    "range": "120 feet",
+    "area": {
+      "shape": "cube",
+      "size": 100
+    },
+    "concentration": false
+  },
+  {
+    "name": "Produce Flame",
+    "level": 0,
+    "castingTime": "action",
+    "range": "Self",
+    "attack": "ranged",
+    "damage": "1d8 fire",
+    "concentration": false
+  },
+  {
+    "name": "Programmed Illusion",
+    "level": 6,
+    "castingTime": "action",
+    "range": "120 feet",
+    "area": {
+      "shape": "cube",
+      "size": 30
+    },
+    "concentration": false
+  },
+  {
+    "name": "Project Image",
+    "level": 7,
+    "castingTime": "action",
+    "range": "500 miles",
+    "concentration": true
+  },
+  {
+    "name": "Protection From Energy",
+    "level": 3,
+    "castingTime": "action",
+    "range": "Touch",
+    "concentration": true
+  },
+  {
+    "name": "Protection from Evil and Good",
+    "level": 1,
+    "castingTime": "action",
+    "range": "Touch",
+    "concentration": true
+  },
+  {
+    "name": "Protection from Poison",
+    "level": 2,
+    "castingTime": "action",
+    "range": "Touch",
+    "concentration": false
+  },
+  {
+    "name": "Purify Food and Drink",
+    "level": 1,
+    "castingTime": "action",
+    "range": "10 feet",
+    "concentration": false
+  },
+  {
+    "name": "Raise Dead",
+    "level": 5,
+    "castingTime": "other",
+    "range": "Touch",
+    "concentration": false
+  },
+  {
+    "name": "Ray of Enfeeblement",
+    "level": 2,
+    "castingTime": "action",
+    "range": "60 feet",
+    "save": "Constitution",
+    "attack": "ranged",
+    "concentration": true
+  },
+  {
+    "name": "Ray of Frost",
+    "level": 0,
+    "castingTime": "action",
+    "range": "60 feet",
+    "attack": "ranged",
+    "damage": "1d8 cold",
+    "concentration": false
+  },
+  {
+    "name": "Regenerate",
+    "level": 7,
+    "castingTime": "other",
+    "range": "Touch",
+    "concentration": false
+  },
+  {
+    "name": "Reincarnate",
+    "level": 5,
+    "castingTime": "other",
+    "range": "Touch",
+    "concentration": false
+  },
+  {
+    "name": "Remove Curse",
+    "level": 3,
+    "castingTime": "action",
+    "range": "Touch",
+    "concentration": false
+  },
+  {
+    "name": "Resilient Sphere",
+    "level": 4,
+    "castingTime": "action",
+    "range": "30 feet",
+    "save": "Dexterity",
+    "concentration": true
+  },
+  {
+    "name": "Resistance",
+    "level": 0,
+    "castingTime": "action",
+    "range": "Touch",
+    "concentration": true
+  },
+  {
+    "name": "Resurrection",
+    "level": 7,
+    "castingTime": "other",
+    "range": "Touch",
+    "concentration": false
+  },
+  {
+    "name": "Reverse Gravity",
+    "level": 7,
+    "castingTime": "action",
+    "range": "100 feet",
+    "area": {
+      "shape": "cylinder",
+      "size": 50
+    },
+    "save": "Dexterity",
+    "concentration": true
+  },
+  {
+    "name": "Revivify",
+    "level": 3,
+    "castingTime": "action",
+    "range": "Touch",
+    "concentration": false
+  },
+  {
+    "name": "Rope Trick",
+    "level": 2,
+    "castingTime": "action",
+    "range": "Touch",
+    "concentration": false
+  },
+  {
+    "name": "Sacred Flame",
+    "level": 0,
+    "castingTime": "action",
+    "range": "60 feet",
+    "save": "Dexterity",
+    "damage": "1d8 radiant",
+    "concentration": false
+  },
+  {
+    "name": "Sanctuary",
+    "level": 1,
+    "castingTime": "bonus",
+    "range": "30 feet",
+    "save": "Wisdom",
+    "concentration": false
+  },
+  {
+    "name": "Scorching Ray",
+    "level": 2,
+    "castingTime": "action",
+    "range": "120 feet",
+    "damage": "2d6 fire",
+    "concentration": false
+  },
+  {
+    "name": "Scrying",
+    "level": 5,
+    "castingTime": "other",
+    "range": "Self",
+    "save": "Wisdom",
+    "concentration": true
+  },
+  {
+    "name": "Secret Chest",
+    "level": 4,
+    "castingTime": "action",
+    "range": "Touch",
+    "concentration": false
+  },
+  {
+    "name": "See Invisibility",
+    "level": 2,
+    "castingTime": "action",
+    "range": "Self",
+    "concentration": false
+  },
+  {
+    "name": "Seeming",
+    "level": 5,
+    "castingTime": "action",
+    "range": "30 feet",
+    "save": "Charisma",
+    "concentration": false
+  },
+  {
+    "name": "Sending",
+    "level": 3,
+    "castingTime": "action",
+    "range": "Unlimited",
+    "concentration": false
+  },
+  {
+    "name": "Sequester",
+    "level": 7,
+    "castingTime": "action",
+    "range": "Touch",
+    "concentration": false
+  },
+  {
+    "name": "Shapechange",
+    "level": 9,
+    "castingTime": "action",
+    "range": "Self",
+    "concentration": true
+  },
+  {
+    "name": "Shatter",
+    "level": 2,
+    "castingTime": "action",
+    "range": "60 feet",
+    "area": {
+      "shape": "sphere",
+      "size": 10
+    },
+    "save": "Constitution",
+    "damage": "3d8 thunder",
+    "concentration": false
+  },
+  {
+    "name": "Shield",
+    "level": 1,
+    "castingTime": "reaction",
+    "range": "Self",
+    "concentration": false
+  },
+  {
+    "name": "Shield of Faith",
+    "level": 1,
+    "castingTime": "bonus",
+    "range": "60 feet",
+    "concentration": true
+  },
+  {
+    "name": "Shillelagh",
+    "level": 0,
+    "castingTime": "bonus",
+    "range": "Touch",
+    "concentration": false
+  },
+  {
+    "name": "Shocking Grasp",
+    "level": 0,
+    "castingTime": "action",
+    "range": "Touch",
+    "attack": "melee",
+    "damage": "1d8 lightning",
+    "concentration": false
+  },
+  {
+    "name": "Silence",
+    "level": 2,
+    "castingTime": "action",
+    "range": "120 feet",
+    "area": {
+      "shape": "sphere",
+      "size": 20
+    },
+    "concentration": true
+  },
+  {
+    "name": "Silent Image",
+    "level": 1,
+    "castingTime": "action",
+    "range": "60 feet",
+    "area": {
+      "shape": "cube",
+      "size": 15
+    },
+    "concentration": true
+  },
+  {
+    "name": "Simulacrum",
+    "level": 7,
+    "castingTime": "other",
+    "range": "Touch",
+    "concentration": false
+  },
+  {
+    "name": "Sleep",
+    "level": 1,
+    "castingTime": "action",
+    "range": "90 feet",
+    "area": {
+      "shape": "sphere",
+      "size": 20
+    },
+    "damage": "5d8",
+    "concentration": false
+  },
+  {
+    "name": "Sleet Storm",
+    "level": 3,
+    "castingTime": "action",
+    "range": "150 feet",
+    "area": {
+      "shape": "cylinder",
+      "size": 40
+    },
+    "save": "Dexterity",
+    "concentration": true
+  },
+  {
+    "name": "Slow",
+    "level": 3,
+    "castingTime": "action",
+    "range": "120 feet",
+    "area": {
+      "shape": "cube",
+      "size": 40
+    },
+    "save": "Wisdom",
+    "concentration": true
+  },
+  {
+    "name": "Spare the Dying",
+    "level": 0,
+    "castingTime": "action",
+    "range": "Touch",
+    "concentration": false
+  },
+  {
+    "name": "Speak with Animals",
+    "level": 1,
+    "castingTime": "action",
+    "range": "Self",
+    "concentration": false
+  },
+  {
+    "name": "Speak with Dead",
+    "level": 3,
+    "castingTime": "action",
+    "range": "10 feet",
+    "concentration": false
+  },
+  {
+    "name": "Speak with Plants",
+    "level": 3,
+    "castingTime": "action",
+    "range": "Self",
+    "area": {
+      "shape": "sphere",
+      "size": 30
+    },
+    "concentration": false
+  },
+  {
+    "name": "Spider Climb",
+    "level": 2,
+    "castingTime": "action",
+    "range": "Touch",
+    "concentration": true
+  },
+  {
+    "name": "Spike Growth",
+    "level": 2,
+    "castingTime": "action",
+    "range": "150 feet",
+    "area": {
+      "shape": "cylinder",
+      "size": 20
+    },
+    "concentration": true
+  },
+  {
+    "name": "Spirit Guardians",
+    "level": 3,
+    "castingTime": "action",
+    "range": "Self",
+    "area": {
+      "shape": "emanation",
+      "size": 15
+    },
+    "save": "Wisdom",
+    "concentration": true
+  },
+  {
+    "name": "Spiritual Weapon",
+    "level": 2,
+    "castingTime": "bonus",
+    "range": "60 feet",
+    "attack": "melee",
+    "damage": "1d8 + MOD force",
+    "concentration": false
+  },
+  {
+    "name": "Stinking Cloud",
+    "level": 3,
+    "castingTime": "action",
+    "range": "90 feet",
+    "area": {
+      "shape": "sphere",
+      "size": 20
+    },
+    "save": "Constitution",
+    "concentration": true
+  },
+  {
+    "name": "Stone Shape",
+    "level": 4,
+    "castingTime": "action",
+    "range": "Touch",
+    "concentration": false
+  },
+  {
+    "name": "Stoneskin",
+    "level": 4,
+    "castingTime": "action",
+    "range": "Touch",
+    "concentration": true
+  },
+  {
+    "name": "Storm of Vengeance",
+    "level": 9,
+    "castingTime": "action",
+    "range": "Sight",
+    "area": {
+      "shape": "sphere",
+      "size": 360
+    },
+    "save": "Constitution",
+    "damage": "2d6 thunder",
+    "concentration": true
+  },
+  {
+    "name": "Suggestion",
+    "level": 2,
+    "castingTime": "action",
+    "range": "30 feet",
+    "save": "Wisdom",
+    "concentration": true
+  },
+  {
+    "name": "Sunbeam",
+    "level": 6,
+    "castingTime": "action",
+    "range": "Self",
+    "area": {
+      "shape": "line",
+      "size": 60
+    },
+    "save": "Constitution",
+    "damage": "6d8 radiant",
+    "concentration": true
+  },
+  {
+    "name": "Sunburst",
+    "level": 8,
+    "castingTime": "action",
+    "range": "150 feet",
+    "area": {
+      "shape": "cylinder",
+      "size": 60
+    },
+    "save": "Constitution",
+    "damage": "12d6 radiant",
+    "concentration": false
+  },
+  {
+    "name": "Symbol",
+    "level": 7,
+    "castingTime": "other",
+    "range": "Touch",
+    "area": {
+      "shape": "cube",
+      "size": 10
+    },
+    "save": "Constitution",
+    "concentration": false
+  },
+  {
+    "name": "Telekinesis",
+    "level": 5,
+    "castingTime": "action",
+    "range": "60 feet",
+    "area": {
+      "shape": "sphere",
+      "size": 30
+    },
+    "concentration": true
+  },
+  {
+    "name": "Telepathic Bond",
+    "level": 5,
+    "castingTime": "action",
+    "range": "30 feet",
+    "concentration": false
+  },
+  {
+    "name": "Teleport",
+    "level": 7,
+    "castingTime": "action",
+    "range": "10 feet",
+    "area": {
+      "shape": "cube",
+      "size": 10
+    },
+    "concentration": false
+  },
+  {
+    "name": "Teleportation Circle",
+    "level": 5,
+    "castingTime": "other",
+    "range": "10 feet",
+    "area": {
+      "shape": "sphere",
+      "size": 10
+    },
+    "concentration": false
+  },
+  {
+    "name": "Thaumaturgy",
+    "level": 0,
+    "castingTime": "action",
+    "range": "30 feet",
+    "concentration": false
+  },
+  {
+    "name": "Thunderwave",
+    "level": 1,
+    "castingTime": "action",
+    "range": "Self",
+    "area": {
+      "shape": "cube",
+      "size": 15
+    },
+    "save": "Constitution",
+    "damage": "2d8 thunder",
+    "concentration": false
+  },
+  {
+    "name": "Time Stop",
+    "level": 9,
+    "castingTime": "action",
+    "range": "Self",
+    "concentration": false
+  },
+  {
+    "name": "Tiny Hut",
+    "level": 3,
+    "castingTime": "other",
+    "range": "Self",
+    "area": {
+      "shape": "sphere",
+      "size": 10
+    },
+    "concentration": false
+  },
+  {
+    "name": "Tongues",
+    "level": 3,
+    "castingTime": "action",
+    "range": "Touch",
+    "concentration": false
+  },
+  {
+    "name": "Transport via Plants",
+    "level": 6,
+    "castingTime": "action",
+    "range": "10 feet",
+    "concentration": false
+  },
+  {
+    "name": "Tree Stride",
+    "level": 5,
+    "castingTime": "action",
+    "range": "Self",
+    "concentration": true
+  },
+  {
+    "name": "True Polymorph",
+    "level": 9,
+    "castingTime": "action",
+    "range": "30 feet",
+    "save": "Wisdom",
+    "concentration": true
+  },
+  {
+    "name": "True Resurrection",
+    "level": 9,
+    "castingTime": "other",
+    "range": "Touch",
+    "concentration": false
+  },
+  {
+    "name": "True Seeing",
+    "level": 6,
+    "castingTime": "action",
+    "range": "Touch",
+    "concentration": false
+  },
+  {
+    "name": "True Strike",
+    "level": 0,
+    "castingTime": "action",
+    "range": "30 feet",
+    "concentration": true
+  },
+  {
+    "name": "Unseen Servant",
+    "level": 1,
+    "castingTime": "action",
+    "range": "60 feet",
+    "concentration": false
+  },
+  {
+    "name": "Vampiric Touch",
+    "level": 3,
+    "castingTime": "action",
+    "range": "Self",
+    "attack": "melee",
+    "damage": "3d6 necrotic",
+    "concentration": true
+  },
+  {
+    "name": "Vicious Mockery",
+    "level": 0,
+    "castingTime": "action",
+    "range": "60 feet",
+    "save": "Wisdom",
+    "damage": "1d4 psychic",
+    "concentration": false
+  },
+  {
+    "name": "Wall of Fire",
+    "level": 4,
+    "castingTime": "action",
+    "range": "120 feet",
+    "area": {
+      "shape": "line",
+      "size": 60
+    },
+    "save": "Dexterity",
+    "damage": "5d8 fire",
+    "concentration": true
+  },
+  {
+    "name": "Wall of Force",
+    "level": 5,
+    "castingTime": "action",
+    "range": "120 feet",
+    "concentration": true
+  },
+  {
+    "name": "Wall of Ice",
+    "level": 6,
+    "castingTime": "action",
+    "range": "120 feet",
+    "area": {
+      "shape": "sphere",
+      "size": 10
+    },
+    "save": "Dexterity",
+    "damage": "10d6 cold",
+    "concentration": true
+  },
+  {
+    "name": "Wall of Stone",
+    "level": 5,
+    "castingTime": "action",
+    "range": "120 feet",
+    "save": "Dexterity",
+    "concentration": true
+  },
+  {
+    "name": "Wall of Thorns",
+    "level": 6,
+    "castingTime": "action",
+    "range": "120 feet",
+    "area": {
+      "shape": "line",
+      "size": 60
+    },
+    "save": "Dexterity",
+    "damage": "7d8 piercing",
+    "concentration": true
+  },
+  {
+    "name": "Warding Bond",
+    "level": 2,
+    "castingTime": "action",
+    "range": "Touch",
+    "concentration": false
+  },
+  {
+    "name": "Water Breathing",
+    "level": 3,
+    "castingTime": "action",
+    "range": "30 feet",
+    "concentration": false
+  },
+  {
+    "name": "Water Walk",
+    "level": 3,
+    "castingTime": "action",
+    "range": "30 feet",
+    "concentration": false
+  },
+  {
+    "name": "Web",
+    "level": 2,
+    "castingTime": "action",
+    "range": "60 feet",
+    "area": {
+      "shape": "cube",
+      "size": 20
+    },
+    "save": "Dexterity",
+    "concentration": true
+  },
+  {
+    "name": "Weird",
+    "level": 9,
+    "castingTime": "action",
+    "range": "120 feet",
+    "area": {
+      "shape": "sphere",
+      "size": 30
+    },
+    "save": "Wisdom",
+    "concentration": true
+  },
+  {
+    "name": "Wind Walk",
+    "level": 6,
+    "castingTime": "other",
+    "range": "30 feet",
+    "concentration": false
+  },
+  {
+    "name": "Wind Wall",
+    "level": 3,
+    "castingTime": "action",
+    "range": "120 feet",
+    "area": {
+      "shape": "line",
+      "size": 50
+    },
+    "save": "Strength",
+    "damage": "3d8 bludgeoning",
+    "concentration": true
+  },
+  {
+    "name": "Wish",
+    "level": 9,
+    "castingTime": "action",
+    "range": "Self",
+    "concentration": false
+  },
+  {
+    "name": "Word of Recall",
+    "level": 6,
+    "castingTime": "action",
+    "range": "5 feet",
+    "area": {
+      "shape": "sphere",
+      "size": 5
+    },
+    "concentration": false
+  },
+  {
+    "name": "Zone of Truth",
+    "level": 2,
+    "castingTime": "action",
+    "range": "60 feet",
+    "area": {
+      "shape": "sphere",
+      "size": 15
+    },
+    "save": "Charisma",
+    "concentration": false
+  }
+]

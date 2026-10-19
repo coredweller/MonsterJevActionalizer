@@ -1,0 +1,71 @@
+{
+  "CharacterName": "Maestro Drazzuk",
+  "Level": 10,
+  "Race": "Half-Orc",
+  "Class": "Bard (College of Whispers)",
+  "Alignment": "Neutral Evil",
+  "HP": "136 (16d8 + 48)",
+  "AC": 16,
+  "Speed": "30 ft.",
+  "AbilityScores": {
+    "Strength": { "Score": 14, "Modifier": "+2" },
+    "Dexterity": { "Score": 16, "Modifier": "+3" },
+    "Constitution": { "Score": 16, "Modifier": "+3" },
+    "Intelligence": { "Score": 12, "Modifier": "+1" },
+    "Wisdom": { "Score": 10, "Modifier": "+0" },
+    "Charisma": { "Score": 20, "Modifier": "+5" }
+  },
+  "SavingThrows": {
+    "Dexterity": "+7",
+    "Charisma": "+9"
+  },
+  "Skills": {
+    "Deception": "+9",
+    "Performance": "+9",
+    "Persuasion": "+9",
+    "Insight": "+6"
+  },
+  "DamageResistances": "",
+  "DamageImmunities": "",
+  "ConditionImmunities": "",
+  "Senses": "Darkvision 60 ft., Passive Perception 10",
+  "Languages": "Common, Orc, Infernal",
+  "ChallengeRating": "10",
+  "ProficiencyBonus": "+4",
+  "SpecialTraits": {
+    "Spellcasting": "Maestro Drazzuk is a 10th-level spellcaster. His spellcasting ability is Charisma (spell save DC 17, +9 to hit with spell attacks). He has the following bard spells prepared:\n\nCantrips (at will): Vicious Mockery, Minor Illusion, Mage Hand\n1st level (4 slots): Dissonant Whispers, Charm Person\n2nd level (3 slots): Suggestion, Shatter\n3rd level (3 slots): Fear, Hypnotic Pattern\n4th level (3 slots): Dominate Beast, Greater Invisibility\n5th level (2 slots): Dominate Person",
+    "Psychic Blades": "When Drazzuk hits a creature with a weapon attack, he can expend one Bardic Inspiration die to deal an extra 16 (3d10) psychic damage.",
+    "Musical Control": "While Drazzuk performs music, creatures within 60 feet must succeed on a DC 17 Wisdom saving throw at the start of their turn or be incapacitated for that turn."
+  },
+  "Actions": {
+    "Multiattack": "Drazzuk makes two melee weapon attacks.",
+    "Maestro's Blade": "Melee Weapon Attack: +7 to hit, reach 5 ft., one target. Hit: 9 (1d8 + 3) slashing damage plus 16 (3d10) psychic damage (if Psychic Blades is used).",
+    "Discordant Strike (Recharge 5-6)": "All creatures within 30 feet of Drazzuk must make a DC 17 Wisdom saving throw. On a failed save, they take 27 (6d8) psychic damage and are deafened for 1 minute. On a successful save, they take half damage and are not deafened."
+  },
+  "BonusActions": {
+    "Unsettling Words": "Maestro Drazzuk expends one use of Bardic Inspiration. Choose a creature within 60 feet. The target subtracts the Bardic Inspiration die (1d10) from its next saving throw before the start of Drazzuk’s next turn."
+  },
+  "Reactions": {
+  },
+  "LegendaryTraits": {
+  },
+  "LegendaryActions": {
+    "Legendary Action Uses": "3",
+    "Options": {
+      "Conduct (1/Day)": "Drazzuk can move up to half his speed without provoking opportunity attacks and cast Hypnotic Pattern as part of this movement."
+    }
+  },
+  "MythicTrait": {
+    "Name": "",
+    "Description": ""
+  },
+  "LairActions": {
+  },
+  "RegionalEffects": [],
+  "Equipment": {
+    "Armor": "Studded Leather",
+    "Weapons": "Maestro’s Blade (enchanted rapier), Infernal Lute (focus)",
+    "Other": "Amulet of Echoes (extends the range of his abilities by 10 feet)"
+  },
+  "Notes": "Maestro Drazzuk is a twisted genius who wields music as a weapon, bending minds and hearts to his will. His performances are both enthralling and deadly, capable of sowing chaos in the most organized groups. Drazzuk's use of bardic magic and psychic attacks makes him a cunning and manipulative adversary."
+}
