@@ -404,6 +404,12 @@ export function setConcentration(tracker: Tracker, concentration: EncounterState
   return withState(tracker, { concentration });
 }
 
+/** Sets whichever settings are given; the rest keep their values. Morale is rounded, then clamped to [0, 100]. */
+export function setSettings(tracker: Tracker, patch: Partial<Settings>): Tracker {
+  const settings = { ...tracker.settings, ...patch };
+  return { ...tracker, settings: { ...settings, morale: clamp(Math.round(settings.morale), 100) } };
+}
+
 /** Sets whichever legendary counters are given; the other keeps its value. */
 export function setLegendary(tracker: Tracker, counters: { readonly actions?: number; readonly resistance?: number }): Tracker {
   const { reviewed, state } = tracker;

@@ -1,18 +1,25 @@
-/** T063: the encounter survives a reload, and an unreadable save starts the app empty with a warning. */
+/**
+ * T063: the encounter survives a reload, and an unreadable save starts the app empty with a warning.
+ * T069: the settings panel saves, survives a reload, and manual recharge skips the roll.
+ */
 import { expect, test, type Page } from "@playwright/test";
 import { CORRUPT_KEY, STORAGE_KEY } from "@/app/useTrackers";
-import { apply, blankSituation, defaultPlayerTurn } from "@/lib/encounter/state";
+import { apply, blankSituation, defaultPlayerTurn, suggestTemperament } from "@/lib/encounter/state";
 import { StoreSchema, serialize } from "@/lib/encounter/storage";
 import { MAESTRO, loadMonster, stored } from "./helpers";
+
+async function savedStore(page: Page) {
+  const text = await stored(page, STORAGE_KEY);
+  if (text === null) throw new Error("savedStore: nothing saved yet");
+  return StoreSchema.parse(JSON.parse(text));
+}
 
 /**
  * Gives the saved tracker one player and one applied turn (Discordant Strike, so its recharge is
  * spent), through the real `apply`, then reloads. Skips the decide request, which needs Jev.
  */
 async function addAppliedTurn(page: Page) {
-  const text = await stored(page, STORAGE_KEY);
-  if (text === null) throw new Error("addAppliedTurn: nothing saved yet");
-  const store = StoreSchema.parse(JSON.parse(text));
+  const store = await savedStore(page);
   const [tracker] = store.trackers;
   if (!tracker) throw new Error("addAppliedTurn: no tracker saved");
   const situation = { ...blankSituation(), players: [defaultPlayerTurn("p1")] };
@@ -53,6 +60,43 @@ test("encounter edits and turn results survive a reload", async ({ page }) => {
   await expect(page.getByText("2 / 3", { exact: true })).toHaveCount(1);
   await expect(page.getByRole("button", { name: "Hit", exact: true })).toHaveAttribute("aria-pressed", "true");
   await expect(page.getByLabel("Note", { exact: true })).toHaveValue("Shield went up");
+});
+
+test("settings are saved, survive a reload, and manual recharge skips the roll", async ({ page }) => {
+  await loadMonster(page, MAESTRO, "Maestro Drazzuk");
+  const int = (await savedStore(page)).trackers[0]?.reviewed.intScore;
+  if (int === undefined) throw new Error("no tracker saved");
+  const suggested = suggestTemperament(int);
+  const other = suggested === "genius" ? "feral" : "genius";
+
+  await page.locator("summary", { hasText: "Settings:" }).click();
+  // By role, not getByLabel: the wrapping <label>'s text includes every option's text.
+  const temperament = page.getByRole("combobox", { name: "Temperament", exact: true });
+  const marked = temperament.locator("option", { hasText: `(suggested for INT ${int})` });
+  await expect(marked).toHaveCount(1);
+  await expect(marked).toHaveAttribute("value", suggested);
+  await expect(temperament).toHaveValue(suggested);
+
+  await temperament.selectOption(other);
+  await page.getByLabel("Morale", { exact: true }).fill("15");
+  const manual = page.getByRole("group", { name: "Recharge mode" }).getByRole("button", { name: "Manual" });
+  await manual.click();
+  await expect
+    .poll(async () => (await savedStore(page)).trackers[0]?.settings)
+    .toEqual({ temperament: other, morale: 15, rechargeMode: "manual" });
+
+  await page.reload();
+  await page.locator("summary", { hasText: "Settings:" }).click();
+  await expect(page.locator("summary", { hasText: "Settings:" })).toContainText("morale 15 · recharge manual");
+  await expect(temperament).toHaveValue(other);
+  await expect(page.getByLabel("Morale", { exact: true })).toHaveValue("15");
+  await expect(manual).toHaveAttribute("aria-pressed", "true");
+
+  await page.getByRole("button", { name: "Available", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Spent", exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Start turn" }).click();
+  await expect(page.getByText("Recharge is manual")).toBeVisible();
+  await expect(page.getByText("Discordant Strike: rolled")).toHaveCount(0);
 });
 
 test("an unreadable save shows the storage warning and an empty app", async ({ page }) => {

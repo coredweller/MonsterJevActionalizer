@@ -6,6 +6,7 @@ import { FixScreen } from "@/components/FixScreen";
 import { MonsterLoader } from "@/components/MonsterLoader";
 import { PartyRoster } from "@/components/PartyRoster";
 import { RecommendationCard } from "@/components/RecommendationCard";
+import { ReminderCards } from "@/components/ReminderCards";
 import { ReviewScreen } from "@/components/ReviewScreen";
 import { SituationForm } from "@/components/SituationForm";
 import { TrackerSidebar } from "@/components/TrackerSidebar";
@@ -203,6 +204,7 @@ export default function Home() {
                   <p className="text-sm text-stone-500">Select a tracker.</p>
                 </Panel>
               )}
+              {selected && <ReminderCards tracker={selected} />}
               {selected && (
                 <PartyRoster roster={selected.roster} onChange={(roster) => upsert({ ...selected, roster, situation: syncSituation(selected.situation, roster) })} />
               )}

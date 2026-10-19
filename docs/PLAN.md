@@ -172,7 +172,9 @@ A tracker belongs to one monster. It holds:
 - **Morale:** a slider from cowardly to fanatical, starting in the middle.
 - **Recharge mode:** auto or manual, defaulting to auto.
 
-**Start turn** moves the round on, refills legendary actions (5e: they come back at the start of the monster's turn; Legendary Resistance is per day and doesn't), rolls a d6 for each spent recharge ability (auto mode) and shows the roll, and shows the reminder cards.
+**Start turn** moves the round on, refills legendary actions (5e: they come back at the start of the monster's turn; Legendary Resistance is per day and doesn't), and rolls a d6 for each spent recharge ability (auto mode) and shows the roll.
+
+**Reminder cards** (legendary actions left and their options, reactions, lair actions) are always shown under the tracker whenever the monster has any, from round 1 on, since the first round is played without pressing Start turn.
 
 **Turn log:** each turn records the action, target, move and slot actually used, plus a result the DM notes (hit / miss / downed / effect). The **last 3 turns** go into Jev's state.
 

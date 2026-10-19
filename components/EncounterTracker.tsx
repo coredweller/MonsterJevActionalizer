@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useId, useState, type ReactNode } from "react";
 import {
   type RechargeRoll,
   legendaryActionMax,
@@ -12,13 +12,22 @@ import {
   setLegendary,
   setPerDay,
   setRecharge,
+  setSettings,
   setSlots,
   slotMax,
   startTurn,
+  suggestTemperament,
 } from "@/lib/encounter/state";
-import { CONDITIONS, type Tracker } from "@/lib/encounter/types";
+import { CONDITIONS, TemperamentSchema, type Settings, type Temperament, type Tracker } from "@/lib/encounter/types";
 import { describeUses } from "@/lib/monster/describe";
 import { Badge, Button, NumberField, Panel, ToggleChip, inputClass, labelClass, toggled } from "./ui";
+
+const TEMPERAMENT_LABELS: Record<Temperament, string> = {
+  mindless: "Mindless",
+  feral: "Feral",
+  cunning: "Cunning",
+  genius: "Tactical genius",
+};
 
 /** The last "Start turn" press, kept so its rolls show until the tracker or round changes. */
 interface TurnStart {
@@ -48,6 +57,8 @@ export function EncounterTracker({ tracker, onChange }: { tracker: Tracker; onCh
   const legendaryResistance = legendaryResistanceMax(reviewed);
   // The current concentration stays selectable even if its ability isn't flagged as concentration.
   const concentrationChoices = reviewed.abilities.filter((a) => a.concentration === true || a.id === state.concentration?.abilityId);
+  const suggested = suggestTemperament(reviewed.intScore);
+  const moraleId = useId();
 
   function start() {
     const result = startTurn(tracker, Math.random);
@@ -58,6 +69,15 @@ export function EncounterTracker({ tracker, onChange }: { tracker: Tracker; onCh
   function chooseConcentration(abilityId: string) {
     const ability = reviewed.abilities.find((a) => a.id === abilityId);
     onChange(setConcentration(tracker, ability ? { abilityId: ability.id, name: ability.name } : null));
+  }
+
+  function chooseTemperament(value: string) {
+    onChange(setSettings(tracker, { temperament: TemperamentSchema.parse(value) }));
+  }
+
+  // Pressing the mode that's already on does nothing, so the pair always has exactly one pressed.
+  function chooseRechargeMode(rechargeMode: Settings["rechargeMode"]) {
+    if (rechargeMode !== settings.rechargeMode) onChange(setSettings(tracker, { rechargeMode }));
   }
 
   return (
@@ -190,6 +210,57 @@ export function EncounterTracker({ tracker, onChange }: { tracker: Tracker; onCh
                 {c}
               </ToggleChip>
             ))}
+          </div>
+        </details>
+
+        <details>
+          <summary className="flex min-h-11 cursor-pointer items-center text-sm">
+            Settings: {TEMPERAMENT_LABELS[settings.temperament].toLowerCase()} · morale {settings.morale} · recharge {settings.rechargeMode}
+          </summary>
+          <div className="mt-2 space-y-4">
+            <label className={labelClass}>
+              Temperament
+              <select className={inputClass} value={settings.temperament} onChange={(e) => chooseTemperament(e.target.value)}>
+                {TemperamentSchema.options.map((t) => (
+                  <option key={t} value={t}>
+                    {t === suggested ? `${TEMPERAMENT_LABELS[t]} (suggested for INT ${reviewed.intScore})` : TEMPERAMENT_LABELS[t]}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <div className="space-y-1 text-sm">
+              <div className="flex items-center justify-between">
+                <label htmlFor={moraleId}>Morale</label>
+                <output htmlFor={moraleId} className="tabular-nums">
+                  {settings.morale}
+                </output>
+              </div>
+              <input
+                id={moraleId}
+                type="range"
+                min={0}
+                max={100}
+                step={1}
+                className="min-h-11 w-full accent-(--accent)"
+                value={settings.morale}
+                onChange={(e) => onChange(setSettings(tracker, { morale: Number(e.target.value) }))}
+              />
+              <div className="flex justify-between text-xs text-stone-600">
+                <span>Cowardly</span>
+                <span>Fanatical</span>
+              </div>
+            </div>
+
+            <div role="group" aria-label="Recharge mode" className="flex items-center gap-2 text-sm">
+              <span className="mr-auto">Recharge</span>
+              <ToggleChip pressed={settings.rechargeMode === "auto"} onToggle={() => chooseRechargeMode("auto")}>
+                Auto
+              </ToggleChip>
+              <ToggleChip pressed={settings.rechargeMode === "manual"} onToggle={() => chooseRechargeMode("manual")}>
+                Manual
+              </ToggleChip>
+            </div>
           </div>
         </details>
       </div>

@@ -93,6 +93,7 @@ type inferred from it (`z.infer`), because a `ReviewedMonster` is read back from
 | `recordResult(t, i, result, note?)` | sets (or, with `undefined`, clears) the result on log entry `i`; an empty note removes it and an omitted one keeps it; throws if there's no entry `i` |
 | `setHp / setSlots / setPerDay / setLegendary` | manual DM edits, clamped to [0, max]; a slot level or ability the monster lacks throws |
 | `setRecharge / setConditions / setConcentration` | manual DM edits; conditions de-duplicated; an ability the monster lacks throws |
+| `setSettings(t, patch)` | merges the given settings, keeps the rest; morale rounded and clamped to [0, 100] |
 
 History sent to Jev = `log.slice(-3)`.
 

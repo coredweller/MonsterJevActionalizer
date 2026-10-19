@@ -9,10 +9,11 @@ import {
   setLegendary,
   setPerDay,
   setRecharge,
+  setSettings,
   setSlots,
   startTurn,
 } from "@/lib/encounter/state";
-import type { ApplyChoice, Tracker } from "@/lib/encounter/types";
+import { TrackerSchema, type ApplyChoice, type Tracker } from "@/lib/encounter/types";
 import { ability, handReviewed, slots } from "../helpers/reviewed";
 
 const NOW = "2026-10-12T12:00:00.000Z";
@@ -229,5 +230,51 @@ describe("manual edits without a range", () => {
 
   it("setConcentration throws for an ability the monster doesn't have", () => {
     expect(() => setConcentration(general(), { abilityId: "spl_bless", name: "Bless" })).toThrow(/spl_bless/);
+  });
+});
+
+describe("setSettings", () => {
+  // The warpriest's INT suggests "cunning"; the defaults are cunning, morale 50, auto recharge.
+  it.each([
+    [{ temperament: "feral" as const }, { temperament: "feral", morale: 50, rechargeMode: "auto" }],
+    [{ morale: 20 }, { temperament: "cunning", morale: 20, rechargeMode: "auto" }],
+    [{ rechargeMode: "manual" as const }, { temperament: "cunning", morale: 50, rechargeMode: "manual" }],
+  ])("sets %o and keeps the other settings", (patch, expected) => {
+    expect(general().settings).toEqual({ temperament: "cunning", morale: 50, rechargeMode: "auto" });
+    expect(setSettings(general(), patch).settings).toEqual(expected);
+  });
+
+  it("sets several settings at once", () => {
+    expect(setSettings(general(), { temperament: "genius", morale: 90, rechargeMode: "manual" }).settings).toEqual({
+      temperament: "genius",
+      morale: 90,
+      rechargeMode: "manual",
+    });
+  });
+
+  it.each([
+    [-10, 0],
+    [0, 0],
+    [100, 100],
+    [150, 100],
+    [33.4, 33],
+    [66.5, 67],
+  ])("morale %d is stored as %i", (morale, expected) => {
+    expect(setSettings(general(), { morale }).settings.morale).toBe(expected);
+  });
+
+  it("the result still passes TrackerSchema", () => {
+    const t = setSettings(general(), { temperament: "mindless", morale: 12.7, rechargeMode: "manual" });
+    expect(TrackerSchema.safeParse(t).success).toBe(true);
+  });
+
+  it("touches nothing but the settings, and doesn't change the tracker it was given", () => {
+    const before = general();
+    const after = setSettings(before, { morale: 5 });
+    expect(before.settings).toEqual({ temperament: "cunning", morale: 50, rechargeMode: "auto" });
+    expect(after.state).toBe(before.state);
+    expect(after.log).toBe(before.log);
+    expect(after.situation).toBe(before.situation);
+    expect({ ...after, settings: before.settings }).toEqual(before);
   });
 });
