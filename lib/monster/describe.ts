@@ -1,5 +1,64 @@
 /** One-line, human-readable descriptions of extracted abilities (review screen, option summaries). */
-import type { Ability, AbilityUses, Area, Attack, Damage, Save } from "./types";
+import type { Ability, AbilitySource, AbilityUses, Area, Attack, Damage, ReviewedMonster, Save } from "./types";
+
+/** One statblock entry as written, with the ability extracted from it. Spellcasting entries have no single ability. */
+export interface StatblockEntry {
+  name: string;
+  text: string;
+  ability?: Ability;
+  spellcasting: boolean;
+}
+
+export interface StatblockSection {
+  title: "Traits" | "Actions" | "Bonus Actions" | "Reactions" | "Legendary Actions" | "Lair Actions";
+  intro?: string;
+  entries: StatblockEntry[];
+}
+
+/**
+ * The review screen's statblock: each section's entries in file order, paired with their extracted ability.
+ * Abilities are matched on source and raw text, which extraction copies verbatim. Spells belong to their
+ * Spellcasting entry. Any other ability that matches no entry comes back in `unplaced` so it is still shown.
+ */
+export function statblockSections(reviewed: Pick<ReviewedMonster, "monster" | "abilities">): { sections: StatblockSection[]; unplaced: Ability[] } {
+  const { monster } = reviewed;
+  const pending = reviewed.abilities.filter((a) => a.source !== "Spellcasting");
+  const take = (source: AbilitySource, text: string) => {
+    const i = pending.findIndex((a) => a.source === source && a.raw === text);
+    return i === -1 ? undefined : pending.splice(i, 1)[0];
+  };
+  const section = (title: StatblockSection["title"], source: AbilitySource, groups: Record<string, string>[], intro?: string): StatblockSection => {
+    const entries: StatblockEntry[] = [];
+    for (const [name, text] of groups.flatMap((g) => Object.entries(g))) {
+      // Extraction skips blank entries outside traits, so the statblock does too.
+      if (text.trim() === "" && source !== "SpecialTraits") continue;
+      const spellcasting = /\bSpellcasting\b/i.test(name) && (source === "Actions" || source === "SpecialTraits");
+      const ability = spellcasting ? undefined : take(source, text);
+      entries.push({ name, text, spellcasting, ...(ability ? { ability } : {}) });
+    }
+    return { title, entries, ...(intro ? { intro } : {}) };
+  };
+
+  const body = monster.body;
+  const sections =
+    monster.kind === "legendary"
+      ? [
+          section("Traits", "SpecialTraits", [monster.body.SpecialTraits, monster.body.LegendaryTraits]),
+          section("Actions", "Actions", [body.Actions]),
+          section("Bonus Actions", "BonusActions", [monster.body.BonusActions]),
+          section("Reactions", "Reactions", [monster.body.Reactions]),
+          section(
+            "Legendary Actions",
+            "LegendaryActions",
+            [monster.body.LegendaryActions.Options],
+            `${body.CharacterName} can take ${monster.body.LegendaryActions["Legendary Action Uses"]} legendary actions, choosing from the options below.`,
+          ),
+          section("Lair Actions", "LairActions", [monster.body.LairActions], "On initiative count 20 (losing ties), it takes one lair action."),
+        ]
+      : [section("Traits", "SpecialTraits", [body.SpecialTraits]), section("Actions", "Actions", [body.Actions])];
+
+  return { sections: sections.filter((s) => s.entries.length > 0), unplaced: pending };
+}
 
 export function describeUses(uses: AbilityUses): string {
   switch (uses.kind) {

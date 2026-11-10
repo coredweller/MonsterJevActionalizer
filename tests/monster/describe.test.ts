@@ -1,6 +1,46 @@
 import { describe, expect, it } from "vitest";
-import { describeUses, summarize } from "@/lib/monster/describe";
-import { ability } from "../helpers/reviewed";
+import { describeUses, statblockSections, summarize } from "@/lib/monster/describe";
+import { ability, extractedReviewed } from "../helpers/reviewed";
+
+describe("statblockSections", () => {
+  it("lays a legendary monster out in statblock order, keeping entry names and text as written", () => {
+    const hag = extractedReviewed("BriarthornHag");
+    const { sections, unplaced } = statblockSections(hag);
+    expect(sections.map((s) => s.title)).toEqual(["Traits", "Actions", "Bonus Actions", "Reactions", "Legendary Actions"]);
+    expect(sections[0]?.entries.map((e) => e.name)).toEqual(["Thorn Warden", "Legendary Resistance (3/Day, or 4/Day in Lair)"]);
+
+    const actions = sections[1]?.entries ?? [];
+    expect(actions.map((e) => e.name)).toEqual(["Multiattack", "Thorn Lash", "Thorn Dart", "Bramble Burst (Recharge 5–6)", "Spellcasting"]);
+    const burst = actions[3];
+    expect(burst?.ability?.name).toBe("Bramble Burst");
+    expect(burst?.text).toBe(hag.monster.body.Actions["Bramble Burst (Recharge 5–6)"]);
+    expect(actions[4]).toMatchObject({ name: "Spellcasting", spellcasting: true });
+    expect(actions[4]?.ability).toBeUndefined();
+
+    expect(sections[4]?.intro).toBe("Briarthorn Hag can take 3 legendary actions, choosing from the options below.");
+    expect(sections[4]?.entries.map((e) => e.ability?.name)).toEqual(["Lash", "Grasping Roots"]);
+    expect(unplaced).toEqual([]);
+  });
+
+  it("adds a Lair Actions section with an initiative 20 intro", () => {
+    const { sections } = statblockSections(extractedReviewed("MirewardenKethra"));
+    const lair = sections.find((s) => s.title === "Lair Actions");
+    expect(lair?.intro).toBe("On initiative count 20 (losing ties), it takes one lair action.");
+    expect(lair?.entries.map((e) => e.name)).toEqual(["Sucking Mud", "Rising Waters", "Will-o'-Wisps"]);
+    expect(lair?.entries.every((e) => e.ability?.category === "lair")).toBe(true);
+  });
+
+  it("gives a general monster only Traits and Actions, and leaves out empty sections", () => {
+    const { sections } = statblockSections(extractedReviewed("TunnelWasp"));
+    expect(sections.map((s) => s.title)).toEqual(["Traits", "Actions"]);
+  });
+
+  it("returns an ability it can't match to an entry as unplaced, never dropping it", () => {
+    const hag = extractedReviewed("BriarthornHag");
+    const stray = ability({ id: "act_stray", name: "Stray", source: "Actions", raw: "Not in the statblock." });
+    expect(statblockSections({ ...hag, abilities: [...hag.abilities, stray] }).unplaced).toEqual([stray]);
+  });
+});
 
 describe("describe", () => {
   it("describes uses", () => {

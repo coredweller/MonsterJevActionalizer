@@ -57,3 +57,36 @@ body {
     color: var(--color-stone-500);
   }
 }
+
+/*
+ * The review screen's statblock, in the classic printed style: parchment, crimson small-caps headings,
+ * gold bars top and bottom, and tapered red rules between blocks. Fonts come from app/layout.tsx.
+ * Crimson #922610 and #7a200d are about 9:1 and 10:1 on the parchment, so they pass WCAG AA as text.
+ */
+@layer components {
+  .statblock {
+    background-color: #fdf1dc;
+    background-image:
+      radial-gradient(ellipse at 15% 8%, rgb(255 255 255 / 0.6), transparent 55%),
+      radial-gradient(ellipse at 90% 95%, rgb(201 152 92 / 0.22), transparent 60%);
+    box-shadow: 0 0 1.25rem rgb(134 116 83 / 0.55);
+    font-family: var(--font-statblock-body), ui-sans-serif, system-ui, sans-serif;
+  }
+  .statblock-bar {
+    height: 6px;
+    background: #e69a28;
+    border: 1px solid #000;
+  }
+  .statblock-rule {
+    height: 5px;
+    margin: 0.5rem 0;
+    background: #922610;
+    clip-path: polygon(0 0, 100% 50%, 0 100%);
+  }
+  .statblock-name,
+  .statblock-heading {
+    font-family: var(--font-statblock-title), Georgia, serif;
+    font-variant: small-caps;
+    color: #922610;
+  }
+}

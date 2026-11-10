@@ -79,14 +79,16 @@ four fixes: two rename-key, one fill-default, one coerce-number. Reverting the L
 
 ## 3. Review screen
 
-- [ ] `TieflingEnforcer`: every ability shows a category badge, a uses badge, and a summary (attack or save, range, damage).
-- [ ] Max HP, Speed and INT are shown. Max HP can be edited.
+- [ ] The monster shows as a parchment statblock: name and type line, Armor Class / Hit Points / Speed, the six ability scores, then Saving Throws through Challenge, Class, Level, Equipment and Notes (empty lines are left out), then traits and the Actions, Bonus Actions, Reactions, Legendary Actions and Lair Actions sections that have entries.
+- [ ] Each entry shows its original text, with chips under it for what was parsed (category, uses, attack or save, range, damage) and an **Edit** button. Check them against `TieflingEnforcer`.
+- [ ] **Hit Points** has an editable Max HP box. **Speed** has a chip with the parsed speeds (amber "speed not parsed" if none).
+- [ ] **Banners above the card**: red for errors (a spell with no level, a failed Confirm), yellow for warnings (unknown spells, raw text only, partly parsed). Clicking a line scrolls to that ability and opens its editor.
 - [ ] `BriarthornHag` (2024 wording):
   - [ ] Attacks and saves are parsed.
-  - [ ] Spellcasting says "No spell slots (at-will and per-day spells only)".
-  - [ ] "Thornward Hex" has an **unknown spell** badge, and the amber "Not in the SRD spell table" note names it.
-  - [ ] **Confirm and create tracker** is disabled, and "Missing: …" names every spell with no level.
-  - [ ] **Edit** on the unknown spell, then give it a level. The missing list shrinks and Confirm turns on once every spell has a level.
+  - [ ] Under the Spellcasting entry: "No spell slots (at-will and per-day spells only)", then each spell with its own chips and Edit.
+  - [ ] "Thornward Hex" has **unknown spell** and **no level** chips, and the yellow banner names it.
+  - [ ] **Confirm and create tracker** is disabled, and the red banner says "Thornward Hex has no spell level".
+  - [ ] **Edit** on the unknown spell, then give it a level. The red banner disappears and Confirm turns on once every spell has a level.
 - [ ] `MaestroDrazzuk`: spellcasting shows the save DC and attack bonus, plus one "Level N slots" box per level. Slot counts can be edited.
 - [ ] Badges: **raw text only** (unparsed; shows the original text), **partly parsed**, and **after Attack action** (`AshenWarpriest`'s War Priest).
 - [ ] **Edit / Done** opens the ability editor and shows the raw rule text. Try each field:
