@@ -21,6 +21,14 @@ Most fixtures are real monsters supplied by the DM. Three were written for test 
 - `BriarthornHag.CR7.2024.json`: the only 2024-wording fixture. It has attack rolls and saving throws in 2024 wording, Spellcasting as an action with no slots, an X/Day bonus-action spell, a Trigger/Response reaction, 2024 Legendary Resistance wording, and one non-SRD spell that must be marked unknown.
 - `MirewardenKethra.CR9.2014.json`: the only fixture with lair actions (three save-based effects), alongside legendary actions and a recharge breath weapon.
 
+## Broken copies for manual testing
+`broken/` holds monsters that are broken on purpose, for the fix screen in
+[manual-test-checklist.md](../../specs/001-monster-turn-advisor/manual-test-checklist.md). The tests and
+`check:monsters` only read the `*.json` files directly in this folder, so they skip `broken/`.
+
+- `broken/ZarielithBroken.CR10.2014.json`: Zarielith with a string `Level`, `"Legendary Actions"` (with a space) and a
+  singular `Equipment.Weapon`. It gets exactly four fixes.
+
 ## Most useful monsters
 - A general monster whose bonus action is in `SpecialTraits` (e.g. *Nimble Escape*)
 - A legendary monster with a recharge ability (e.g. a breath weapon) and legendary actions

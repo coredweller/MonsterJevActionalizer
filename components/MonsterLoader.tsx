@@ -2,7 +2,7 @@
 
 import { useState, type ChangeEvent } from "react";
 import { normalize, withCr, type NormalizeResult } from "@/lib/monster/normalize";
-import { Button, Panel, inputClass, labelClass } from "./ui";
+import { Button, Panel, fileInputClass, inputClass, labelClass } from "./ui";
 
 /** Paste or upload a statblock; runs the normalizer and asks for CR when it can't find one. */
 export function MonsterLoader({ onLoaded, onCancel }: { onLoaded: (result: NormalizeResult) => void; onCancel?: () => void }) {
@@ -65,7 +65,7 @@ export function MonsterLoader({ onLoaded, onCancel }: { onLoaded: (result: Norma
       <div className="space-y-3">
         <label className={labelClass}>
           Upload a statblock JSON
-          <input type="file" accept=".json,application/json" onChange={onFile} className="min-h-11 text-sm" />
+          <input type="file" accept=".json,application/json" onChange={onFile} className={fileInputClass} />
         </label>
         <label className={labelClass}>
           …or paste it

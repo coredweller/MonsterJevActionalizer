@@ -50,14 +50,14 @@ All in `fixtures/monsters/`.
 
 ## 2. Fix screen
 
-Make a copy of `Zarielith.CR10.2014.json` with these breakages, then upload it:
-`"Level": "10"`, `"LegendaryActions"` renamed to `"Legendary Actions"` (with the space), and
-`"Equipment": { "Weapon": "Cursed Scepter of Binding" }` (singular, with Armor and Other missing). Expect exactly four fixes.
-Reverting the Level fix gives the clearest inline error.
+Upload `fixtures/monsters/broken/ZarielithBroken.CR10.2014.json`. It's a copy of `Zarielith.CR10.2014.json` with
+three breakages: `"Level": "10"` (a string), `"LegendaryActions"` renamed to `"Legendary Actions"` (with the space),
+and `"Equipment": { "Weapon": "Cursed Scepter of Binding" }` (singular, with Armor and Other missing). Expect exactly
+four fixes: two rename-key, one fill-default, one coerce-number. Reverting the Level fix gives the clearest inline error.
 
 - [ ] The header shows **Check <name>**, a template badge (general or legendary), and **valid** or **N error(s)**.
 - [ ] **Automatic fixes (N)** lists one readable line per fix, each with its kind.
-- [ ] **Accept** turns into an "accepted" badge.
+- [ ] **Accept** turns into a green d20 showing 20 with "Accepted" beside it. The d20 rolls in (no animation with reduced motion on), and Revert doesn't move.
 - [ ] **Revert** removes the fix from the list, shows it struck through as "Reverted: …", and puts back the original value.
 - [ ] A revert that makes the monster invalid shows the error under **Errors to fix**, and **Continue to review** becomes disabled with the tooltip "Fix the errors below first".
 - [ ] **Re-apply** on a reverted fix brings it back and clears the error.

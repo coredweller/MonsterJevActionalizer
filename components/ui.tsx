@@ -6,10 +6,12 @@ import { useEffect, useId, useRef, useState, type ButtonHTMLAttributes, type Rea
 type Variant = "primary" | "secondary" | "danger" | "ghost";
 
 // Colours come from the surrounding accent (`--accent*` in app/globals.css), so a button takes its column's colour.
+// Borders use `--accent` (4.9:1 or more on white for every accent) and red-700, for the 3:1 WCAG 1.4.11 asks of a
+// control's boundary. Disabled controls are exempt, so a disabled secondary keeps a faint border to look disabled.
 const VARIANTS: Record<Variant, string> = {
   primary: "bg-(--accent) text-white shadow-sm hover:bg-(--accent-strong) disabled:bg-stone-300 disabled:text-stone-600 disabled:shadow-none",
-  secondary: "border border-(--accent-line) bg-white text-(--accent-strong) hover:bg-(--accent-soft) disabled:text-stone-400",
-  danger: "border border-red-300 bg-white text-red-700 hover:bg-red-50",
+  secondary: "border border-(--accent) bg-white text-(--accent-strong) hover:bg-(--accent-soft) disabled:border-stone-300 disabled:text-stone-400",
+  danger: "border border-red-700 bg-white text-red-700 hover:bg-red-50",
   ghost: "text-(--accent-strong) hover:bg-(--accent-soft)",
 };
 
@@ -22,6 +24,13 @@ export function Button({ variant = "secondary", className = "", ...props }: Butt
     />
   );
 }
+
+/**
+ * A file input whose browse button looks like a secondary Button. Tailwind only sees whole class names in the
+ * source, so the `file:` copies can't be derived from VARIANTS.secondary and the Button base: keep them in step.
+ */
+export const fileInputClass =
+  "min-h-11 text-sm file:mr-3 file:min-h-11 file:rounded-md file:border file:border-(--accent) file:bg-white file:px-3 file:text-sm file:font-semibold file:text-(--accent-strong) hover:file:bg-(--accent-soft)";
 
 /** A column's colour; see the `accent-*` classes in app/globals.css. Without one, a Panel keeps the surrounding accent. */
 type Accent = "monster" | "party" | "situation" | "recommendation";

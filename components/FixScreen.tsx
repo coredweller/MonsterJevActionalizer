@@ -58,6 +58,40 @@ function ErrorEditor({ error, result, onChange }: { error: FieldError; result: N
   );
 }
 
+// Edges from the inner triangle's corners out to the hexagon's corners, as [x1, y1, x2, y2].
+const D20_EDGES = [
+  [32, 4, 32, 16],
+  [56.2, 18, 46, 40],
+  [56.2, 46, 46, 40],
+  [32, 60, 46, 40],
+  [32, 60, 18, 40],
+  [7.8, 46, 18, 40],
+  [7.8, 18, 18, 40],
+  [7.8, 18, 32, 16],
+  [56.2, 18, 32, 16],
+] as const;
+
+/** A natural 20: shown in place of Accept once a fix is accepted. It rolls in unless reduced motion is on. */
+function AcceptedD20() {
+  return (
+    <span role="status" className="inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-green-800">
+      <svg viewBox="0 0 64 64" aria-hidden="true" className="size-10 motion-safe:animate-roll">
+        <polygon points="32,4 56.2,18 56.2,46 32,60 7.8,46 7.8,18" className="fill-green-700 stroke-green-800" strokeWidth={2} strokeLinejoin="round" />
+        <polygon points="32,16 46,40 18,40" className="fill-green-600 stroke-green-200" strokeWidth={1.4} strokeLinejoin="round" />
+        <g className="stroke-green-200" strokeWidth={1.1} opacity={0.7}>
+          {D20_EDGES.map(([x1, y1, x2, y2]) => (
+            <line key={`${x1},${y1}-${x2},${y2}`} x1={x1} y1={y1} x2={x2} y2={y2} />
+          ))}
+        </g>
+        <text x={32} y={37} textAnchor="middle" fontFamily="Georgia, serif" fontWeight={700} fontSize={14} className="fill-white">
+          20
+        </text>
+      </svg>
+      Accepted
+    </span>
+  );
+}
+
 export function FixScreen({
   result,
   onChange,
@@ -129,9 +163,9 @@ export function FixScreen({
                   <span>
                     {c.message} <span className="text-xs text-stone-500">({c.kind})</span>
                   </span>
-                  <span className="flex gap-2">
+                  <span className="flex items-center gap-2">
                     {accepted.has(c.id) ? (
-                      <Badge tone="green">accepted</Badge>
+                      <AcceptedD20 />
                     ) : (
                       <Button onClick={() => setAccepted((s) => new Set(s).add(c.id))}>Accept</Button>
                     )}
