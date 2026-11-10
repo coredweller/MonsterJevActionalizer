@@ -1,0 +1,73 @@
+{
+  "CharacterName": "Kethra, the Mirewarden",
+  "Level": 9,
+  "Race": "Swamp Naga",
+  "Class": "Bog Oracle",
+  "Alignment": "Neutral Evil",
+  "HP": "136 (16d10 + 48)",
+  "AC": 16,
+  "Speed": "30 ft., swim 40 ft.",
+  "AbilityScores": {
+    "Strength": { "Score": 19, "Modifier": "+4" },
+    "Dexterity": { "Score": 14, "Modifier": "+2" },
+    "Constitution": { "Score": 17, "Modifier": "+3" },
+    "Intelligence": { "Score": 12, "Modifier": "+1" },
+    "Wisdom": { "Score": 18, "Modifier": "+4" },
+    "Charisma": { "Score": 13, "Modifier": "+1" }
+  },
+  "SavingThrows": {
+    "Constitution": "+7",
+    "Wisdom": "+8"
+  },
+  "Skills": {
+    "Perception": "+8",
+    "Stealth": "+6"
+  },
+  "DamageResistances": "",
+  "DamageImmunities": "Poison",
+  "ConditionImmunities": "Poisoned",
+  "Senses": "Darkvision 60 ft., Passive Perception 18",
+  "Languages": "Common, Draconic",
+  "ChallengeRating": "9",
+  "ProficiencyBonus": "+4",
+  "SpecialTraits": {
+    "Amphibious": "Kethra can breathe air and water.",
+    "Mire Sense": "While in water or mud, Kethra knows the location of every creature within 60 ft. of her that is touching the same water or mud."
+  },
+  "Actions": {
+    "Multiattack": "Kethra makes two attacks: one with her Bite and one with her Tail.",
+    "Bite": "Melee Weapon Attack: +8 to hit, reach 10 ft., one target. Hit: 15 (2d10 + 4) piercing damage, and the target must make a DC 15 Constitution saving throw, taking 18 (4d8) poison damage on a failed save, or half as much on a successful one.",
+    "Tail": "Melee Weapon Attack: +8 to hit, reach 10 ft., one target. Hit: 13 (2d8 + 4) bludgeoning damage. If the target is Large or smaller, it is grappled (escape DC 16).",
+    "Bog Breath (Recharge 5-6)": "Kethra exhales choking swamp gas in a 30-foot cone. Each creature in that area must make a DC 15 Constitution saving throw, taking 31 (7d8) poison damage on a failed save, or half as much on a successful one."
+  },
+  "BonusActions": {
+  },
+  "Reactions": {
+  },
+  "LegendaryTraits": {
+  },
+  "LegendaryActions": {
+    "Legendary Action Uses": "3",
+    "Options": {
+      "Detect": "Kethra makes a Wisdom (Perception) check.",
+      "Tail": "Kethra makes one Tail attack.",
+      "Sink Beneath (Costs 2 Actions)": "While in water or mud, Kethra moves up to her swimming speed without provoking opportunity attacks."
+    }
+  },
+  "MythicTrait": {
+    "Name": "",
+    "Description": ""
+  },
+  "LairActions": {
+    "Sucking Mud": "The ground in a 20-foot square that Kethra can see within 120 ft. of her turns to sucking mud until initiative count 20 on the next round. Each creature standing in that area must succeed on a DC 15 Strength saving throw or be restrained until the mud hardens.",
+    "Rising Waters": "Murky water surges in a 10-foot-radius circle centered on a point Kethra can see within 120 ft. of her. Each creature in that area must succeed on a DC 15 Dexterity saving throw or take 10 (3d6) bludgeoning damage and be knocked prone.",
+    "Will-o'-Wisps": "Ghostly lights flicker around one creature Kethra can see within 120 ft. of her. That creature must succeed on a DC 15 Wisdom saving throw or be frightened of Kethra until initiative count 20 on the next round."
+  },
+  "RegionalEffects": [],
+  "Equipment": {
+    "Armor": "",
+    "Weapons": "",
+    "Other": ""
+  },
+  "Notes": "Authored test monster. Kethra is the only fixture with lair actions: three effects (a restrain save, an area damage save that knocks prone, and a frighten save), alongside legendary actions and a recharge breath. She can't use the same lair action two rounds in a row."
+}

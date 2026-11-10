@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-- Node 20.8+ (Next.js 15; Next 16 would need Node ≥ 20.9), npm 10.
+- Node 24+ (`engines` in `package.json`), npm 10.
 - A TypeSafe API key.
 
 ## Setup
@@ -18,14 +18,16 @@ npm run dev                      # http://localhost:3000
 
 ```bash
 npm test                         # Vitest: lib/monster, lib/encounter, lib/decide
-npx tsc --noEmit                 # type check
+npm run typecheck                # tsc --noEmit
 npm run check:monsters           # every fixture: OK, zero changes
+npm run test:e2e                 # Playwright; starts its own dev server on :3100
 ```
 
 ## Manual validation (from PLAN.md → Verification §2)
 
-1. **Broken upload**: upload a copy of a fixture with `"Equipment": {}`, `"Level": "5"`, a
-   `"Legendary Actions"` key and `"Weapon"` instead of `"Weapons"`. Expect four listed changes; revert
+1. **Broken upload**: upload a copy of `Zarielith.CR10.2014.json` with `"Level": "10"`, a `"Legendary Actions"`
+   key instead of `"LegendaryActions"`, and `"Equipment": { "Weapon": "…" }` (singular, with Armor and Other
+   missing). Expect four listed changes; revert
    one and see its error inline; continue is blocked until valid; download returns fixed JSON.
 2. **Review**: load `fixtures/monsters/TieflingEnforcer.CR6.2014.json`; every ability shows category,
    uses, attack/save, range, damage. Then load `BriarthornHag.CR7.2024.json` (2024 wording): attacks and

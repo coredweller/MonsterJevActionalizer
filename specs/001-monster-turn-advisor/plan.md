@@ -15,7 +15,7 @@ and Apply spends what was actually chosen.
 
 ## Technical Context
 
-**Language/Version**: TypeScript 5.x, strict mode; Node 20.8 (local)
+**Language/Version**: TypeScript 5.x, strict mode; Node 24+ (`engines` in `package.json`)
 **Primary Dependencies**: Next.js 15 (App Router) + React 19, Tailwind CSS v4, zod ^3.25 (v3 API)
 **Storage**: browser `localStorage` (single versioned key); no database
 **Testing**: Vitest (node environment) for `lib/**`; recorded Jev responses in `fixtures/jev/`

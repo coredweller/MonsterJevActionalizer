@@ -23,7 +23,7 @@ describe("monster schema", () => {
     const legendary = loadMonsterFixtures()
       .filter((f) => classify(f.raw) === "legendary")
       .map((f) => f.name);
-    expect(legendary.sort()).toEqual(["BriarthornHag", "MaestroDrazzuk", "Zarielith"]);
+    expect(legendary.sort()).toEqual(["BriarthornHag", "MaestroDrazzuk", "MirewardenKethra", "Zarielith"]);
   });
 
   it('accepts Modifier as "+3", 3 or missing, and normalises it to a number', () => {

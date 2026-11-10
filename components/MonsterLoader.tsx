@@ -70,7 +70,7 @@ export function MonsterLoader({ onLoaded, onCancel }: { onLoaded: (result: Norma
         <label className={labelClass}>
           …or paste it
           <textarea
-            className="min-h-48 w-full rounded border border-stone-300 p-2 font-mono text-xs"
+            className="min-h-48 w-full rounded border border-stone-500 p-2 font-mono text-xs"
             value={text}
             onChange={(e) => {
               setText(e.target.value);

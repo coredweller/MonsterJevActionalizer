@@ -300,12 +300,12 @@ Each item states the **current behaviour**, the **recommendation** and what a ch
 
 ## Phase 8: Polish & Cross-Cutting Concerns
 
-- [ ] T071 [P] Update `README.md` with setup (`.env.local`, `npm run dev`), the checks to run, and a link to quickstart.md
-- [ ] T072 [P] Tablet pass: check every screen at 768 px and 1024 px widths, with no horizontal scroll and touch targets ≥ 44 px; fix the Tailwind classes in `components/*.tsx`
-- [ ] T073 Confirm `lib/monster`, `lib/encounter` and `lib/decide` contain no `react`, `fetch(` or `localStorage` (grep), and that every `localStorage` call is in `app/useTrackers.ts` inside try/catch
-- [ ] T074 Run the quality gates: `npm test`, `npm run typecheck`, `npm run check:monsters` (zero changes); report any failure verbatim
+- [X] T071 [P] *(2026-10-19; docs only, no tests. README follows package.json's Node 24+, not quickstart's 20.8+)* Update `README.md` with setup (`.env.local`, `npm run dev`), the checks to run, and a link to quickstart.md
+- [X] T072 [P] *(2026-10-20; scripted audit of load, fix, review, tracker, pick-by-hand and drawer at both widths: no horizontal scroll anywhere. Only failure was icon buttons 35–36 px wide; fixed with `min-w-11` on `Button` in `ui.tsx`. e2e 9/9)* Tablet pass: check every screen at 768 px and 1024 px widths, with no horizontal scroll and touch targets ≥ 44 px; fix the Tailwind classes in `components/*.tsx`
+- [X] T073 *(2026-10-19; grep clean, the only `lib/` hit is a doc comment in `lib/encounter/storage.ts:2`. All 3 localStorage calls are in `app/useTrackers.ts` (L21, L28, L70), each in try/catch)* Confirm `lib/monster`, `lib/encounter` and `lib/decide` contain no `react`, `fetch(` or `localStorage` (grep), and that every `localStorage` call is in `app/useTrackers.ts` inside try/catch
+- [X] T074 *(2026-10-20; run before and after T076: 594/594 tests, typecheck clean, 9 fixtures OK with zero changes, e2e 9/9)* Run the quality gates: `npm test`, `npm run typecheck`, `npm run check:monsters` (zero changes); report any failure verbatim
 - [ ] T075 Run the quickstart.md manual validation (steps 1–7), including the five scenarios: confirm exactly one `jev …` log line per recommended turn and none for a stunned monster, and time one turn from Start turn to Apply (under 60 s, SC-001)
-- [ ] T076 "Ensure all generated user interfaces, components, and text styles strictly comply with WCAG 2.2 (fallback to 2.1 if needed) Level AA contrast standards (specifically SC 1.4.3 and SC 1.4.11), maintaining a minimum 4.5:1 ratio for normal text and 3:1 for UI elements."
+- [X] T076 *(2026-10-20; scripted audit of rendered colours on 10 screens, including a recommended and a blocked card served offline. All text passed. Fixed placeholders (3.35:1 → stone-500 in `globals.css`) and field borders (1.49:1 → `border-stone-500` in `inputClass` and the loader textarea). Disabled controls are exempt; native checkboxes and the range slider were not measured)* "Ensure all generated user interfaces, components, and text styles strictly comply with WCAG 2.2 (fallback to 2.1 if needed) Level AA contrast standards (specifically SC 1.4.3 and SC 1.4.11), maintaining a minimum 4.5:1 ratio for normal text and 3:1 for UI elements."
 
 
 ---

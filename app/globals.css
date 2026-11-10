@@ -42,3 +42,10 @@
 body {
   @apply bg-paper text-stone-900;
 }
+
+/* Tailwind's default placeholder (the text colour at 50%) is about 3.4:1; stone-500 meets WCAG AA's 4.5:1. */
+@layer base {
+  ::placeholder {
+    color: var(--color-stone-500);
+  }
+}

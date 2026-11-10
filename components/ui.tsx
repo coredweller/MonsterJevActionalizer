@@ -17,7 +17,7 @@ export function Button({ variant = "secondary", className = "", ...props }: Butt
   return (
     <button
       type="button"
-      className={`inline-flex min-h-11 items-center justify-center rounded-md px-3 text-sm font-semibold disabled:cursor-not-allowed ${VARIANTS[variant]} ${className}`}
+      className={`inline-flex min-h-11 min-w-11 items-center justify-center rounded-md px-3 text-sm font-semibold disabled:cursor-not-allowed ${VARIANTS[variant]} ${className}`}
       {...props}
     />
   );
@@ -41,7 +41,8 @@ export function Panel({ title, accent, actions, children }: { title: string; acc
   );
 }
 
-export const inputClass = "min-h-11 w-full rounded border border-stone-300 bg-white px-2 text-sm";
+// stone-500 is the lightest stone border with the 3:1 WCAG 1.4.11 asks of a field's boundary.
+export const inputClass = "min-h-11 w-full rounded border border-stone-500 bg-white px-2 text-sm";
 export const labelClass = "flex flex-col gap-1 text-sm";
 
 export function CheckboxField({

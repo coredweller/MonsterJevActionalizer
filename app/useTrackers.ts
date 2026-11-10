@@ -7,6 +7,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { parse, serialize, type Store } from "@/lib/encounter/storage";
 import type { Tracker } from "@/lib/encounter/types";
+import { errorText, log } from "@/lib/log";
 
 export const STORAGE_KEY = "mja.v1.trackers";
 export const CORRUPT_KEY = "mja.v1.trackers.corrupt";
@@ -19,15 +20,17 @@ function load(): { store: Store; warning: string | null } {
   let text: string | null;
   try {
     text = window.localStorage.getItem(STORAGE_KEY);
-  } catch {
+  } catch (e) {
+    log.error("storage.read_failed", { error: errorText(e) });
     return { store: emptyStore(), warning: "Saved trackers can't be read in this browser. Changes won't be kept." };
   }
   const result = parse(text);
   if (result.ok) return { store: result.store, warning: null };
   try {
     window.localStorage.setItem(CORRUPT_KEY, result.raw);
-  } catch {
+  } catch (e) {
     // Best effort: the warning below still tells the DM their data wasn't loaded.
+    log.error("storage.corrupt_backup_failed", { error: errorText(e) });
   }
   return {
     store: result.empty,
@@ -68,7 +71,8 @@ export function useTrackers(): UseTrackers {
     }
     try {
       window.localStorage.setItem(STORAGE_KEY, serialize(store));
-    } catch {
+    } catch (e) {
+      log.error("storage.save_failed", { trackers: store.trackers.length, error: errorText(e) });
       setStorageWarning("Couldn't save trackers (storage full or blocked). This session still works, but changes may be lost on reload.");
     }
   }, [store, loaded]);
