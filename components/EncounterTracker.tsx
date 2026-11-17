@@ -19,7 +19,9 @@ import {
   suggestTemperament,
 } from "@/lib/encounter/state";
 import { CONDITIONS, TemperamentSchema, type Settings, type Temperament, type Tracker } from "@/lib/encounter/types";
-import { describeUses } from "@/lib/monster/describe";
+import { describeUses, type StatblockSection } from "@/lib/monster/describe";
+import type { Ability } from "@/lib/monster/types";
+import { MonsterStatblock, spellBoxClass } from "./MonsterStatblock";
 import { Badge, Button, NumberField, Panel, ToggleChip, inputClass, labelClass, toggled } from "./ui";
 
 const TEMPERAMENT_LABELS: Record<Temperament, string> = {
@@ -37,9 +39,11 @@ interface TurnStart {
 }
 
 /**
- * The monster's encounter state, editable by hand. Controlled: every edit goes through a reducer in
- * `lib/encounter/state.ts` and emits the whole new tracker, which the caller saves. Only resources
- * the statblock gives are shown, and the reducers clamp each counter to [0, max].
+ * The monster's encounter state, editable by hand: settings and conditions above, then the same
+ * statblock as the review screen with each live counter placed beside what it tracks. Controlled:
+ * every edit goes through a reducer in `lib/encounter/state.ts` and emits the whole new tracker,
+ * which the caller saves. Only resources the statblock gives are shown, and the reducers clamp
+ * each counter to [0, max].
  */
 export function EncounterTracker({ tracker, onChange }: { tracker: Tracker; onChange: (tracker: Tracker) => void }) {
   const { reviewed, state, settings } = tracker;
@@ -48,15 +52,13 @@ export function EncounterTracker({ tracker, onChange }: { tracker: Tracker; onCh
 
   const slots = slotMax(reviewed);
   const perDay = perDayMax(reviewed);
-  const perDayRows = reviewed.abilities.flatMap((ability) => {
-    const max = perDay[ability.id];
-    return max === undefined ? [] : [{ ability, max }];
-  });
-  const rechargeAbilities = reviewed.abilities.filter((a) => a.uses.kind === "recharge");
+  const hasRecharge = reviewed.abilities.some((a) => a.uses.kind === "recharge");
   const legendaryActions = legendaryActionMax(reviewed);
   const legendaryResistance = legendaryResistanceMax(reviewed);
   // The current concentration stays selectable even if its ability isn't flagged as concentration.
   const concentrationChoices = reviewed.abilities.filter((a) => a.concentration === true || a.id === state.concentration?.abilityId);
+  // Spells aren't statblock entries of their own, so their live controls go in the Spellcasting box.
+  const trackedSpells = reviewed.abilities.filter((a) => a.source === "Spellcasting" && (perDay[a.id] !== undefined || a.uses.kind === "recharge"));
   const suggested = suggestTemperament(reviewed.intScore);
   const moraleId = useId();
 
@@ -80,9 +82,94 @@ export function EncounterTracker({ tracker, onChange }: { tracker: Tracker; onCh
     if (rechargeMode !== settings.rechargeMode) onChange(setSettings(tracker, { rechargeMode }));
   }
 
+  /** An ability's daily-use counter or recharge toggle; nothing for an ability without either. */
+  function liveControls(a: Ability): ReactNode {
+    const max = perDay[a.id];
+    if (max !== undefined) {
+      return (
+        <Live>
+          <Counter label={a.name} value={counter(state.perDay, a.id, "daily-use ability")} max={max} onChange={(n) => onChange(setPerDay(tracker, a.id, n))} />
+        </Live>
+      );
+    }
+    if (a.uses.kind !== "recharge") return null;
+    const available = state.recharge[a.id] === "available";
+    return (
+      <Live>
+        <div className="flex items-center justify-between gap-2 text-sm">
+          <span className="min-w-0">
+            {a.name} <span className="text-stone-600">({describeUses(a.uses)})</span>
+          </span>
+          <ToggleChip pressed={available} onToggle={(on) => onChange(setRecharge(tracker, a.id, on ? "available" : "spent"))}>
+            {available ? "Available" : "Spent"}
+          </ToggleChip>
+        </div>
+      </Live>
+    );
+  }
+
+  const concentrating = state.concentration !== null;
+  const spellBox = (
+    <div className={spellBoxClass}>
+      <label className={`${labelClass} rounded p-2 ${concentrating ? "bg-amber-100 font-semibold text-amber-950" : ""}`}>
+        Concentrating on
+        <select className={inputClass} value={state.concentration?.abilityId ?? ""} onChange={(e) => chooseConcentration(e.target.value)}>
+          <option value="">Nothing</option>
+          {concentrationChoices.map((a) => (
+            <option key={a.id} value={a.id}>
+              {a.name}
+            </option>
+          ))}
+        </select>
+      </label>
+      {Object.keys(slots).length > 0 && (
+        <Section title="Spell slots">
+          {Object.entries(slots).map(([level, max]) => (
+            <Counter
+              key={level}
+              label={`Level ${level}`}
+              value={counter(state.slots, level, "slot level")}
+              max={max}
+              onChange={(n) => onChange(setSlots(tracker, Number(level), n))}
+            />
+          ))}
+        </Section>
+      )}
+      {trackedSpells.length > 0 && <Section title="Daily spells">{trackedSpells.map((a) => <div key={a.id}>{liveControls(a)}</div>)}</Section>}
+    </div>
+  );
+
+  function sectionExtra(title: StatblockSection["title"]): ReactNode {
+    if (title === "Traits" && legendaryResistance > 0) {
+      return (
+        <Live>
+          <Counter
+            label="Legendary Resistance"
+            value={state.legendaryResistanceLeft}
+            max={legendaryResistance}
+            onChange={(resistance) => onChange(setLegendary(tracker, { resistance }))}
+          />
+        </Live>
+      );
+    }
+    if (title === "Legendary Actions" && legendaryActions > 0) {
+      return (
+        <Live>
+          <Counter
+            label="Legendary actions"
+            value={state.legendaryActionsLeft}
+            max={legendaryActions}
+            onChange={(actions) => onChange(setLegendary(tracker, { actions }))}
+          />
+        </Live>
+      );
+    }
+    return null;
+  }
+
   return (
     <Panel
-      title={tracker.name}
+      title="Monster"
       accent="monster"
       actions={
         <>
@@ -101,7 +188,7 @@ export function EncounterTracker({ tracker, onChange }: { tracker: Tracker; onCh
             <p className="font-semibold">Round {state.round} started.</p>
             {legendaryActions > 0 && <p>Legendary actions back to {legendaryActions}.</p>}
             {settings.rechargeMode === "manual" ? (
-              rechargeAbilities.length > 0 && <p>Recharge is manual: set each ability below.</p>
+              hasRecharge && <p>Recharge is manual: set each ability in the statblock.</p>
             ) : rolls.length > 0 ? (
               <ul>
                 {rolls.map((r) => (
@@ -111,113 +198,13 @@ export function EncounterTracker({ tracker, onChange }: { tracker: Tracker; onCh
                 ))}
               </ul>
             ) : (
-              rechargeAbilities.length > 0 && <p>Nothing to recharge.</p>
+              hasRecharge && <p>Nothing to recharge.</p>
             )}
           </div>
         )}
 
-        <div className="flex items-end gap-2">
-          <NumberField className="w-28" label="HP" value={state.hp} onChange={(hp) => onChange(setHp(tracker, hp))} />
-          <span className="flex min-h-11 items-center text-sm text-stone-600">/ {state.hpMax}</span>
-        </div>
-
-        {Object.keys(slots).length > 0 && (
-          <Section title="Spell slots">
-            {Object.entries(slots).map(([level, max]) => (
-              <Counter
-                key={level}
-                label={`Level ${level}`}
-                value={counter(state.slots, level, "slot level")}
-                max={max}
-                onChange={(n) => onChange(setSlots(tracker, Number(level), n))}
-              />
-            ))}
-          </Section>
-        )}
-
-        {perDayRows.length > 0 && (
-          <Section title="Daily uses">
-            {perDayRows.map(({ ability, max }) => (
-              <Counter
-                key={ability.id}
-                label={ability.name}
-                value={counter(state.perDay, ability.id, "daily-use ability")}
-                max={max}
-                onChange={(n) => onChange(setPerDay(tracker, ability.id, n))}
-              />
-            ))}
-          </Section>
-        )}
-
-        {rechargeAbilities.length > 0 && (
-          <Section title="Recharge">
-            {rechargeAbilities.map((a) => {
-              const available = state.recharge[a.id] === "available";
-              return (
-                <div key={a.id} className="flex items-center justify-between gap-2 text-sm">
-                  <span className="min-w-0">
-                    {a.name} <span className="text-stone-600">({describeUses(a.uses)})</span>
-                  </span>
-                  <ToggleChip pressed={available} onToggle={(on) => onChange(setRecharge(tracker, a.id, on ? "available" : "spent"))}>
-                    {available ? "Available" : "Spent"}
-                  </ToggleChip>
-                </div>
-              );
-            })}
-          </Section>
-        )}
-
-        {(legendaryActions > 0 || legendaryResistance > 0) && (
-          <Section title="Legendary">
-            {legendaryActions > 0 && (
-              <Counter
-                label="Legendary actions"
-                value={state.legendaryActionsLeft}
-                max={legendaryActions}
-                onChange={(actions) => onChange(setLegendary(tracker, { actions }))}
-              />
-            )}
-            {legendaryResistance > 0 && (
-              <Counter
-                label="Legendary Resistance"
-                value={state.legendaryResistanceLeft}
-                max={legendaryResistance}
-                onChange={(resistance) => onChange(setLegendary(tracker, { resistance }))}
-              />
-            )}
-          </Section>
-        )}
-
-        <label className={labelClass}>
-          Concentrating on
-          <select className={inputClass} value={state.concentration?.abilityId ?? ""} onChange={(e) => chooseConcentration(e.target.value)}>
-            <option value="">Nothing</option>
-            {concentrationChoices.map((a) => (
-              <option key={a.id} value={a.id}>
-                {a.name}
-              </option>
-            ))}
-          </select>
-        </label>
-
-        <details>
-          <summary className="flex min-h-11 cursor-pointer items-center text-sm">
-            Conditions: {state.conditions.length > 0 ? state.conditions.join(", ") : "none"}
-          </summary>
-          <div className="mt-2 flex flex-wrap gap-2">
-            {CONDITIONS.map((c) => (
-              <ToggleChip key={c} pressed={state.conditions.includes(c)} onToggle={(on) => onChange(setConditions(tracker, toggled(state.conditions, c, on)))}>
-                {c}
-              </ToggleChip>
-            ))}
-          </div>
-        </details>
-
-        <details>
-          <summary className="flex min-h-11 cursor-pointer items-center text-sm">
-            Settings: {TEMPERAMENT_LABELS[settings.temperament].toLowerCase()} · morale {settings.morale} · recharge {settings.rechargeMode}
-          </summary>
-          <div className="mt-2 space-y-4">
+        <section aria-label="Settings" className="@container space-y-4 rounded-md border border-(--accent-line) p-3">
+          <div className="grid grid-cols-1 gap-4 @md:grid-cols-2">
             <label className={labelClass}>
               Temperament
               <select className={inputClass} value={settings.temperament} onChange={(e) => chooseTemperament(e.target.value)}>
@@ -251,18 +238,44 @@ export function EncounterTracker({ tracker, onChange }: { tracker: Tracker; onCh
                 <span>Fanatical</span>
               </div>
             </div>
+          </div>
 
-            <div role="group" aria-label="Recharge mode" className="flex items-center gap-2 text-sm">
-              <span className="mr-auto">Recharge</span>
-              <ToggleChip pressed={settings.rechargeMode === "auto"} onToggle={() => chooseRechargeMode("auto")}>
-                Auto
-              </ToggleChip>
-              <ToggleChip pressed={settings.rechargeMode === "manual"} onToggle={() => chooseRechargeMode("manual")}>
-                Manual
-              </ToggleChip>
+          <div role="group" aria-label="Recharge mode" className="flex items-center gap-2 text-sm">
+            <span className="mr-auto">Recharge</span>
+            <ToggleChip pressed={settings.rechargeMode === "auto"} onToggle={() => chooseRechargeMode("auto")}>
+              Auto
+            </ToggleChip>
+            <ToggleChip pressed={settings.rechargeMode === "manual"} onToggle={() => chooseRechargeMode("manual")}>
+              Manual
+            </ToggleChip>
+          </div>
+
+          <div role="group" aria-label="Conditions" className="space-y-1">
+            <p className="text-sm">Conditions: {state.conditions.length > 0 ? state.conditions.join(", ") : "none"}</p>
+            <div className="flex flex-wrap gap-2">
+              {CONDITIONS.map((c) => (
+                <ToggleChip key={c} pressed={state.conditions.includes(c)} onToggle={(on) => onChange(setConditions(tracker, toggled(state.conditions, c, on)))}>
+                  {c}
+                </ToggleChip>
+              ))}
             </div>
           </div>
-        </details>
+        </section>
+
+        <MonsterStatblock
+          reviewed={reviewed}
+          name={tracker.name}
+          hitPoints={
+            <>
+              <span className="font-bold">Hit Points</span>
+              <NumberField className="w-24" label="HP" hideLabel value={state.hp} onChange={(hp) => onChange(setHp(tracker, hp))} />
+              <span>/ {state.hpMax}</span>
+            </>
+          }
+          abilityExtra={liveControls}
+          spellcasting={spellBox}
+          sectionExtra={sectionExtra}
+        />
       </div>
     </Panel>
   );
@@ -275,10 +288,15 @@ function counter(counters: Readonly<Record<string, number>>, key: string, what: 
   return value;
 }
 
+/** A live control set into the statblock text, boxed so it reads as the tracker's, not the book's. */
+function Live({ children }: { children: ReactNode }) {
+  return <div className="mt-1 rounded border border-[#7a200d]/30 bg-white/60 px-2 py-1">{children}</div>;
+}
+
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
     <section className="space-y-1">
-      <h3 className="text-sm font-semibold text-(--accent-strong)">{title}</h3>
+      <h4 className="text-sm font-semibold text-(--accent-strong)">{title}</h4>
       {children}
     </section>
   );

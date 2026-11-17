@@ -141,12 +141,12 @@ Use `MaestroDrazzuk` unless noted.
   - [ ] Legendary actions go back to max, and the box says so.
   - [ ] Auto recharge: each spent recharge ability shows "rolled X (needs 5+), recharged / still spent", and the chip matches.
   - [ ] Auto recharge with nothing spent shows "Nothing to recharge."
-  - [ ] Manual recharge: "Recharge is manual: set each ability below." No roll happens, and the chips don't change.
+  - [ ] Manual recharge: "Recharge is manual: set each ability in the statblock." No roll happens, and the chips don't change.
 - [ ] Start turn clears the recommendation on screen, since it was for the previous turn.
 
 ## 6. Settings
 
-- [ ] The collapsed summary reads "Settings: <temperament> · morale N · recharge auto|manual".
+- [ ] Temperament, Morale, Recharge mode and Conditions are always shown, directly above the monster's statblock, with nothing to expand.
 - [ ] **Temperament** is suggested from INT: ≤3 mindless, 4–7 feral, 8–13 cunning, 14+ tactical genius. The suggested option is marked "(suggested for INT n)" and is the default on a new tracker. Check at least two bands.
 - [ ] **Morale** slider: starts at 50, runs from 0 (Cowardly) to 100 (Fanatical), and the number follows the slider.
 - [ ] **Recharge mode**: exactly one of Auto / Manual is pressed at a time. Pressing the one already pressed does nothing.
@@ -154,12 +154,13 @@ Use `MaestroDrazzuk` unless noted.
 
 ## 7. Reminders
 
-- [ ] `MaestroDrazzuk` shows a Reminders panel from round 1, before Start turn. **Legendary actions** shows "x / y left" and each option with its full rule text.
-- [ ] Spend a legendary action in the monster panel. The reminder count follows. It still shows at 0 left.
-- [ ] `BriarthornHag` also shows a **Reactions** card with its reaction's full text.
-- [ ] `TunnelWasp` has no Reminders panel at all.
-- [ ] **Lair actions** (`MirewardenKethra`): the **Lair actions** card says "On initiative count 20 (losing ties)" and lists all three entries in order, each with its full text: Sucking Mud, Rising Waters, Will-o'-Wisps.
-- [ ] Nothing in Reminders is recommended or decided. It's reference text only.
+- [ ] `MaestroDrazzuk`'s statblock shows its **Legendary Actions** section from round 1, before Start turn, with a "x / y" legendary-actions counter and each option with its full rule text.
+- [ ] Spend a legendary action with that counter. It still shows at 0 left, and Start turn refills it.
+- [ ] `BriarthornHag` also shows a **Reactions** section with its reaction's full text.
+- [ ] `TunnelWasp` has no Reactions, Legendary Actions or Lair Actions section.
+- [ ] **Lair actions** (`MirewardenKethra`): the **Lair Actions** section says "On initiative count 20 (losing ties)" and lists all three entries in order, each with its full text: Sucking Mud, Rising Waters, Will-o'-Wisps.
+- [ ] Nothing in these sections is recommended or decided. It's reference text only.
+- [ ] "Concentrating on" sits in the Spellcasting box and is highlighted while the monster concentrates.
 
 ## 8. Party roster
 

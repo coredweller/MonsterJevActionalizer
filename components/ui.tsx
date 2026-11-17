@@ -87,7 +87,14 @@ export function ToggleChip({ pressed, onToggle, children }: { pressed: boolean; 
   );
 }
 
-type NumberFieldProps = { label: string; placeholder?: string; disabled?: boolean; className?: string } & (
+type NumberFieldProps = {
+  label: string;
+  /** Keeps the label for screen readers only, for a field whose visible label sits beside it. */
+  hideLabel?: boolean;
+  placeholder?: string;
+  disabled?: boolean;
+  className?: string;
+} & (
   | { optional: true; value: number | undefined; onChange: (value: number | undefined) => void }
   | { optional?: false; value: number; onChange: (value: number) => void }
 );
@@ -106,7 +113,7 @@ function wholeNumberError(text: string, optional: boolean): string | null {
  * set as the input's custom validity, so a surrounding <form> won't submit while it shows.
  */
 export function NumberField(props: NumberFieldProps) {
-  const { label, placeholder, disabled, className = "" } = props;
+  const { label, hideLabel = false, placeholder, disabled, className = "" } = props;
   const [text, setText] = useState(props.value === undefined ? "" : String(props.value));
   // Resync the text when the value changes from outside (React's "adjust state on prop change" pattern).
   const [lastValue, setLastValue] = useState(props.value);
@@ -138,7 +145,7 @@ export function NumberField(props: NumberFieldProps) {
 
   return (
     <label className={`${labelClass} ${className}`}>
-      {label}
+      {hideLabel ? <span className="sr-only">{label}</span> : label}
       <input
         ref={inputRef}
         className={`${inputClass} ${error ? "border-red-500" : ""}`}

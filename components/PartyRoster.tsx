@@ -1,14 +1,14 @@
 "use client";
 
 import { PlayerSchema, type Player } from "@/lib/encounter/types";
-import { Button, NumberField, Panel, inputClass, labelClass } from "./ui";
+import { Button, NumberField, inputClass, labelClass } from "./ui";
 
 const RoleSchema = PlayerSchema.shape.role;
 type Role = Player["role"];
 const ROLE_LABEL: Record<Role, string> = { melee: "Melee", ranged: "Ranged", caster: "Caster", healer: "Healer" };
 
 /**
- * The tracker's party roster. Controlled: every edit emits the whole new roster, which the caller
+ * The tracker's party roster, shown at the top of the Situation panel. Controlled: every edit emits the whole new roster, which the caller
  * saves on the tracker. Removing a player asks first, then drops their situation row when the
  * situation is next synced with the roster (`syncSituation`).
  */
@@ -33,15 +33,13 @@ export function PartyRoster({ roster, onChange }: { roster: readonly Player[]; o
   }
 
   return (
-    <Panel
-      title="Party"
-      accent="party"
-      actions={
+    <section aria-label="Party" className="accent-party space-y-3 rounded-md border border-(--accent-line) p-3">
+      <header className="flex flex-wrap items-center justify-between gap-2">
+        <h3 className="font-semibold text-(--accent-strong)">Party</h3>
         <Button variant="primary" onClick={add}>
           Add player
         </Button>
-      }
-    >
+      </header>
       {roster.length === 0 ? (
         <p className="text-sm text-stone-500">No players yet.</p>
       ) : (
@@ -82,6 +80,6 @@ export function PartyRoster({ roster, onChange }: { roster: readonly Player[]; o
           ))}
         </ul>
       )}
-    </Panel>
+    </section>
   );
 }

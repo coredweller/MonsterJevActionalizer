@@ -1,7 +1,7 @@
 "use client";
 
-import { useMemo, useState, type ReactNode } from "react";
-import { describeUses, statblockSections, summarize, type StatblockEntry } from "@/lib/monster/describe";
+import { useMemo, useState } from "react";
+import { describeUses, summarize } from "@/lib/monster/describe";
 import { confirmReview, parseDamage, spellsMissingLevel, type ReviewDraft } from "@/lib/monster/extract";
 import {
   AbilityCategorySchema,
@@ -10,10 +10,10 @@ import {
   AreaShapeSchema,
   ReviewedMonsterSchema,
   type Ability,
-  type AbilityName,
   type AbilityUses,
   type ReviewedMonster,
 } from "@/lib/monster/types";
+import { Chip, MonsterStatblock, spellBoxClass } from "./MonsterStatblock";
 import { Button, Panel, inputClass, labelClass } from "./ui";
 
 const CATEGORY_LABEL: Record<Ability["category"], string> = {
@@ -248,7 +248,6 @@ export function ReviewScreen({
   const names = useMemo(() => Object.fromEntries(draft.abilities.map((a) => [a.id, a.name])), [draft.abilities]);
   const slots = draft.spellcasting?.slots ?? {};
   const missingLevel = spellsMissingLevel(draft);
-  const { sections, unplaced } = useMemo(() => statblockSections(draft), [draft]);
   const spells = draft.abilities.filter((a) => a.source === "Spellcasting");
 
   function updateAbility(next: Ability) {
@@ -305,7 +304,7 @@ export function ReviewScreen({
   );
 
   const spellcastingTools = draft.spellcasting && (
-    <div className="mt-2 space-y-2 rounded border border-[#7a200d]/30 bg-white/50 p-2">
+    <div className={spellBoxClass}>
       <p className="text-xs text-stone-700">
         {draft.spellcasting.saveDc !== undefined && `Save DC ${draft.spellcasting.saveDc}. `}
         {draft.spellcasting.attackBonus !== undefined && `+${draft.spellcasting.attackBonus} to hit with spell attacks. `}
@@ -336,32 +335,7 @@ export function ReviewScreen({
     </div>
   );
 
-  // Spells and slots hang off the first Spellcasting entry only, so a monster with two never lists them twice.
-  const firstSpellcasting = sections.flatMap((s) => s.entries).find((e) => e.spellcasting);
-
-  const entry = (e: StatblockEntry) => (
-    <div key={`${e.name}-${e.ability?.id ?? "text"}`} id={e.ability ? `ability-${e.ability.id}` : undefined} className="scroll-mt-24">
-      <p className="whitespace-pre-line">
-        <span className="font-bold italic">{e.name.endsWith(".") ? e.name : `${e.name}.`}</span> {e.text}
-      </p>
-      {e.ability && (
-        <>
-          <div className="mt-1 flex flex-wrap items-center gap-1.5">
-            <AbilityChips ability={e.ability} names={names} />
-            {editToggle(e.ability)}
-          </div>
-          {editing === e.ability.id && <AbilityEditor ability={e.ability} onChange={updateAbility} />}
-        </>
-      )}
-      {e === firstSpellcasting && spellcastingTools}
-    </div>
-  );
-
   const body = draft.monster.body;
-  const legendary = draft.monster.kind === "legendary" ? draft.monster.body : undefined;
-  const equipment = Object.entries(body.Equipment)
-    .flatMap(([slot, item]) => (typeof item === "string" && item.trim() !== "" ? [`${slot}: ${item}`] : []))
-    .join("; ");
   const speedParsed = Object.entries(draft.speed)
     .map(([mode, ft]) => `${mode} ${ft}`)
     .join(" · ");
@@ -392,124 +366,42 @@ export function ReviewScreen({
           <ProblemBanner tone="warning" title={`${warnings.length} ${warnings.length === 1 ? "warning" : "warnings"}`} problems={warnings} onGo={goTo} />
         )}
 
-        <article className="statblock mx-auto max-w-3xl text-sm leading-snug text-stone-950">
-          <div className="statblock-bar" />
-          <div className="px-4 py-3 sm:px-6">
-            <h3 className="statblock-name text-3xl leading-tight font-bold">{body.CharacterName}</h3>
-            <p className="italic">{[body.Race, body.Alignment.toLowerCase()].filter((part) => part.trim() !== "").join(", ")}</p>
-            <div className="statblock-rule" />
-
-            <div className="space-y-0.5 text-[#7a200d]">
-              <Prop label="Armor Class">{body.AC}</Prop>
-              <p className="flex flex-wrap items-center gap-x-2">
-                <label htmlFor="review-max-hp" className="font-bold">
-                  Hit Points
-                </label>
-                {/* The wrapper sets the width: inputClass's w-full beats a w-24 added beside it. */}
-                <span className="w-24">
-                  <input
-                    id="review-max-hp"
-                    aria-label="Max HP"
-                    className={inputClass}
-                    type="number"
-                    value={draft.hpMax}
-                    onChange={(e) => setDraft((d) => ({ ...d, hpMax: Math.max(1, int(e.target.value, d.hpMax)) }))}
-                  />
-                </span>
-                <span>{body.HP.replace(/^\s*\d+\s*/, "")}</span>
-              </p>
-              <p className="flex flex-wrap items-center gap-x-2">
-                <span>
-                  <span className="font-bold">Speed</span> {body.Speed}
-                </span>
-                {speedParsed ? <Chip>{speedParsed}</Chip> : <Chip tone="warning">speed not parsed</Chip>}
-              </p>
-            </div>
-            <div className="statblock-rule" />
-
-            <dl className="grid grid-cols-3 gap-y-2 text-center text-[#7a200d] sm:grid-cols-6">
-              {AbilityNameSchema.options.map((name) => (
-                <div key={name}>
-                  <dt className="font-bold">{ABILITY_ABBR[name]}</dt>
-                  <dd>
-                    {body.AbilityScores[name].Score} ({signed(body.AbilityScores[name].Modifier)})
-                  </dd>
-                </div>
-              ))}
-            </dl>
-            <div className="statblock-rule" />
-
-            <div className="space-y-0.5 text-[#7a200d]">
-              {Object.keys(body.SavingThrows).length > 0 && <Prop label="Saving Throws">{joinBonuses(body.SavingThrows, true)}</Prop>}
-              {Object.keys(body.Skills).length > 0 && <Prop label="Skills">{joinBonuses(body.Skills, false)}</Prop>}
-              {legendary?.DamageResistances && <Prop label="Damage Resistances">{legendary.DamageResistances}</Prop>}
-              {legendary?.DamageImmunities && <Prop label="Damage Immunities">{legendary.DamageImmunities}</Prop>}
-              {legendary?.ConditionImmunities && <Prop label="Condition Immunities">{legendary.ConditionImmunities}</Prop>}
-              {body.Senses && <Prop label="Senses">{body.Senses}</Prop>}
-              {body.Languages && <Prop label="Languages">{body.Languages}</Prop>}
-              {legendary && (
-                <Prop label="Challenge">
-                  {legendary.ChallengeRating} (Proficiency Bonus {legendary.ProficiencyBonus})
-                </Prop>
-              )}
-              {body.Class && <Prop label="Class">{body.Class}</Prop>}
-              <Prop label="Level">{body.Level}</Prop>
-              {equipment && <Prop label="Equipment">{equipment}</Prop>}
-              {body.Notes && <Prop label="Notes">{body.Notes}</Prop>}
-            </div>
-            <div className="statblock-rule" />
-
-            {sections.map((section) => (
-              <section key={section.title} className="space-y-2.5">
-                {section.title !== "Traits" && <h4 className="statblock-heading mt-4 border-b border-[#922610] text-2xl">{section.title}</h4>}
-                {section.intro && <p>{section.intro}</p>}
-                {section.entries.map(entry)}
-              </section>
-            ))}
-
-            {unplaced.length > 0 && (
-              <section className="space-y-2.5">
-                <h4 className="statblock-heading mt-4 border-b border-[#922610] text-2xl">Other abilities</h4>
-                {unplaced.map((a) => entry({ name: a.name, text: a.raw, ability: a, spellcasting: false }))}
-              </section>
-            )}
-          </div>
-          <div className="statblock-bar" />
-        </article>
+        <MonsterStatblock
+          reviewed={draft}
+          name={body.CharacterName}
+          hitPoints={
+            <>
+              <label htmlFor="review-max-hp" className="font-bold">
+                Hit Points
+              </label>
+              {/* The wrapper sets the width: inputClass's w-full beats a w-24 added beside it. */}
+              <span className="w-24">
+                <input
+                  id="review-max-hp"
+                  aria-label="Max HP"
+                  className={inputClass}
+                  type="number"
+                  value={draft.hpMax}
+                  onChange={(e) => setDraft((d) => ({ ...d, hpMax: Math.max(1, int(e.target.value, d.hpMax)) }))}
+                />
+              </span>
+            </>
+          }
+          speedNote={speedParsed ? <Chip>{speedParsed}</Chip> : <Chip tone="warning">speed not parsed</Chip>}
+          abilityExtra={(a) => (
+            <>
+              <div className="mt-1 flex flex-wrap items-center gap-1.5">
+                <AbilityChips ability={a} names={names} />
+                {editToggle(a)}
+              </div>
+              {editing === a.id && <AbilityEditor ability={a} onChange={updateAbility} />}
+            </>
+          )}
+          spellcasting={spellcastingTools}
+        />
       </div>
     </Panel>
   );
-}
-
-const ABILITY_ABBR: Record<AbilityName, string> = {
-  Strength: "STR",
-  Dexterity: "DEX",
-  Constitution: "CON",
-  Intelligence: "INT",
-  Wisdom: "WIS",
-  Charisma: "CHA",
-};
-
-const signed = (n: number) => (n >= 0 ? `+${n}` : String(n));
-
-/** "Dex +7, Wis +7" for saving throws (ability names shortened), "Perception +7, Stealth +7" for skills. */
-const joinBonuses = (bonuses: Record<string, string>, shorten: boolean) =>
-  Object.entries(bonuses)
-    .map(([name, bonus]) => `${shorten ? name.slice(0, 3) : name} ${bonus}`)
-    .join(", ");
-
-/** A "Label value" line in the statblock's property block. */
-function Prop({ label, children }: { label: string; children: ReactNode }) {
-  return (
-    <p>
-      <span className="font-bold">{label}</span> {children}
-    </p>
-  );
-}
-
-function Chip({ tone = "plain", children }: { tone?: "plain" | "warning"; children: ReactNode }) {
-  const tones = { plain: "border-[#7a200d]/40 bg-white/70 text-stone-800", warning: "border-amber-600 bg-amber-100 text-amber-950" };
-  return <span className={`inline-block rounded border px-1.5 py-0.5 text-xs ${tones[tone]}`}>{children}</span>;
 }
 
 /** What was parsed from an ability, as small chips under its statblock text. */

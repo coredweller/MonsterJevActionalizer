@@ -19,7 +19,7 @@ Reference implementation for calling Jev: `F:\Projects\AI\typesafe-assist\smart-
 ## Scope (v1)
 - Runs **locally** on the DM's laptop (`npm run dev`). The layout must still work on a tablet. No auth and no deployment.
 - **One monster per tracker.** For five goblins, use five trackers (Duplicate makes this quick).
-- The app **decides** only the monster's own turn. **Legendary actions, reactions and lair actions** (initiative 20) appear as reminder cards and are not decided.
+- The app **decides** only the monster's own turn. **Legendary actions, reactions and lair actions** (initiative 20) appear as reminders in the tracker's statblock and are not decided.
 - **No second LLM.** Low confidence shows the alternatives. We'll revisit this if the output isn't good enough.
 - **Out of scope for now:**
   - loading monsters from the DandDTemplateParser database (it needs a new JSON endpoint there, since `GET /monsters/:id` returns only HTML)
@@ -35,7 +35,7 @@ Next.js (App Router), TypeScript, npm, Tailwind and hand-rolled components. The 
 ## Structure
 ```
 app/
-  page.tsx                  – layout: tracker sidebar | monster + tracker | situation form | recommendation
+  page.tsx                  – layout: tracker sidebar | settings + monster statblock | party + situation form | recommendation
   useTrackers.ts            – the only localStorage access (try/catch, empty default)
   api/decide/route.ts       – server: build request → call Jev → interpret → Recommendation
 lib/jev/
@@ -55,7 +55,6 @@ lib/encounter/
   state.ts                  – reducers: create, duplicate, startTurn, apply, recordResult, manual edits
   storage.ts                – pure serialize/parse of saved trackers (zod-validated, empty default on bad data);
                               the localStorage calls themselves live in app/useTrackers.ts, wrapped in try/catch
-  reminders.ts              – reminder cards: legendary actions left, reactions, lair actions
 lib/decide/
   constants.ts              – confidence and consistency thresholds as named constants
   clusters.ts               – groups players from "clustered with"
@@ -68,8 +67,8 @@ scripts/
   check-monsters.ts         – `npm run check:monsters [--fix]`: runs normalize.ts over fixtures/monsters/*.json
   build-srd-spells.ts       – generates data/srd-spells.json from the SRD 5.1 (CC BY 4.0)
   record-jev.ts             – `npm run record:jev`: records one live Jev response per scenario into fixtures/jev/
-components/                 – TrackerSidebar, MonsterLoader, FixScreen, ReviewScreen, EncounterTracker, PartyRoster,
-                              SituationForm, PlayerRow, RecommendationCard, ReminderCards, TurnLog
+components/                 – TrackerSidebar, MonsterLoader, FixScreen, ReviewScreen, MonsterStatblock (shared by review
+                              and tracker), EncounterTracker, PartyRoster, SituationForm, PlayerRow, RecommendationCard, TurnLog
 fixtures/
   monsters/                 – real monster JSONs supplied by the DM, plus two authored test monsters
                               (AshenWarpriest 2014, BriarthornHag 2024; see fixtures/monsters/README.md)
@@ -174,12 +173,14 @@ A tracker belongs to one monster. It holds:
 
 **Start turn** moves the round on, refills legendary actions (5e: they come back at the start of the monster's turn; Legendary Resistance is per day and doesn't), and rolls a d6 for each spent recharge ability (auto mode) and shows the roll.
 
-**Reminder cards** (legendary actions left and their options, reactions, lair actions) are always shown under the tracker whenever the monster has any, from round 1 on, since the first round is played without pressing Start turn.
+**Tracker layout:** the settings (temperament, morale, recharge mode) and the monster's conditions are always shown, directly above the monster card. The card is the same statblock as the review screen, with each live counter beside what it tracks: HP on the Hit Points line, daily uses and recharge under their abilities, slots and **"Concentrating on"** in the Spellcasting box, Legendary Resistance under the traits, and legendary actions left in the Legendary Actions section.
+
+**Reminders** (legendary actions and their options, reactions, lair actions) are the statblock's own sections, so they show from round 1 on, since the first round is played without pressing Start turn.
 
 **Turn log:** each turn records the action, target, move and slot actually used, plus a result the DM notes (hit / miss / downed / effect). The **last 3 turns** go into Jev's state.
 
 ## Situation form
-**Party roster** (saved per tracker): name, role (melee / ranged / caster / healer), class, and AC if known.
+**Party roster** (saved per tracker, at the top of the Situation panel): name, role (melee / ranged / caster / healer), class, and AC if known.
 
 **Per-turn player fields**, which **carry over** from the last turn so the DM edits only what changed:
 - **zone:** engaged / near / far / very far, with an optional exact distance in feet
@@ -264,7 +265,7 @@ Code reads the `probabilities` distributions, not just `choice`, because the pro
   - writes a turn-log entry (the DM then records the result)
   - carries the situation forward
 - **If the Jev call fails:** the app shows the error, keeps the legal options, and lets the DM pick by hand and apply.
-- **Reminder cards:** legendary actions left and their options, reactions, and lair actions (initiative 20).
+- **Reminders:** legendary actions left and their options, reactions, and lair actions (initiative 20), shown in the tracker's statblock.
 
 ## Env
 - `TYPESAFE_API_KEY`: required. The DM puts it in `.env.local` themselves.

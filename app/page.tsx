@@ -4,9 +4,7 @@ import { useId, useRef, useState } from "react";
 import { EncounterTracker } from "@/components/EncounterTracker";
 import { FixScreen } from "@/components/FixScreen";
 import { MonsterLoader } from "@/components/MonsterLoader";
-import { PartyRoster } from "@/components/PartyRoster";
 import { RecommendationCard } from "@/components/RecommendationCard";
-import { ReminderCards } from "@/components/ReminderCards";
 import { ReviewScreen } from "@/components/ReviewScreen";
 import { SituationForm } from "@/components/SituationForm";
 import { TrackerSidebar } from "@/components/TrackerSidebar";
@@ -204,10 +202,6 @@ export default function Home() {
                   <p className="text-sm text-stone-500">Select a tracker.</p>
                 </Panel>
               )}
-              {selected && <ReminderCards tracker={selected} />}
-              {selected && (
-                <PartyRoster roster={selected.roster} onChange={(roster) => upsert({ ...selected, roster, situation: syncSituation(selected.situation, roster) })} />
-              )}
             </div>
 
             <div className="min-w-0">
@@ -215,6 +209,7 @@ export default function Home() {
                 <SituationForm
                   roster={selected.roster}
                   situation={selected.situation}
+                  onRosterChange={(roster) => upsert({ ...selected, roster, situation: syncSituation(selected.situation, roster) })}
                   onChange={(situation) => upsert({ ...selected, situation })}
                   onRecommend={(situation) => void recommend(selected, situation)}
                   pending={shown !== null && shown.outcome === null}

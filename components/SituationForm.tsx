@@ -4,6 +4,7 @@ import { useMemo, useState, type FormEvent } from "react";
 import { syncSituation, updatePlayerTurn } from "@/lib/encounter/state";
 import { SituationSchema, type Player, type Situation } from "@/lib/encounter/types";
 import { log } from "@/lib/log";
+import { PartyRoster } from "./PartyRoster";
 import { PlayerRow } from "./PlayerRow";
 import { Button, CheckboxField, NumberField, Panel, inputClass, labelClass } from "./ui";
 
@@ -28,12 +29,15 @@ const INVERTED: ReadonlySet<TerrainFlag> = new Set(["flyingPossible"]);
 export function SituationForm({
   roster,
   situation,
+  onRosterChange,
   onChange,
   onRecommend,
   pending = false,
 }: {
   roster: readonly Player[];
   situation: Situation;
+  /** Party edits, from the roster at the top of the panel. */
+  onRosterChange: (roster: Player[]) => void;
   onChange: (situation: Situation) => void;
   onRecommend: (situation: Situation) => void;
   /** True while a recommendation request is in flight; disables "Recommend" so it isn't sent twice. */
@@ -65,10 +69,10 @@ export function SituationForm({
 
   return (
     <Panel title="Situation" accent="situation">
-      <form className="space-y-4" onSubmit={submit}>
-        {roster.length === 0 ? (
-          <p className="text-sm text-stone-500">No players yet. Add them to the party to say where they are.</p>
-        ) : (
+      {/* Outside the form: pressing Enter in a roster field mustn't submit Recommend. */}
+      <PartyRoster roster={roster} onChange={onRosterChange} />
+      <form className="mt-4 space-y-4" onSubmit={submit}>
+        {roster.length > 0 && (
           <div className="space-y-3">
             {roster.map((player) => {
               const turn = synced.players.find((t) => t.playerId === player.id);

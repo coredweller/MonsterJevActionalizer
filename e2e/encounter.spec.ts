@@ -1,6 +1,6 @@
 /**
  * T063: the encounter survives a reload, and an unreadable save starts the app empty with a warning.
- * T069: the settings panel saves, survives a reload, and manual recharge skips the roll.
+ * T069: the settings (always shown above the statblock) save, survive a reload, and manual recharge skips the roll.
  */
 import { expect, test, type Page } from "@playwright/test";
 import { CORRUPT_KEY, STORAGE_KEY } from "@/app/useTrackers";
@@ -69,7 +69,8 @@ test("settings are saved, survive a reload, and manual recharge skips the roll",
   const suggested = suggestTemperament(int);
   const other = suggested === "genius" ? "feral" : "genius";
 
-  await page.locator("summary", { hasText: "Settings:" }).click();
+  // Settings sit open above the statblock: nothing to expand first.
+  await expect(page.getByRole("region", { name: "Settings" })).toBeVisible();
   // By role, not getByLabel: the wrapping <label>'s text includes every option's text.
   const temperament = page.getByRole("combobox", { name: "Temperament", exact: true });
   const marked = temperament.locator("option", { hasText: `(suggested for INT ${int})` });
@@ -86,8 +87,6 @@ test("settings are saved, survive a reload, and manual recharge skips the roll",
     .toEqual({ temperament: other, morale: 15, rechargeMode: "manual" });
 
   await page.reload();
-  await page.locator("summary", { hasText: "Settings:" }).click();
-  await expect(page.locator("summary", { hasText: "Settings:" })).toContainText("morale 15 · recharge manual");
   await expect(temperament).toHaveValue(other);
   await expect(page.getByLabel("Morale", { exact: true })).toHaveValue("15");
   await expect(manual).toHaveAttribute("aria-pressed", "true");
