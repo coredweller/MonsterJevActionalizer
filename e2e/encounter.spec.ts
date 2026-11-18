@@ -69,8 +69,12 @@ test("settings are saved, survive a reload, and manual recharge skips the roll",
   const suggested = suggestTemperament(int);
   const other = suggested === "genius" ? "feral" : "genius";
 
-  // Settings sit open above the statblock: nothing to expand first.
-  await expect(page.getByRole("region", { name: "Settings" })).toBeVisible();
+  // Settings start collapsed above the statblock, so the statblock shows higher up.
+  const settings = page.getByRole("region", { name: "Settings" });
+  const openSettings = () => settings.locator("summary").click();
+  await expect(settings).toBeVisible();
+  await expect(page.getByRole("combobox", { name: "Temperament", exact: true })).toBeHidden();
+  await openSettings();
   // By role, not getByLabel: the wrapping <label>'s text includes every option's text.
   const temperament = page.getByRole("combobox", { name: "Temperament", exact: true });
   const marked = temperament.locator("option", { hasText: `(suggested for INT ${int})` });
@@ -87,6 +91,7 @@ test("settings are saved, survive a reload, and manual recharge skips the roll",
     .toEqual({ temperament: other, morale: 15, rechargeMode: "manual" });
 
   await page.reload();
+  await openSettings();
   await expect(temperament).toHaveValue(other);
   await expect(page.getByLabel("Morale", { exact: true })).toHaveValue("15");
   await expect(manual).toHaveAttribute("aria-pressed", "true");

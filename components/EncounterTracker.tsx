@@ -203,7 +203,20 @@ export function EncounterTracker({ tracker, onChange }: { tracker: Tracker; onCh
           </div>
         )}
 
-        <section aria-label="Settings" className="@container space-y-4 rounded-md border border-(--accent-line) p-3">
+        {/* Closed by default so the statblock starts higher; the summary still shows every current value. */}
+        <section aria-label="Settings" className="@container rounded-md border border-(--accent-line)">
+          <details className="group">
+            <summary className="flex min-h-11 cursor-pointer list-none flex-wrap items-center gap-x-2 px-3 py-2 text-sm [&::-webkit-details-marker]:hidden">
+              <span aria-hidden="true" className="text-(--accent-strong) transition-transform group-open:rotate-90">
+                ▸
+              </span>
+              <span className="font-semibold text-(--accent-strong)">Settings</span>
+              <span className="text-stone-600">
+                {TEMPERAMENT_LABELS[settings.temperament]} · Morale {settings.morale} · Recharge {settings.rechargeMode} · Conditions:{" "}
+                {state.conditions.length > 0 ? state.conditions.join(", ") : "none"}
+              </span>
+            </summary>
+            <div className="space-y-4 px-3 pb-3">
           <div className="grid grid-cols-1 gap-4 @md:grid-cols-2">
             <label className={labelClass}>
               Temperament
@@ -260,6 +273,8 @@ export function EncounterTracker({ tracker, onChange }: { tracker: Tracker; onCh
               ))}
             </div>
           </div>
+            </div>
+          </details>
         </section>
 
         <MonsterStatblock

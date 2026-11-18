@@ -146,7 +146,7 @@ Use `MaestroDrazzuk` unless noted.
 
 ## 6. Settings
 
-- [ ] Temperament, Morale, Recharge mode and Conditions are always shown, directly above the monster's statblock, with nothing to expand.
+- [ ] Temperament, Morale, Recharge mode and Conditions sit in a **Settings** box directly above the monster's statblock. It starts collapsed, and its one-line summary shows the current value of all four. Clicking it expands the controls.
 - [ ] **Temperament** is suggested from INT: ≤3 mindless, 4–7 feral, 8–13 cunning, 14+ tactical genius. The suggested option is marked "(suggested for INT n)" and is the default on a new tracker. Check at least two bands.
 - [ ] **Morale** slider: starts at 50, runs from 0 (Cowardly) to 100 (Fanatical), and the number follows the slider.
 - [ ] **Recharge mode**: exactly one of Auto / Manual is pressed at a time. Pressing the one already pressed does nothing.
