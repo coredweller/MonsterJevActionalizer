@@ -9,6 +9,9 @@ const sidebar = (page: Page) => page.getByRole("complementary", { name: "Tracker
 /** A tracker's select button in the sidebar. Its name is the tracker name followed by its HP and round. */
 const row = (page: Page, name: string) => sidebar(page).getByRole("button", { name: new RegExp(`^${name}\\s*HP`) });
 
+/** The sidebar button that opens the collapsed trackers list. Its name ends in the count, e.g. "Show all (2)". */
+const showAll = (page: Page) => sidebar(page).getByRole("button", { name: /^Show all/ });
+
 async function savedNames(page: Page): Promise<string[]> {
   const text = await stored(page, STORAGE_KEY);
   if (text === null) throw new Error("savedNames: nothing saved yet");
@@ -32,6 +35,7 @@ test("duplicating a damaged tracker gives a fresh, selected copy and leaves the 
   await expect(page.getByRole("button", { name: "Level 3: restore one" })).toBeDisabled();
   await expect.poll(() => savedNames(page)).toEqual(["Maestro Drazzuk", "Maestro Drazzuk 2"]);
 
+  await showAll(page).click();
   await row(page, "Maestro Drazzuk").click();
   await expect(page.getByRole("heading", { name: "Maestro Drazzuk", exact: true })).toBeVisible();
   await expect(row(page, "Maestro Drazzuk")).toHaveAttribute("aria-current", "true");
@@ -40,10 +44,36 @@ test("duplicating a damaged tracker gives a fresh, selected copy and leaves the 
   await expect(page.getByRole("button", { name: "Level 3: restore one" })).toBeEnabled();
 });
 
+test("with a tracker selected the others are collapsed until the DM shows them all", async ({ page }) => {
+  await loadMonster(page, MAESTRO, "Maestro Drazzuk");
+  // A single tracker needs no toggle.
+  await expect(showAll(page)).toHaveCount(0);
+
+  await sidebar(page).getByRole("button", { name: "Duplicate Maestro Drazzuk" }).click();
+  await expect(row(page, "Maestro Drazzuk 2")).toHaveAttribute("aria-current", "true");
+  await expect(row(page, "Maestro Drazzuk")).toHaveCount(0);
+  await expect(showAll(page)).toHaveText("Show all (2)");
+  await expect(showAll(page)).toHaveAttribute("aria-expanded", "false");
+
+  await showAll(page).click();
+  await expect(row(page, "Maestro Drazzuk")).toBeVisible();
+  const hide = sidebar(page).getByRole("button", { name: "Show selected only" });
+  await expect(hide).toHaveAttribute("aria-expanded", "true");
+  await hide.click();
+  await expect(row(page, "Maestro Drazzuk")).toHaveCount(0);
+
+  // Picking another monster collapses the list onto it.
+  await showAll(page).click();
+  await row(page, "Maestro Drazzuk").click();
+  await expect(row(page, "Maestro Drazzuk")).toHaveAttribute("aria-current", "true");
+  await expect(row(page, "Maestro Drazzuk 2")).toHaveCount(0);
+});
+
 test("deleting a tracker asks first: cancelling keeps it, confirming removes it", async ({ page }) => {
   await loadMonster(page, MAESTRO, "Maestro Drazzuk");
   await sidebar(page).getByRole("button", { name: "Duplicate Maestro Drazzuk" }).click();
   await expect.poll(() => savedNames(page)).toEqual(["Maestro Drazzuk", "Maestro Drazzuk 2"]);
+  await showAll(page).click();
 
   page.once("dialog", (dialog) => {
     expect(dialog.message()).toContain("Delete Maestro Drazzuk?");
@@ -97,6 +127,37 @@ test.describe("at tablet width", () => {
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), `no horizontal scroll at ${width}px`).toBe(true);
     }
   });
+});
+
+test("the party is edited in the sidebar; players this turn and the battlefield are their own panels", async ({ page }) => {
+  await loadMonster(page, MAESTRO, "Maestro Drazzuk");
+  const party = sidebar(page).getByRole("region", { name: "Party" });
+
+  // A new player opens for editing; Done closes it to a one-line summary with an Edit button.
+  await party.getByRole("button", { name: "Add player" }).click();
+  await party.getByLabel("Name").fill("Ann");
+  await party.getByLabel("Class").fill("Fighter");
+  await party.getByRole("button", { name: "Done" }).click();
+  await expect(party.getByLabel("Name")).toBeHidden();
+  await expect(party.getByText("Melee · Fighter")).toBeVisible();
+
+  await party.getByRole("button", { name: "Edit Ann" }).click();
+  await party.getByLabel("AC").fill("18");
+  await party.getByRole("button", { name: "Done" }).click();
+  await expect(party.getByText("Melee · Fighter · AC 18")).toBeVisible();
+
+  const players = page.getByRole("region", { name: "Players this turn" });
+  await expect(players.getByText("Ann")).toBeVisible();
+  await expect(players.getByRole("combobox", { name: "Zone" })).toBeVisible();
+
+  const battlefield = page.getByRole("region", { name: "Battlefield" });
+  await expect(battlefield.getByLabel("Allies present")).toBeVisible();
+  await expect(battlefield.getByRole("button", { name: "Recommend" })).toBeVisible();
+
+  // A bad number in a player row still blocks Recommend, though the row sits in another panel.
+  await players.getByLabel("Exact ft.").fill("x");
+  await battlefield.getByRole("button", { name: "Recommend" }).click();
+  await expect(page.getByText("Recommending…")).toHaveCount(0);
 });
 
 test("at desktop width the sidebar is a column and the drawer button is hidden", async ({ page }) => {

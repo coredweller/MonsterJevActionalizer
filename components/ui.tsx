@@ -38,11 +38,13 @@ type Accent = "monster" | "party" | "situation" | "recommendation";
 /** A Panel's frame. Also used by the page's sections that aren't Panels, so every box matches. */
 export const panelFrame = "overflow-hidden rounded-md border border-t-4 border-(--accent-line) border-t-(--accent) bg-white shadow-sm";
 
+/** A titled box. Its title names it, so each Panel is a landmark region a screen reader (or a test) can find by name. */
 export function Panel({ title, accent, actions, children }: { title: string; accent?: Accent; actions?: ReactNode; children: ReactNode }) {
+  const titleId = useId();
   return (
-    <section className={`${accent ? `accent-${accent}` : ""} ${panelFrame}`}>
+    <section aria-labelledby={titleId} className={`${accent ? `accent-${accent}` : ""} ${panelFrame}`}>
       <header className="flex flex-wrap items-center justify-between gap-2 border-b border-(--accent-line) bg-(--accent-soft) px-3 py-2">
-        <h2 className="font-semibold text-(--accent-strong)">{title}</h2>
+        <h2 id={titleId} className="font-semibold text-(--accent-strong)">{title}</h2>
         {actions && <div className="flex flex-wrap gap-2">{actions}</div>}
       </header>
       <div className="p-3">{children}</div>

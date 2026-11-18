@@ -12,6 +12,7 @@ import {
   type PlayerTurn,
   type Zone,
 } from "@/lib/encounter/types";
+import { describePlayer } from "./PartyRoster";
 import { CheckboxField, NumberField, ToggleChip, inputClass, labelClass, toggled } from "./ui";
 
 const CoverSchema = PlayerTurnSchema.shape.cover;
@@ -56,11 +57,7 @@ export function PlayerRow({
     <fieldset className="min-w-0 rounded-md border border-(--accent-line) p-3">
       <legend className="px-1 font-semibold text-(--accent-strong)">
         {player.name || "Unnamed player"}
-        <span className="ml-2 text-sm font-normal text-stone-600">
-          {player.role}
-          {player.class && `, ${player.class}`}
-          {player.ac !== undefined && `, AC ${player.ac}`}
-        </span>
+        <span className="ml-2 text-sm font-normal text-stone-600">{describePlayer(player)}</span>
       </legend>
 
       {/* Two columns only on md+ screens AND when this row is itself wide enough: the page's xl grid makes the situation column narrow. */}

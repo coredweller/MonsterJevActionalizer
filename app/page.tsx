@@ -4,6 +4,7 @@ import { useId, useRef, useState } from "react";
 import { EncounterTracker } from "@/components/EncounterTracker";
 import { FixScreen } from "@/components/FixScreen";
 import { MonsterLoader } from "@/components/MonsterLoader";
+import { PartyRoster } from "@/components/PartyRoster";
 import { RecommendationCard } from "@/components/RecommendationCard";
 import { ReviewScreen } from "@/components/ReviewScreen";
 import { SituationForm } from "@/components/SituationForm";
@@ -133,6 +134,34 @@ export default function Home() {
     if (next.state.round !== previous.state.round) clearDecision();
   }
 
+  // The recommendation and the turn log, under the Battlefield panel in the last column.
+  const outcomePanels = (
+    <>
+      {selected && shown?.outcome ? (
+        <>
+          {shown.outcome.kind === "failed" && (
+            <p role="alert" className="rounded bg-red-50 p-2 text-sm text-red-800">
+              {shown.outcome.message}
+            </p>
+          )}
+          <RecommendationCard
+            tracker={selected}
+            situation={shown.situation}
+            recommendation={shown.outcome.kind === "failed" ? null : shown.outcome.recommendation}
+            onApply={onApplied}
+          />
+        </>
+      ) : (
+        <Panel title="Recommendation" accent="recommendation">
+          <p className="text-sm text-stone-500">
+            {shown ? "Recommending…" : selected ? "Fill in the situation and press Recommend." : "Select a tracker."}
+          </p>
+        </Panel>
+      )}
+      {selected && <TurnLog tracker={selected} onChange={upsert} />}
+    </>
+  );
+
   return (
     <div className="flex min-h-screen flex-col">
       <header className="flex items-center justify-between bg-linear-to-r from-rose-700 via-violet-700 to-blue-700 px-4 py-3 text-white shadow">
@@ -157,8 +186,12 @@ export default function Home() {
         </div>
       )}
 
-      {/* Below xl the sidebar is a drawer outside the grid's flow, so the content columns get the full width. */}
-      <div className="grid flex-1 grid-cols-1 gap-4 p-4 md:grid-cols-2 xl:grid-cols-[14rem_1fr_1fr_1fr]">
+      {/*
+        Below xl the sidebar is a drawer outside the grid's flow, so the content columns get the full width.
+        On md the monster spans both rows on the left and the players and battlefield columns stack on the
+        right; the second row takes the leftover height, so the battlefield sits right under the players.
+      */}
+      <div className="grid flex-1 grid-cols-1 gap-4 p-4 md:grid-cols-2 md:grid-rows-[auto_1fr] xl:grid-cols-[14rem_1fr_1fr_1fr] xl:grid-rows-none">
         <TrackerSidebar
           id={sidebarId}
           open={drawerOpen}
@@ -170,7 +203,16 @@ export default function Home() {
           onAdd={() => setFlow({ step: "load" })}
           onDuplicate={onDuplicated}
           onDelete={remove}
-        />
+        >
+          {/* Keyed by tracker, so a player left open for editing closes on a switch. */}
+          {!loading && selected && (
+            <PartyRoster
+              key={selected.id}
+              roster={selected.roster}
+              onChange={(roster) => upsert({ ...selected, roster, situation: syncSituation(selected.situation, roster) })}
+            />
+          )}
+        </TrackerSidebar>
 
         {loaded && loading ? (
           <div className="md:col-span-2 xl:col-span-3">
@@ -194,7 +236,7 @@ export default function Home() {
           </div>
         ) : (
           <>
-            <div className="min-w-0 space-y-4">
+            <div className="min-w-0 space-y-4 md:row-span-2 xl:row-span-1">
               {selected ? (
                 <EncounterTracker tracker={selected} onChange={(next) => onTrackerEdited(selected, next)} />
               ) : (
@@ -204,47 +246,26 @@ export default function Home() {
               )}
             </div>
 
-            <div className="min-w-0">
-              {selected ? (
-                <SituationForm
-                  roster={selected.roster}
-                  situation={selected.situation}
-                  onRosterChange={(roster) => upsert({ ...selected, roster, situation: syncSituation(selected.situation, roster) })}
-                  onChange={(situation) => upsert({ ...selected, situation })}
-                  onRecommend={(situation) => void recommend(selected, situation)}
-                  pending={shown !== null && shown.outcome === null}
-                />
-              ) : (
-                <Panel title="Situation" accent="situation">
-                  <p className="text-sm text-stone-500">Select a tracker.</p>
-                </Panel>
-              )}
-            </div>
-
-            <div className="min-w-0 space-y-4">
-              {selected && shown?.outcome ? (
-                <>
-                  {shown.outcome.kind === "failed" && (
-                    <p role="alert" className="rounded bg-red-50 p-2 text-sm text-red-800">
-                      {shown.outcome.message}
-                    </p>
-                  )}
-                  <RecommendationCard
-                    tracker={selected}
-                    situation={shown.situation}
-                    recommendation={shown.outcome.kind === "failed" ? null : shown.outcome.recommendation}
-                    onApply={onApplied}
-                  />
-                </>
-              ) : (
-                <Panel title="Recommendation" accent="recommendation">
-                  <p className="text-sm text-stone-500">
-                    {shown ? "Recommending…" : selected ? "Fill in the situation and press Recommend." : "Select a tracker."}
-                  </p>
-                </Panel>
-              )}
-              {selected && <TurnLog tracker={selected} onChange={upsert} />}
-            </div>
+            {selected ? (
+              <SituationForm
+                roster={selected.roster}
+                situation={selected.situation}
+                onChange={(situation) => upsert({ ...selected, situation })}
+                onRecommend={(situation) => void recommend(selected, situation)}
+                pending={shown !== null && shown.outcome === null}
+              >
+                {outcomePanels}
+              </SituationForm>
+            ) : (
+              <>
+                <div className="min-w-0">
+                  <Panel title="Players this turn" accent="party">
+                    <p className="text-sm text-stone-500">Select a tracker.</p>
+                  </Panel>
+                </div>
+                <div className="min-w-0 space-y-4">{outcomePanels}</div>
+              </>
+            )}
           </>
         )}
       </div>

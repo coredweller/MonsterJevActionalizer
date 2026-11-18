@@ -1,30 +1,43 @@
 "use client";
 
+import { useState } from "react";
 import { PlayerSchema, type Player } from "@/lib/encounter/types";
-import { Button, NumberField, inputClass, labelClass } from "./ui";
+import { Button, NumberField, Panel, inputClass, labelClass } from "./ui";
 
 const RoleSchema = PlayerSchema.shape.role;
 type Role = Player["role"];
 const ROLE_LABEL: Record<Role, string> = { melee: "Melee", ranged: "Ranged", caster: "Caster", healer: "Healer" };
 
+/** "Caster · Wizard · AC 13": a player's role, then class and AC when known. Shared with the per-turn rows. */
+export function describePlayer(player: Player): string {
+  return [ROLE_LABEL[player.role], player.class, player.ac === undefined ? "" : `AC ${player.ac}`].filter((part) => part !== "").join(" · ");
+}
+
 /**
- * The tracker's party roster, shown at the top of the Situation panel. Controlled: every edit emits the whole new roster, which the caller
- * saves on the tracker. Removing a player asks first, then drops their situation row when the
- * situation is next synced with the roster (`syncSituation`).
+ * The tracker's party roster, in the sidebar under the trackers. Each player is a one-line summary;
+ * Edit opens their fields in place, one player at a time. Controlled: every edit emits the whole new
+ * roster, which the caller saves on the tracker. Removing a player asks first, then drops their
+ * situation row when the situation is next synced with the roster (`syncSituation`).
  */
 export function PartyRoster({ roster, onChange }: { roster: readonly Player[]; onChange: (roster: Player[]) => void }) {
+  // The player whose fields are open, or null. An id no longer in the roster opens nothing.
+  const [editingId, setEditingId] = useState<string | null>(null);
+
   function update(next: Player) {
     onChange(roster.map((p) => (p.id === next.id ? next : p)));
   }
 
   function add() {
-    onChange([...roster, { id: crypto.randomUUID(), name: `Player ${roster.length + 1}`, role: "melee", class: "" }]);
+    const player: Player = { id: crypto.randomUUID(), name: `Player ${roster.length + 1}`, role: "melee", class: "" };
+    onChange([...roster, player]);
+    setEditingId(player.id);
   }
 
   function remove(player: Player) {
     const name = player.name || "this unnamed player";
     if (!window.confirm(`Remove ${name}? Their zone, HP, conditions and groups in the current situation go too.`)) return;
     onChange(roster.filter((x) => x.id !== player.id));
+    setEditingId(null);
   }
 
   function setAc(player: Player, ac: number | undefined) {
@@ -33,53 +46,65 @@ export function PartyRoster({ roster, onChange }: { roster: readonly Player[]; o
   }
 
   return (
-    <section aria-label="Party" className="accent-party space-y-3 rounded-md border border-(--accent-line) p-3">
-      <header className="flex flex-wrap items-center justify-between gap-2">
-        <h3 className="font-semibold text-(--accent-strong)">Party</h3>
-        <Button variant="primary" onClick={add}>
+    <Panel title="Party" accent="party">
+      <div className="space-y-2">
+        {roster.length === 0 ? (
+          <p className="text-sm text-stone-500">No players yet.</p>
+        ) : (
+          <ul className="space-y-2">
+            {roster.map((p) => (
+              <li key={p.id}>
+                {p.id === editingId ? (
+                  <div className="space-y-2 rounded-md border border-(--accent) bg-(--accent-soft) p-2">
+                    <label className={labelClass}>
+                      Name
+                      <input className={inputClass} value={p.name} onChange={(e) => update({ ...p, name: e.target.value })} />
+                    </label>
+                    <div className="grid grid-cols-2 gap-2">
+                      <label className={labelClass}>
+                        Role
+                        <select className={inputClass} value={p.role} onChange={(e) => update({ ...p, role: RoleSchema.parse(e.target.value) })}>
+                          {RoleSchema.options.map((r) => (
+                            <option key={r} value={r}>
+                              {ROLE_LABEL[r]}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                      <NumberField label="AC" optional value={p.ac} placeholder="?" onChange={(ac) => setAc(p, ac)} />
+                    </div>
+                    <label className={labelClass}>
+                      Class
+                      <input className={inputClass} value={p.class} onChange={(e) => update({ ...p, class: e.target.value })} />
+                    </label>
+                    <div className="grid grid-cols-2 gap-2">
+                      <Button variant="danger" aria-label={`Remove ${p.name || "unnamed player"}`} onClick={() => remove(p)}>
+                        Remove
+                      </Button>
+                      <Button variant="primary" onClick={() => setEditingId(null)}>
+                        Done
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-between gap-1 rounded-md border border-(--accent-line) py-0.5 pl-2">
+                    <div className="min-w-0">
+                      <span className="block truncate font-semibold text-(--accent-strong)">{p.name || "Unnamed player"}</span>
+                      <span className="block text-xs text-stone-600">{describePlayer(p)}</span>
+                    </div>
+                    <Button variant="ghost" aria-label={`Edit ${p.name || "unnamed player"}`} onClick={() => setEditingId(p.id)}>
+                      Edit
+                    </Button>
+                  </div>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+        <Button variant="primary" className="w-full" onClick={add}>
           Add player
         </Button>
-      </header>
-      {roster.length === 0 ? (
-        <p className="text-sm text-stone-500">No players yet.</p>
-      ) : (
-        <ul className="@container space-y-3">
-          {roster.map((p) => (
-            <li key={p.id} className="rounded-md border border-(--accent-line) p-3">
-              {/* One column below md, or whenever the roster's own column is narrow (the page's xl grid). */}
-              <div className="grid grid-cols-1 items-start gap-3 md:@xl:grid-cols-[minmax(0,1fr)_8rem_minmax(0,1fr)_5rem_auto]">
-                <label className={labelClass}>
-                  Name
-                  <input className={inputClass} value={p.name} onChange={(e) => update({ ...p, name: e.target.value })} />
-                </label>
-                <label className={labelClass}>
-                  Role
-                  <select className={inputClass} value={p.role} onChange={(e) => update({ ...p, role: RoleSchema.parse(e.target.value) })}>
-                    {RoleSchema.options.map((r) => (
-                      <option key={r} value={r}>
-                        {ROLE_LABEL[r]}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <label className={labelClass}>
-                  Class
-                  <input className={inputClass} value={p.class} onChange={(e) => update({ ...p, class: e.target.value })} />
-                </label>
-                <NumberField label="AC" optional value={p.ac} placeholder="?" onChange={(ac) => setAc(p, ac)} />
-                <Button
-                  variant="danger"
-                  className="md:@xl:mt-6"
-                  aria-label={`Remove ${p.name || "unnamed player"}`}
-                  onClick={() => remove(p)}
-                >
-                  Remove
-                </Button>
-              </div>
-            </li>
-          ))}
-        </ul>
-      )}
-    </section>
+      </div>
+    </Panel>
   );
 }

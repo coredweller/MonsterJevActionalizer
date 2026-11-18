@@ -35,7 +35,7 @@ Next.js (App Router), TypeScript, npm, Tailwind and hand-rolled components. The 
 ## Structure
 ```
 app/
-  page.tsx                  – layout: tracker sidebar | settings + monster statblock | party + situation form | recommendation
+  page.tsx                  – layout: sidebar (trackers + party) | settings + monster statblock | players this turn | battlefield + recommendation + turn log
   useTrackers.ts            – the only localStorage access (try/catch, empty default)
   api/decide/route.ts       – server: build request → call Jev → interpret → Recommendation
 lib/jev/
@@ -155,6 +155,8 @@ A tracker belongs to one monster. It holds:
 
 **Delete** removes a tracker, after the DM confirms.
 
+**Collapsed list:** while a tracker is selected, the sidebar lists only that one. "Show all (n)" opens the rest, and picking, adding or duplicating a monster collapses the list again.
+
 **Encounter state:**
 - current and max HP
 - slots remaining per level
@@ -180,7 +182,9 @@ A tracker belongs to one monster. It holds:
 **Turn log:** each turn records the action, target, move and slot actually used, plus a result the DM notes (hit / miss / downed / effect). The **last 3 turns** go into Jev's state.
 
 ## Situation form
-**Party roster** (saved per tracker, at the top of the Situation panel): name, role (melee / ranged / caster / healer), class, and AC if known.
+**Party roster** (saved per tracker, in the sidebar under the trackers): name, role (melee / ranged / caster / healer), class, and AC if known. Each player is a one-line summary; Edit opens their fields in place. Below `xl` the sidebar is a drawer, so on a tablet the party is one tap away.
+
+**Where the form sits:** the per-turn player fields are their own "Players this turn" column. Allies, terrain, DM notes and Recommend form a "Battlefield" panel directly above the recommendation it produces. On a tablet the statblock fills the left and the two stack on the right.
 
 **Per-turn player fields**, which **carry over** from the last turn so the DM edits only what changed:
 - **zone:** engaged / near / far / very far, with an optional exact distance in feet
