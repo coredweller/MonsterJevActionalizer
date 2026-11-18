@@ -193,10 +193,16 @@ test("the party is edited in the sidebar; players this turn and the battlefield 
   await expect(battlefield.getByLabel("Allies present")).toBeVisible();
   await expect(battlefield.getByRole("button", { name: "Recommend" })).toBeVisible();
 
-  // A bad number in a player row still blocks Recommend, though the row sits in another panel.
-  await players.getByLabel("Exact ft.").fill("x");
-  await battlefield.getByRole("button", { name: "Recommend" }).click();
-  await expect(page.getByText("Recommending…")).toHaveCount(0);
+  // Exact feet take digits only, and move the zone to the one they fall in.
+  const feet = players.getByLabel("Exact ft.");
+  await feet.pressSequentially("3x3");
+  await expect(feet).toHaveValue("33");
+  await expect(zone.getByRole("button", { name: "Far", exact: true })).toHaveAttribute("aria-pressed", "true");
+  await expect(players.getByRole("status")).toHaveCount(0);
+
+  // Tapping a zone the feet don't fall in clears the feet.
+  await zone.getByRole("button", { name: "Engaged" }).click();
+  await expect(feet).toHaveValue("");
 });
 
 test("at desktop width the sidebar is a column and the drawer button is hidden", async ({ page }) => {

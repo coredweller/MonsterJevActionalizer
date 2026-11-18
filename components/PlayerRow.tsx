@@ -1,7 +1,7 @@
 "use client";
 
 import { useId, useState } from "react";
-import { mismatchedZone } from "@/lib/encounter/state";
+import { setDistance, setZone } from "@/lib/encounter/state";
 import {
   ApparentHpSchema,
   CONDITIONS,
@@ -21,13 +21,6 @@ const CoverSchema = PlayerTurnSchema.shape.cover;
 type Cover = PlayerTurn["cover"];
 
 const ZONE_NAME: Record<Zone, string> = { engaged: "Engaged", near: "Near", far: "Far", veryFar: "Very far" };
-/** With the zone's default distance, for the hint shown when the exact feet fall in another zone. */
-const ZONE_LABEL: Record<Zone, string> = {
-  engaged: `Engaged (${ZONE_DEFAULT_FT.engaged} ft)`,
-  near: `Near (≤ ${ZONE_DEFAULT_FT.near} ft)`,
-  far: `Far (≤ ${ZONE_DEFAULT_FT.far} ft)`,
-  veryFar: `Very far (> ${ZONE_DEFAULT_FT.far} ft)`,
-};
 const HP_LABEL: Record<ApparentHp, string> = { healthy: "Healthy", bloodied: "Bloodied", nearDown: "Near down", down: "Down" };
 // Short so HP, Cover and Hit you fit beside the name in the narrow column.
 const COVER_LABEL: Record<Cover, string> = { none: "None", half: "Half", threeQuarters: "¾", total: "Full" };
@@ -86,14 +79,8 @@ export function PlayerRow({
   const conditionsId = useId();
   const withId = useId();
   const set = (patch: Partial<Omit<PlayerTurn, "playerId">>) => onChange({ ...turn, ...patch });
-  const zoneHint = mismatchedZone(turn);
   const name = player.name || "Unnamed player";
   const unpicked = CONDITIONS.filter((c) => !turn.conditions.includes(c));
-
-  function setDistance(distanceFt: number | undefined) {
-    const { distanceFt: _previous, ...rest } = turn;
-    onChange(distanceFt === undefined ? rest : { ...rest, distanceFt });
-  }
 
   function addCondition(value: string) {
     // "Pick one" is the select's resting value, so choosing it adds nothing.
@@ -171,7 +158,7 @@ export function PlayerRow({
                         type="button"
                         aria-pressed={picked}
                         className={`min-h-11 min-w-0 px-0.5 text-xs font-semibold ${i > 0 ? "border-l border-(--accent-line)" : ""} ${picked ? "bg-(--accent) text-white" : "bg-white text-(--accent-strong) hover:bg-(--accent-soft)"}`}
-                        onClick={() => set({ zone: z })}
+                        onClick={() => onChange(setZone(turn, z))}
                       >
                         {ZONE_NAME[z]}
                       </button>
@@ -183,14 +170,17 @@ export function PlayerRow({
                 <span aria-hidden="true" className={captionClass}>
                   Exact ft.
                 </span>
-                <NumberField label="Exact ft." hideLabel optional value={turn.distanceFt} placeholder={`${ZONE_DEFAULT_FT[turn.zone]}`} onChange={setDistance} />
+                <NumberField
+                  label="Exact ft."
+                  hideLabel
+                  digitsOnly
+                  optional
+                  value={turn.distanceFt}
+                  placeholder={`${ZONE_DEFAULT_FT[turn.zone]}`}
+                  onChange={(ft) => onChange(setDistance(turn, ft))}
+                />
               </div>
             </div>
-            {zoneHint && (
-              <p role="status" className="mt-1 rounded bg-amber-50 p-2 text-xs text-amber-900">
-                {turn.distanceFt} ft. is {ZONE_LABEL[zoneHint]}, not {ZONE_LABEL[turn.zone]}. Range checks use the {turn.distanceFt} ft.; update the zone to match.
-              </p>
-            )}
           </div>
 
           <div>
@@ -199,7 +189,7 @@ export function PlayerRow({
             </span>
             <div className="flex items-center gap-1.5">
               {/* The width is on a wrapper: inputClass is w-full, which would win over a width on the select itself. */}
-              <div className="w-[5.25rem] shrink-0">
+              <div className="w-[5.625rem] shrink-0">
                 <select aria-labelledby={conditionsId} className={inputClass} value="" onChange={(e) => addCondition(e.target.value)}>
                   <option value="">Pick one</option>
                   {unpicked.map((c) => (
@@ -211,7 +201,7 @@ export function PlayerRow({
               </div>
               {/* Three columns of two rows sit beside the select, so six conditions fit without growing the row. */}
               {turn.conditions.length > 0 && (
-                <div className="grid min-w-0 flex-1 grid-cols-3 gap-[3px]">
+                <div className="grid min-w-0 flex-1 grid-cols-3 gap-0.5">
                   {turn.conditions.map((c) => {
                     const chip = conditionChip(c);
                     return (
@@ -220,7 +210,7 @@ export function PlayerRow({
                         type="button"
                         title={chip.label}
                         aria-label={`Remove ${chip.label}`}
-                        className={`flex h-[21px] min-w-0 items-center justify-between gap-0.5 rounded-full border pr-1 pl-1.5 text-[11px] font-semibold hover:brightness-95 ${chip.className}`}
+                        className={`flex h-[21px] min-w-0 items-center justify-between gap-0.5 rounded-full border pr-[3px] pl-[5px] text-[11px] font-semibold hover:brightness-95 ${chip.className}`}
                         onClick={() => set({ conditions: turn.conditions.filter((x) => x !== c) })}
                       >
                         <span className="truncate">{chip.label}</span>

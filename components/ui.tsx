@@ -96,6 +96,8 @@ type NumberFieldProps = {
   placeholder?: string;
   disabled?: boolean;
   className?: string;
+  /** Drops anything but digits as it's typed or pasted, so the field can't hold a bad value. */
+  digitsOnly?: boolean;
 } & (
   | { optional: true; value: number | undefined; onChange: (value: number | undefined) => void }
   | { optional?: false; value: number; onChange: (value: number) => void }
@@ -115,7 +117,7 @@ function wholeNumberError(text: string, optional: boolean): string | null {
  * set as the input's custom validity, so a surrounding <form> won't submit while it shows.
  */
 export function NumberField(props: NumberFieldProps) {
-  const { label, hideLabel = false, placeholder, disabled, className = "" } = props;
+  const { label, hideLabel = false, placeholder, disabled, className = "", digitsOnly = false } = props;
   const [text, setText] = useState(props.value === undefined ? "" : String(props.value));
   // Resync the text when the value changes from outside (React's "adjust state on prop change" pattern).
   const [lastValue, setLastValue] = useState(props.value);
@@ -129,7 +131,8 @@ export function NumberField(props: NumberFieldProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   useEffect(() => inputRef.current?.setCustomValidity(error ?? ""), [error]);
 
-  function edit(next: string) {
+  function edit(typed: string) {
+    const next = digitsOnly ? typed.replace(/\D/g, "") : typed;
     setText(next);
     const trimmed = next.trim();
     if (wholeNumberError(trimmed, props.optional === true) !== null) return;

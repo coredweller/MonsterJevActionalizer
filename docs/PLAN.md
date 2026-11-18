@@ -201,7 +201,7 @@ A tracker belongs to one monster. It holds:
 - terrain checkboxes: difficult terrain, chokepoint, escape route, flying not possible (flying is assumed possible unless ticked)
 - free-text DM notes
 
-Each zone has a default distance, used only when no exact distance is given: engaged = within 5 ft, near = within 30 ft, far = within 60 ft, very far = more than 60 ft. Code uses these distances for range checks. When an exact distance falls in a different zone than the one picked (e.g. engaged at 40 ft.), the exact feet win for range checks, and the player's row shows a hint naming the zone that distance belongs to, so the DM can fix it.
+Each zone has a default distance, used only when no exact distance is given: engaged = within 5 ft, near = within 30 ft, far = within 60 ft, very far = more than 60 ft. Code uses these distances for range checks. Entering an exact distance moves the zone to the one it falls in (e.g. 33 ft. → far), and tapping a zone the distance doesn't fall in clears the distance, so the two never disagree. The exact-feet field takes digits only.
 
 ## Legal options (`options.ts`, deterministic)
 - **Hard blocks (Q11):**

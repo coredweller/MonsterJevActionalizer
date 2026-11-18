@@ -43,16 +43,21 @@ export function defaultPlayerTurn(playerId: string): PlayerTurn {
   return { playerId, zone: "near", apparentHp: "healthy", conditions: [], cover: "none", hitMonsterLastRound: false, clusteredWith: [] };
 }
 
-/**
- * The zone a player's exact distance falls in, when it differs from the zone the DM picked; else
- * undefined. Zones split by their defaults: ≤ 5 ft. engaged, ≤ 30 near, ≤ 60 far, beyond that very far.
- * Range checks already use the exact feet, so this only tells the DM the zone is stale (F33).
- */
-export function mismatchedZone(turn: PlayerTurn): Zone | undefined {
-  const ft = turn.distanceFt;
-  if (ft === undefined) return undefined;
-  const zone: Zone = ft <= ZONE_DEFAULT_FT.engaged ? "engaged" : ft <= ZONE_DEFAULT_FT.near ? "near" : ft <= ZONE_DEFAULT_FT.far ? "far" : "veryFar";
-  return zone === turn.zone ? undefined : zone;
+/** The zone a distance falls in. Zones split by their defaults: ≤ 5 ft. engaged, ≤ 30 near, ≤ 60 far, beyond that very far. */
+export function zoneForDistance(ft: number): Zone {
+  return ft <= ZONE_DEFAULT_FT.engaged ? "engaged" : ft <= ZONE_DEFAULT_FT.near ? "near" : ft <= ZONE_DEFAULT_FT.far ? "far" : "veryFar";
+}
+
+/** Sets a player's exact feet and moves their zone to the one the feet fall in. `undefined` clears the feet and keeps the zone. */
+export function setDistance(turn: PlayerTurn, distanceFt: number | undefined): PlayerTurn {
+  const { distanceFt: _previous, ...rest } = turn;
+  return distanceFt === undefined ? rest : { ...rest, zone: zoneForDistance(distanceFt), distanceFt };
+}
+
+/** Sets a player's zone. Exact feet that fall in another zone are dropped, so the zone and the feet never disagree. */
+export function setZone(turn: PlayerTurn, zone: Zone): PlayerTurn {
+  const { distanceFt, ...rest } = turn;
+  return distanceFt !== undefined && zoneForDistance(distanceFt) === zone ? { ...rest, zone, distanceFt } : { ...rest, zone };
 }
 
 /** Each player's cluster links with self links, unknown ids and duplicates dropped, then mirrored so every link goes both ways. */

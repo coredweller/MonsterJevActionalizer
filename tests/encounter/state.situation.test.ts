@@ -1,5 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { blankSituation, defaultPlayerTurn, mismatchedZone, sameSituation, syncSituation, updatePlayerTurn } from "@/lib/encounter/state";
+import {
+  blankSituation,
+  defaultPlayerTurn,
+  sameSituation,
+  setDistance,
+  setZone,
+  syncSituation,
+  updatePlayerTurn,
+  zoneForDistance,
+} from "@/lib/encounter/state";
 import { SituationSchema, type Player, type PlayerTurn, type Situation, type Zone } from "@/lib/encounter/types";
 
 const player = (id: string): Player => ({ id, name: id.toUpperCase(), role: "melee", class: "Fighter" });
@@ -27,32 +36,50 @@ describe("blankSituation", () => {
   });
 });
 
-describe("mismatchedZone (F33)", () => {
-  it("is undefined with no exact distance", () => {
-    expect(mismatchedZone(turn("a", { zone: "engaged" }))).toBeUndefined();
+describe("zoneForDistance", () => {
+  it.each<[number, Zone]>([
+    [0, "engaged"],
+    [5, "engaged"],
+    [6, "near"],
+    [30, "near"],
+    [31, "far"],
+    [60, "far"],
+    [61, "veryFar"],
+    [300, "veryFar"],
+  ])("%i ft. is %s", (distanceFt, zone) => {
+    expect(zoneForDistance(distanceFt)).toBe(zone);
+  });
+});
+
+describe("setDistance", () => {
+  it("sets the exact feet and moves the zone to the one they fall in", () => {
+    expect(setDistance(turn("a", { zone: "engaged" }), 33)).toEqual(turn("a", { zone: "far", distanceFt: 33 }));
   });
 
-  it.each<[Zone, number]>([
-    ["engaged", 0],
-    ["engaged", 5],
-    ["near", 6],
-    ["near", 30],
-    ["far", 31],
-    ["far", 60],
-    ["veryFar", 61],
-    ["veryFar", 300],
-  ])("is undefined when %s matches %i ft.", (zone, distanceFt) => {
-    expect(mismatchedZone(turn("a", { zone, distanceFt }))).toBeUndefined();
+  it("keeps the zone when the feet already fall in it", () => {
+    expect(setDistance(turn("a", { zone: "near" }), 20)).toEqual(turn("a", { zone: "near", distanceFt: 20 }));
   });
 
-  it.each<[Zone, number, Zone]>([
-    ["engaged", 40, "far"],
-    ["near", 5, "engaged"],
-    ["far", 30, "near"],
-    ["veryFar", 60, "far"],
-    ["near", 61, "veryFar"],
-  ])("%s at %i ft. → the distance's zone, %s", (zone, distanceFt, expected) => {
-    expect(mismatchedZone(turn("a", { zone, distanceFt }))).toBe(expected);
+  it("clearing the feet keeps the zone", () => {
+    const cleared = setDistance(turn("a", { zone: "far", distanceFt: 33 }), undefined);
+    expect(cleared).toEqual(turn("a", { zone: "far" }));
+    expect(cleared).not.toHaveProperty("distanceFt");
+  });
+});
+
+describe("setZone", () => {
+  it("sets the zone", () => {
+    expect(setZone(turn("a", { zone: "near" }), "veryFar")).toEqual(turn("a", { zone: "veryFar" }));
+  });
+
+  it("keeps exact feet that fall in the new zone", () => {
+    expect(setZone(turn("a", { zone: "near", distanceFt: 30 }), "near")).toEqual(turn("a", { zone: "near", distanceFt: 30 }));
+  });
+
+  it("drops exact feet that fall in another zone, so the two never disagree", () => {
+    const moved = setZone(turn("a", { zone: "far", distanceFt: 33 }), "engaged");
+    expect(moved).toEqual(turn("a", { zone: "engaged" }));
+    expect(moved).not.toHaveProperty("distanceFt");
   });
 });
 
