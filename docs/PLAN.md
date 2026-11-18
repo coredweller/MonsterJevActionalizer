@@ -186,6 +186,8 @@ A tracker belongs to one monster. It holds:
 
 **Where the form sits:** the per-turn player fields are their own "Players this turn" column. Allies, terrain, DM notes and Recommend form a "Battlefield" panel directly above the recommendation it produces. On a tablet the statblock fills the left and the two stack on the right.
 
+**Player rows** are collapsible. The first line always shows the name and AC, then HP, cover and "hit you". Open adds the zone as a one-tap strip with exact feet at its end, conditions as a "Pick one" dropdown whose picks become removable chips (three columns of two beside it, one colour per condition), and "with" toggles.
+
 **Per-turn player fields**, which **carry over** from the last turn so the DM edits only what changed:
 - **zone:** engaged / near / far / very far, with an optional exact distance in feet
 - apparent HP: healthy / bloodied / near down / down

@@ -148,7 +148,46 @@ test("the party is edited in the sidebar; players this turn and the battlefield 
 
   const players = page.getByRole("region", { name: "Players this turn" });
   await expect(players.getByText("Ann")).toBeVisible();
-  await expect(players.getByRole("combobox", { name: "Zone" })).toBeVisible();
+  await expect(players.getByRole("combobox", { name: "HP", exact: true })).toBeVisible();
+  await expect(players.getByRole("combobox", { name: "Cover", exact: true })).toBeVisible();
+  await expect(players.getByRole("checkbox", { name: "Hit you" })).toBeVisible();
+
+  // Zone is a one-tap strip.
+  const zone = players.getByRole("group", { name: "Zone" });
+  await zone.getByRole("button", { name: "Near" }).click();
+  await expect(zone.getByRole("button", { name: "Near" })).toHaveAttribute("aria-pressed", "true");
+  await expect(zone.getByRole("button", { name: "Engaged" })).toHaveAttribute("aria-pressed", "false");
+
+  // A picked condition becomes a chip and leaves the dropdown, which goes back to "Pick one"; tapping the chip removes it.
+  const conditions = players.getByRole("combobox", { name: "Conditions" });
+  await conditions.selectOption("prone");
+  await expect(conditions).toHaveValue("");
+  await expect(conditions.getByRole("option", { name: "Prone" })).toHaveCount(0);
+  // The dropdown stays narrow and the chip sits beside it, inside the player's box.
+  const row = players.getByRole("article", { name: "Ann" });
+  const [selectBox, chipBox, rowBox] = await Promise.all([
+    conditions.boundingBox(),
+    players.getByRole("button", { name: "Remove Prone" }).boundingBox(),
+    row.boundingBox(),
+  ]);
+  if (!selectBox || !chipBox || !rowBox) throw new Error("conditions layout: an element has no box");
+  expect(selectBox.width).toBeLessThan(100);
+  expect(chipBox.x).toBeGreaterThan(selectBox.x + selectBox.width);
+  expect(chipBox.x + chipBox.width).toBeLessThanOrEqual(rowBox.x + rowBox.width);
+  expect(chipBox.width).toBeGreaterThan(40);
+  await players.getByRole("button", { name: "Remove Prone" }).click();
+  await expect(players.getByRole("button", { name: "Remove Prone" })).toHaveCount(0);
+  await expect(conditions.getByRole("option", { name: "Prone" })).toHaveCount(1);
+
+  // Collapsing keeps line 1 and hides the rest.
+  const toggle = players.getByRole("button", { name: /^Ann/ });
+  await expect(toggle).toHaveAttribute("aria-expanded", "true");
+  await toggle.click();
+  await expect(toggle).toHaveAttribute("aria-expanded", "false");
+  await expect(zone).toBeHidden();
+  await expect(players.getByRole("combobox", { name: "HP", exact: true })).toBeVisible();
+  await expect(toggle).toContainText("Near");
+  await toggle.click();
 
   const battlefield = page.getByRole("region", { name: "Battlefield" });
   await expect(battlefield.getByLabel("Allies present")).toBeVisible();

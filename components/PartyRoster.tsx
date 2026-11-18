@@ -8,8 +8,8 @@ const RoleSchema = PlayerSchema.shape.role;
 type Role = Player["role"];
 const ROLE_LABEL: Record<Role, string> = { melee: "Melee", ranged: "Ranged", caster: "Caster", healer: "Healer" };
 
-/** "Caster · Wizard · AC 13": a player's role, then class and AC when known. Shared with the per-turn rows. */
-export function describePlayer(player: Player): string {
+/** "Caster · Wizard · AC 13": a player's role, then class and AC when known. */
+function describePlayer(player: Player): string {
   return [ROLE_LABEL[player.role], player.class, player.ac === undefined ? "" : `AC ${player.ac}`].filter((part) => part !== "").join(" · ");
 }
 
