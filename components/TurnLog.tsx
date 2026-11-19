@@ -1,9 +1,9 @@
 "use client";
 
 import { MOVEMENT_LABELS } from "@/lib/decide/explain";
-import { recordResult } from "@/lib/encounter/state";
+import { canUndo, recordResult, undoLastTurn } from "@/lib/encounter/state";
 import { TurnResultSchema, type Player, type TurnLogEntry, type TurnResult, type Tracker } from "@/lib/encounter/types";
-import { Badge, Panel, ToggleChip, inputClass, labelClass } from "./ui";
+import { Badge, Button, Panel, ToggleChip, inputClass, labelClass } from "./ui";
 
 const RESULT_LABEL: Record<TurnResult, string> = { hit: "Hit", miss: "Miss", downed: "Downed", effect: "Effect" };
 
@@ -27,12 +27,13 @@ function describePart(name: string, targetIds: readonly string[], slotLevel: num
 /**
  * The tracker's turn log, newest first. Controlled: picking a result or typing a note emits the
  * whole new tracker through `recordResult`, which the caller saves. Pressing the picked result
- * again clears it.
+ * again clears it. The newest entry offers Undo until Start turn is pressed (`canUndo`).
  */
 export function TurnLog({ tracker, onChange }: { tracker: Tracker; onChange: (tracker: Tracker) => void }) {
   const { log, roster } = tracker;
   // Newest first, keeping each entry's index in the log for `recordResult`.
   const newestFirst = log.map((entry, i) => ({ entry, i })).reverse();
+  const undoable = canUndo(tracker);
 
   return (
     <Panel title="Turn log" accent="monster">
@@ -42,7 +43,12 @@ export function TurnLog({ tracker, onChange }: { tracker: Tracker; onChange: (tr
         <ol className="space-y-3">
           {newestFirst.map(({ entry, i }) => (
             <li key={i}>
-              <Entry entry={entry} roster={roster} onRecord={(result, note) => onChange(recordResult(tracker, i, result, note))} />
+              <Entry
+                entry={entry}
+                roster={roster}
+                onRecord={(result, note) => onChange(recordResult(tracker, i, result, note))}
+                onUndo={undoable && i === log.length - 1 ? () => onChange(undoLastTurn(tracker)) : undefined}
+              />
             </li>
           ))}
         </ol>
@@ -55,10 +61,13 @@ function Entry({
   entry,
   roster,
   onRecord,
+  onUndo,
 }: {
   entry: TurnLogEntry;
   roster: readonly Player[];
   onRecord: (result: TurnResult | undefined, note?: string) => void;
+  /** Present only on the newest entry while it can still be undone. */
+  onUndo: (() => void) | undefined;
 }) {
   const action = entry.actionId === null ? "No action" : describePart(entry.actionName, entry.targetIds, entry.slotLevel, entry.clusterId !== undefined, roster);
 
@@ -66,7 +75,14 @@ function Entry({
     <article className="rounded-md border border-(--accent-line) p-3 text-sm">
       <header className="mb-1 flex flex-wrap items-center justify-between gap-2">
         <h3 className="font-semibold text-(--accent-strong)">Round {entry.round}</h3>
-        {entry.recommended ? <Badge tone="green">Recommended</Badge> : <Badge tone="amber">Overridden</Badge>}
+        <span className="flex items-center gap-2">
+          {entry.recommended ? <Badge tone="green">Recommended</Badge> : <Badge tone="amber">Overridden</Badge>}
+          {onUndo && (
+            <Button aria-label={`Undo round ${entry.round}'s turn`} onClick={onUndo}>
+              Undo
+            </Button>
+          )}
+        </span>
       </header>
       <dl className="grid grid-cols-[auto_1fr] gap-x-3">
         <dt className="text-stone-600">Action</dt>

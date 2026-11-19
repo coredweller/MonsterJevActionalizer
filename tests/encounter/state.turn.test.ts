@@ -117,7 +117,7 @@ describe("recordResult", () => {
     situation: general().situation,
     recommended: true,
   };
-  const twoTurns = (): Tracker => apply(apply(general(), mace), mace);
+  const twoTurns = (): Tracker => apply(startTurn(apply(general(), mace), () => 0).tracker, mace);
 
   it("sets the result on entry i only", () => {
     const t = recordResult(twoTurns(), 0, "hit");

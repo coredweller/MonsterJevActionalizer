@@ -155,6 +155,10 @@ export const ApplyChoiceSchema = z.object({
 });
 export type ApplyChoice = z.infer<typeof ApplyChoiceSchema>;
 
+/** What `apply` changes in the encounter state, as it was just before, so Undo can put it back. */
+export const BeforeApplySchema = EncounterStateSchema.pick({ slots: true, perDay: true, recharge: true, concentration: true });
+export type BeforeApply = z.infer<typeof BeforeApplySchema>;
+
 export const TrackerSchema = z.object({
   id: z.string().min(1),
   name: z.string(),
@@ -165,5 +169,7 @@ export const TrackerSchema = z.object({
   log: z.array(TurnLogEntrySchema),
   settings: SettingsSchema,
   createdAt: z.string(),
+  /** Set by `apply`, cleared by `startTurn` and `undoLastTurn`: present only while the newest turn can be undone. */
+  beforeApply: BeforeApplySchema.optional(),
 });
 export type Tracker = z.infer<typeof TrackerSchema>;

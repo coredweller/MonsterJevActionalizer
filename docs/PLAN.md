@@ -175,6 +175,10 @@ A tracker belongs to one monster. It holds:
 
 **Start turn** moves the round on, refills legendary actions (5e: they come back at the start of the monster's turn; Legendary Resistance is per day and doesn't), and rolls a d6 for each spent recharge ability (auto mode) and shows the roll.
 
+**One turn per round:** the monster's turn is taken once its round has a turn-log entry. After that, Apply is refused, and the Battlefield panel disables Recommend and shows its own red **Start turn** button beside it, so the DM never has to hunt for the next step. Until Apply, Recommend stays enabled, so the DM can edit the situation and ask again.
+
+**Undo last turn** (on the newest log entry, until Start turn is pressed) removes that entry and puts back what its Apply changed: slots, daily uses, recharge and concentration, as they were just before Apply. HP, conditions, legendary counters and the situation are left as they are, since Apply never touched them.
+
 **Tracker layout:** the settings (temperament, morale, recharge mode) and the monster's conditions are always shown, directly above the monster card. The card is the same statblock as the review screen, with each live counter beside what it tracks: HP on the Hit Points line, daily uses and recharge under their abilities, slots and **"Concentrating on"** in the Spellcasting box, Legendary Resistance under the traits, and legendary actions left in the Legendary Actions section.
 
 **Reminders** (legendary actions and their options, reactions, lair actions) are the statblock's own sections, so they show from round 1 on, since the first round is played without pressing Start turn.
@@ -271,6 +275,7 @@ Code reads the `probabilities` distributions, not just `choice`, because the pro
   - updates concentration
   - writes a turn-log entry (the DM then records the result)
   - carries the situation forward
+  - is refused if this round's turn is already applied (see **One turn per round**)
 - **If the Jev call fails:** the app shows the error, keeps the legal options, and lets the DM pick by hand and apply.
 - **Reminders:** legendary actions left and their options, reactions, and lair actions (initiative 20), shown in the tracker's statblock.
 

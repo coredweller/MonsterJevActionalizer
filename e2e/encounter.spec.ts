@@ -1,6 +1,7 @@
 /**
  * T063: the encounter survives a reload, and an unreadable save starts the app empty with a warning.
  * T069: the settings (always shown above the statblock) save, survive a reload, and manual recharge skips the roll.
+ * One turn per round: an applied round disables Recommend and offers Start turn beside it, and Undo takes the turn back.
  */
 import { expect, test, type Page } from "@playwright/test";
 import { CORRUPT_KEY, STORAGE_KEY } from "@/app/useTrackers";
@@ -44,8 +45,20 @@ test("encounter edits and turn results survive a reload", async ({ page }) => {
   await addAppliedTurn(page);
   await expect(page.getByText("Discordant Strike → Ann")).toBeVisible();
 
-  await page.getByRole("button", { name: "Start turn" }).click();
+  // Round 1's turn is applied, so the Battlefield panel disables Recommend and offers Start turn beside it.
+  const battlefield = page.getByRole("region", { name: "Battlefield" });
+  await expect(page.getByText("Round 1's turn is applied. Record its result in the turn log.")).toBeVisible();
+  await expect(battlefield.getByRole("button", { name: "Recommend" })).toBeDisabled();
+  const appliedTip = battlefield.getByRole("tooltip");
+  await expect(appliedTip).toBeHidden();
+  // Forced: the disabled button lets the pointer through to its wrapper, which shows the tip.
+  await battlefield.getByRole("button", { name: "Recommend" }).hover({ force: true });
+  await expect(appliedTip).toHaveText("Round 1's turn is applied. Start turn to move on, or undo it in the turn log.");
+  await battlefield.getByRole("button", { name: "Start turn" }).click();
   await expect(page.getByText("Discordant Strike: rolled")).toBeVisible();
+  await expect(battlefield.getByRole("button", { name: "Recommend" })).toBeEnabled();
+  await expect(battlefield.getByRole("button", { name: "Start turn" })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: /^Undo/ })).toHaveCount(0);
   await page.getByLabel("HP", { exact: true }).fill("100");
   await page.getByRole("button", { name: "Level 3: use one" }).click();
   await page.getByRole("button", { name: "Hit", exact: true }).click();
@@ -60,6 +73,19 @@ test("encounter edits and turn results survive a reload", async ({ page }) => {
   await expect(page.getByText("2 / 3", { exact: true })).toHaveCount(1);
   await expect(page.getByRole("button", { name: "Hit", exact: true })).toHaveAttribute("aria-pressed", "true");
   await expect(page.getByLabel("Note", { exact: true })).toHaveValue("Shield went up");
+});
+
+test("Undo takes back this round's applied turn and its recharge, and Recommend comes back", async ({ page }) => {
+  await loadMonster(page, MAESTRO, "Maestro Drazzuk");
+  await addAppliedTurn(page);
+  await expect(page.getByRole("button", { name: "Spent", exact: true })).toBeVisible();
+
+  await page.getByRole("button", { name: "Undo round 1's turn" }).click();
+  await expect(page.getByText("Discordant Strike → Ann")).toHaveCount(0);
+  await expect(page.getByText("No turns yet.")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Available", exact: true })).toBeVisible();
+  await expect(page.getByRole("region", { name: "Battlefield" }).getByRole("button", { name: "Recommend" })).toBeEnabled();
+  await expect.poll(async () => (await savedStore(page)).trackers[0]?.log).toEqual([]);
 });
 
 test("settings are saved, survive a reload, and manual recharge skips the roll", async ({ page }) => {

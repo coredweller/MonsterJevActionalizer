@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState, type ReactNode } from "react";
+import { useId, type ReactNode } from "react";
 import {
   type RechargeRoll,
   legendaryActionMax,
@@ -15,7 +15,6 @@ import {
   setSettings,
   setSlots,
   slotMax,
-  startTurn,
   suggestTemperament,
 } from "@/lib/encounter/state";
 import { CONDITIONS, TemperamentSchema, type Settings, type Temperament, type Tracker } from "@/lib/encounter/types";
@@ -31,24 +30,27 @@ const TEMPERAMENT_LABELS: Record<Temperament, string> = {
   genius: "Tactical genius",
 };
 
-/** The last "Start turn" press, kept so its rolls show until the tracker or round changes. */
-interface TurnStart {
-  readonly trackerId: string;
-  readonly round: number;
-  readonly rolls: readonly RechargeRoll[];
-}
-
 /**
  * The monster's encounter state, editable by hand: settings and conditions above, then the same
  * statblock as the review screen with each live counter placed beside what it tracks. Controlled:
  * every edit goes through a reducer in `lib/encounter/state.ts` and emits the whole new tracker,
  * which the caller saves. Only resources the statblock gives are shown, and the reducers clamp
- * each counter to [0, max].
+ * each counter to [0, max]. Start turn is the caller's (the Battlefield panel offers it too), so it
+ * passes the rolls in.
  */
-export function EncounterTracker({ tracker, onChange }: { tracker: Tracker; onChange: (tracker: Tracker) => void }) {
+export function EncounterTracker({
+  tracker,
+  onChange,
+  rolls,
+  onStartTurn,
+}: {
+  tracker: Tracker;
+  onChange: (tracker: Tracker) => void;
+  /** The recharge rolls of the Start turn press that began this round, or null when none did. */
+  rolls: readonly RechargeRoll[] | null;
+  onStartTurn: () => void;
+}) {
   const { reviewed, state, settings } = tracker;
-  const [turnStart, setTurnStart] = useState<TurnStart | null>(null);
-  const rolls = turnStart?.trackerId === tracker.id && turnStart.round === state.round ? turnStart.rolls : null;
 
   const slots = slotMax(reviewed);
   const perDay = perDayMax(reviewed);
@@ -61,12 +63,6 @@ export function EncounterTracker({ tracker, onChange }: { tracker: Tracker; onCh
   const trackedSpells = reviewed.abilities.filter((a) => a.source === "Spellcasting" && (perDay[a.id] !== undefined || a.uses.kind === "recharge"));
   const suggested = suggestTemperament(reviewed.intScore);
   const moraleId = useId();
-
-  function start() {
-    const result = startTurn(tracker, Math.random);
-    setTurnStart({ trackerId: result.tracker.id, round: result.tracker.state.round, rolls: result.rolls });
-    onChange(result.tracker);
-  }
 
   function chooseConcentration(abilityId: string) {
     const ability = reviewed.abilities.find((a) => a.id === abilityId);
@@ -176,7 +172,7 @@ export function EncounterTracker({ tracker, onChange }: { tracker: Tracker; onCh
           <span className="flex items-center">
             <Badge>Round {state.round}</Badge>
           </span>
-          <Button variant="primary" onClick={start}>
+          <Button variant="primary" onClick={onStartTurn}>
             Start turn
           </Button>
         </>

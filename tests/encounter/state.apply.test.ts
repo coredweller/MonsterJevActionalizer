@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { apply, createTracker } from "@/lib/encounter/state";
+import { apply, canUndo, createTracker, setHp, setLegendary, startTurn, turnTaken, undoLastTurn } from "@/lib/encounter/state";
 import { ApplyChoiceSchema, TrackerSchema, TurnLogEntrySchema, type ApplyChoice, type Situation, type Tracker } from "@/lib/encounter/types";
 import type { Ability } from "@/lib/monster/types";
 import { ability, handReviewed } from "../helpers/reviewed";
@@ -26,6 +26,8 @@ const reviewed = handReviewed(
 );
 
 const fresh = (): Tracker => createTracker(reviewed, "t1", NOW);
+/** Presses Start turn. No recharge is spent where it's used, so the rng is never called. */
+const nextRound = (t: Tracker): Tracker => startTurn(t, () => 0).tracker;
 
 const SITUATION: Situation = {
   players: [
@@ -53,6 +55,11 @@ const choice = (over: Partial<ApplyChoice> = {}): ApplyChoice => ({
   situation: SITUATION,
   recommended: true,
   ...over,
+});
+
+const setConcentrationOn = (t: Tracker, abilityId: string, name: string): Tracker => ({
+  ...t,
+  state: { ...t.state, concentration: { abilityId, name } },
 });
 
 const holdPersonAt = (slotLevel: number): ApplyChoice["action"] => ({
@@ -124,7 +131,7 @@ describe("apply: concentration", () => {
   it("replaces existing concentration with the new spell", () => {
     const first = apply(fresh(), choice({ action: holdPersonAt(2) }));
     const second = apply(
-      first,
+      nextRound(first),
       choice({ action: { key: "spl_spirit_guardians", name: "Spirit Guardians", abilityId: "spl_spirit_guardians", targetIds: [], slotLevel: 3 } }),
     );
     expect(second.state.concentration).toEqual({ abilityId: "spl_spirit_guardians", name: "Spirit Guardians" });
@@ -141,7 +148,7 @@ describe("apply: concentration", () => {
   it("keeps existing concentration when the spell cast doesn't need it", () => {
     const first = apply(fresh(), choice({ action: holdPersonAt(2) }));
     const second = apply(
-      first,
+      nextRound(first),
       choice({ action: { key: "spl_guiding_bolt", name: "Guiding Bolt", abilityId: "spl_guiding_bolt", targetIds: ["p1"], slotLevel: 1 } }),
     );
     expect(second.state.concentration).toEqual({ abilityId: "spl_hold_person", name: "Hold Person" });
@@ -184,7 +191,7 @@ describe("apply: turn log and situation", () => {
   });
 
   it("appends to the existing log", () => {
-    const t = apply(apply(fresh(), choice()), choice({ recommended: false }));
+    const t = apply(nextRound(apply(fresh(), choice())), choice({ recommended: false }));
     expect(t.log.map((e) => e.recommended)).toEqual([true, false]);
   });
 
@@ -240,6 +247,90 @@ describe("apply: rejects choices that don't match the monster", () => {
     expect(() =>
       apply(fresh(), choice({ action: { key: "act_mace", name: "Mace", abilityId: "act_mace", targetIds: [], slotLevel: 2 } })),
     ).toThrow(/slot level/i);
+  });
+});
+
+describe("one turn per round", () => {
+  it("turnTaken is false until this round has a log entry, and false again after Start turn", () => {
+    const applied = apply(fresh(), choice());
+    expect(turnTaken(fresh())).toBe(false);
+    expect(turnTaken(applied)).toBe(true);
+    expect(turnTaken(nextRound(applied))).toBe(false);
+  });
+
+  it("apply throws when this round's turn is already applied", () => {
+    const applied = apply(fresh(), choice());
+    expect(() => apply(applied, choice())).toThrow(/round 1/i);
+  });
+
+  it("apply works again after Start turn", () => {
+    const t = apply(nextRound(apply(fresh(), choice())), choice());
+    expect(t.log.map((e) => e.round)).toEqual([1, 2]);
+  });
+});
+
+describe("undoLastTurn", () => {
+  const ashBurst: ApplyChoice["action"] = { key: "act_ash_burst", name: "Ash Burst", abilityId: "act_ash_burst", targetIds: [] };
+  const cinderWard: ApplyChoice["action"] = { key: "act_cinder_ward", name: "Cinder Ward", abilityId: "act_cinder_ward", targetIds: [] };
+  const shieldOfFaith: ApplyChoice["bonusAction"] = {
+    key: "spl_shield_of_faith",
+    name: "Shield of Faith",
+    abilityId: "spl_shield_of_faith",
+    targetIds: [],
+    slotLevel: 1,
+  };
+
+  it("canUndo is false before any Apply and after Start turn, true right after Apply", () => {
+    const applied = apply(fresh(), choice());
+    expect(canUndo(fresh())).toBe(false);
+    expect(canUndo(applied)).toBe(true);
+    expect(canUndo(nextRound(applied))).toBe(false);
+  });
+
+  it("puts back the slot, daily use, recharge and concentration the turn spent, and drops its log entry", () => {
+    // The situation is the DM's latest either way, so only the state, log and undo point are compared.
+    const restored = (t: Tracker) => ({ state: t.state, log: t.log, beforeApply: t.beforeApply });
+    const start = setConcentrationOn(fresh(), "spl_hold_person", "Hold Person");
+    const spentSlot = apply(start, choice({ action: holdPersonAt(3), bonusAction: shieldOfFaith }));
+    expect(restored(undoLastTurn(spentSlot))).toEqual(restored(start));
+
+    const spentRecharge = apply(fresh(), choice({ action: ashBurst }));
+    expect(restored(undoLastTurn(spentRecharge))).toEqual(restored(fresh()));
+
+    const spentDaily = apply(fresh(), choice({ action: cinderWard }));
+    expect(restored(undoLastTurn(spentDaily))).toEqual(restored(fresh()));
+  });
+
+  it("keeps earlier rounds' log entries", () => {
+    const twoRounds = apply(nextRound(apply(fresh(), choice())), choice({ recommended: false }));
+    expect(undoLastTurn(twoRounds).log.map((e) => e.round)).toEqual([1]);
+  });
+
+  it("leaves HP, legendary counters and the situation as they are now", () => {
+    const applied = apply(fresh(), choice({ action: holdPersonAt(2) }));
+    const edited = setLegendary(setHp(applied, 12), { actions: 0 });
+    const undone = undoLastTurn(edited);
+    expect(undone.state.hp).toBe(12);
+    expect(undone.state.legendaryActionsLeft).toBe(edited.state.legendaryActionsLeft);
+    expect(undone.situation).toEqual(SITUATION);
+    expect(undone.state.slots["2"]).toBe(3);
+  });
+
+  it("lets the turn be applied again", () => {
+    const again = apply(undoLastTurn(apply(fresh(), choice())), choice({ recommended: false }));
+    expect(again.log).toHaveLength(1);
+    expect(again.log[0]?.recommended).toBe(false);
+  });
+
+  it("throws when there's nothing to undo", () => {
+    expect(() => undoLastTurn(fresh())).toThrow(/nothing to undo/i);
+    expect(() => undoLastTurn(nextRound(apply(fresh(), choice())))).toThrow(/nothing to undo/i);
+  });
+
+  it("a tracker with an undo point still passes TrackerSchema, keeping the undo point", () => {
+    const applied = apply(fresh(), choice({ action: holdPersonAt(2) }));
+    const parsed = TrackerSchema.parse(JSON.parse(JSON.stringify(applied)));
+    expect(undoLastTurn(parsed).state.slots["2"]).toBe(3);
   });
 });
 

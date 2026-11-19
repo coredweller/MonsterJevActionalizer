@@ -56,6 +56,9 @@ export function Panel({ title, accent, actions, children }: { title: string; acc
 export const inputClass = "min-h-11 w-full rounded border border-stone-500 bg-white px-2 text-sm";
 export const labelClass = "flex flex-col gap-1 text-sm";
 
+/** The dark tip box, shared by InfoTip and other hover tips. Position it where it's used. */
+export const tooltipClass = "z-20 rounded-md bg-stone-900 p-2 text-xs leading-snug font-normal text-white shadow-lg";
+
 /**
  * A "?" button that explains the control beside it. Hover or keyboard focus shows the tip, and so does a
  * tap, since touch screens have no hover; moving away, Escape or tapping elsewhere hides it.
@@ -87,7 +90,7 @@ export function InfoTip({ label, children }: { label: string; children: ReactNod
         ?
       </button>
       {open && (
-        <span id={tipId} role="tooltip" className="absolute inset-x-0 top-full z-20 mt-1 rounded-md bg-stone-900 p-2 text-xs leading-snug font-normal text-white shadow-lg">
+        <span id={tipId} role="tooltip" className={`absolute inset-x-0 top-full mt-1 ${tooltipClass}`}>
           {children}
         </span>
       )}

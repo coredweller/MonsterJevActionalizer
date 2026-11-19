@@ -12,7 +12,7 @@ import { TrackerSidebar } from "@/components/TrackerSidebar";
 import { TurnLog } from "@/components/TurnLog";
 import { Panel } from "@/components/ui";
 import { type BlockedRecommendation, type DecideRequest, DecideResponseSchema, type Recommendation } from "@/lib/decide/types";
-import { createTracker, duplicate, syncSituation } from "@/lib/encounter/state";
+import { type RechargeRoll, createTracker, duplicate, startTurn, syncSituation, turnTaken } from "@/lib/encounter/state";
 import type { Situation, Tracker } from "@/lib/encounter/types";
 import { errorText, log } from "@/lib/log";
 import { extractAbilities, type ReviewDraft } from "@/lib/monster/extract";
@@ -43,6 +43,13 @@ interface Decision {
   readonly trackerId: string;
   readonly situation: Situation;
   readonly outcome: DecideOutcome | null;
+}
+
+/** The last Start turn press, kept so its rolls show until the tracker or round changes. */
+interface TurnStart {
+  readonly trackerId: string;
+  readonly round: number;
+  readonly rolls: readonly RechargeRoll[];
 }
 
 const UNEXPECTED_ANSWER = "The server's answer wasn't in the expected shape.";
@@ -87,6 +94,7 @@ export default function Home() {
   const [decision, setDecision] = useState<Decision | null>(null);
   // Only the latest Recommend press may set the decision; an older answer that arrives late is dropped.
   const latestRequest = useRef(0);
+  const [turnStart, setTurnStart] = useState<TurnStart | null>(null);
   const loading = flow !== null || (loaded && trackers.length === 0);
   const current: LoadFlow = flow ?? { step: "load" };
   const shown = decision !== null && decision.trackerId === selected?.id ? decision : null;
@@ -128,10 +136,12 @@ export default function Home() {
     clearDecision();
   }
 
-  function onTrackerEdited(previous: Tracker, next: Tracker) {
-    upsert(next);
-    // A new round means Start turn was pressed: the recommendation on screen was for the last turn.
-    if (next.state.round !== previous.state.round) clearDecision();
+  /** Start turn, from the monster panel or the Battlefield panel. The recommendation on screen was for the last turn. */
+  function onStartTurn(tracker: Tracker) {
+    const result = startTurn(tracker, Math.random);
+    setTurnStart({ trackerId: result.tracker.id, round: result.tracker.state.round, rolls: result.rolls });
+    upsert(result.tracker);
+    clearDecision();
   }
 
   // The recommendation and the turn log, under the Battlefield panel in the last column.
@@ -154,7 +164,13 @@ export default function Home() {
       ) : (
         <Panel title="Recommendation" accent="recommendation">
           <p className="text-sm text-stone-500">
-            {shown ? "Recommending…" : selected ? "Fill in the situation and press Recommend." : "Select a tracker."}
+            {shown
+              ? "Recommending…"
+              : !selected
+                ? "Select a tracker."
+                : turnTaken(selected)
+                  ? `Round ${selected.state.round}'s turn is applied. Record its result in the turn log.`
+                  : "Fill in the situation and press Recommend."}
           </p>
         </Panel>
       )}
@@ -238,7 +254,12 @@ export default function Home() {
           <>
             <div className="min-w-0 space-y-4 md:row-span-2 xl:row-span-1">
               {selected ? (
-                <EncounterTracker tracker={selected} onChange={(next) => onTrackerEdited(selected, next)} />
+                <EncounterTracker
+                  tracker={selected}
+                  onChange={upsert}
+                  rolls={turnStart?.trackerId === selected.id && turnStart.round === selected.state.round ? turnStart.rolls : null}
+                  onStartTurn={() => onStartTurn(selected)}
+                />
               ) : (
                 <Panel title="Monster" accent="monster">
                   <p className="text-sm text-stone-500">Select a tracker.</p>
@@ -253,6 +274,8 @@ export default function Home() {
                 onChange={(situation) => upsert({ ...selected, situation })}
                 onRecommend={(situation) => void recommend(selected, situation)}
                 pending={shown !== null && shown.outcome === null}
+                appliedRound={turnTaken(selected) ? selected.state.round : null}
+                onStartTurn={() => onStartTurn(selected)}
               >
                 {outcomePanels}
               </SituationForm>

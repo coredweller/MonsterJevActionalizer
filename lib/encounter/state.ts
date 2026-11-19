@@ -289,12 +289,26 @@ function spend(state: EncounterState, reviewed: ReviewedMonster, chosen: ChosenO
   return next;
 }
 
+/** Whether the monster's turn this round is already applied: the newest log entry is for the current round. */
+export function turnTaken(tracker: Tracker): boolean {
+  return tracker.log.at(-1)?.round === tracker.state.round;
+}
+
+/** The tracker without its undo point. */
+function withoutUndo(tracker: Tracker): Tracker {
+  const { beforeApply: _dropped, ...rest } = tracker;
+  return rest;
+}
+
 /**
  * Applies what the DM actually chose (never the recommendation): spends resources, updates
  * concentration, pushes a turn-log entry for the current round and carries the situation forward.
  * HP and the round are untouched: damage is a manual edit and the round advances in `startTurn`.
+ * Keeps what it changed as the undo point. Throws when this round's turn is already applied, since
+ * a second Apply would spend the monster's resources twice.
  */
 export function apply(tracker: Tracker, choice: ApplyChoice): Tracker {
+  if (turnTaken(tracker)) throw new Error(`apply: round ${tracker.state.round}'s turn is already applied. Start turn first, or undo it`);
   const { action, bonusAction } = choice;
   const state = spend(spend(tracker.state, tracker.reviewed, action), tracker.reviewed, bonusAction);
 
@@ -314,7 +328,25 @@ export function apply(tracker: Tracker, choice: ApplyChoice): Tracker {
   if (action?.slotLevel !== undefined) entry.slotLevel = action.slotLevel;
   if (bonusAction?.slotLevel !== undefined) entry.bonusSlotLevel = bonusAction.slotLevel;
 
-  return { ...tracker, state, situation: choice.situation, log: [...tracker.log, entry] };
+  const { slots, perDay, recharge, concentration } = tracker.state;
+  return { ...tracker, state, situation: choice.situation, log: [...tracker.log, entry], beforeApply: { slots, perDay, recharge, concentration } };
+}
+
+/** Whether `undoLastTurn` can run: this round's turn is applied and Start turn hasn't been pressed since. */
+export function canUndo(tracker: Tracker): boolean {
+  return turnTaken(tracker) && tracker.beforeApply !== undefined;
+}
+
+/**
+ * Takes back this round's Apply: drops its log entry and puts the slots, daily uses, recharge and
+ * concentration back as they were just before it. Everything else (HP, conditions, legendary
+ * counters, the situation) keeps its current value, since Apply never changed it. Throws when
+ * `canUndo` is false.
+ */
+export function undoLastTurn(tracker: Tracker): Tracker {
+  const { beforeApply } = tracker;
+  if (beforeApply === undefined || !turnTaken(tracker)) throw new Error("undoLastTurn: nothing to undo this round");
+  return { ...withoutUndo(tracker), state: { ...tracker.state, ...beforeApply }, log: tracker.log.slice(0, -1) };
 }
 
 /** One recharge roll made by `startTurn`, shown to the DM. */
@@ -330,6 +362,7 @@ export interface RechargeRoll {
  * Starts the monster's next turn: moves the round on and refills legendary actions (5e: they come
  * back at the start of its turn; Legendary Resistance is per day, so it doesn't). In auto mode it
  * rolls a d6 for each spent recharge ability, in ability order; manual mode leaves recharge to the DM.
+ * Drops the undo point.
  */
 export function startTurn(tracker: Tracker, rng: () => number): { tracker: Tracker; rolls: RechargeRoll[] } {
   const { reviewed, state } = tracker;
@@ -344,7 +377,8 @@ export function startTurn(tracker: Tracker, rng: () => number): { tracker: Track
       rolls.push({ abilityId: a.id, name: a.name, roll, min: a.uses.min, recharged });
     }
   }
-  const next = withState(tracker, { round: state.round + 1, recharge, legendaryActionsLeft: legendaryActionMax(reviewed) });
+  // The new round can't undo the last one's Apply: its recharge rolls would no longer add up.
+  const next = withState(withoutUndo(tracker), { round: state.round + 1, recharge, legendaryActionsLeft: legendaryActionMax(reviewed) });
   return { tracker: next, rolls };
 }
 

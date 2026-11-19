@@ -5,7 +5,7 @@ import { syncSituation, updatePlayerTurn } from "@/lib/encounter/state";
 import { SituationSchema, type Player, type Situation } from "@/lib/encounter/types";
 import { log } from "@/lib/log";
 import { PlayerRow } from "./PlayerRow";
-import { Button, InfoTip, Panel, ToggleChip, inputClass, labelClass } from "./ui";
+import { Button, InfoTip, Panel, ToggleChip, inputClass, labelClass, tooltipClass } from "./ui";
 
 type TerrainFlag = keyof Situation["terrain"];
 const TERRAIN_FLAGS = SituationSchema.shape.terrain.keyof().options;
@@ -48,6 +48,8 @@ export function SituationForm({
   onChange,
   onRecommend,
   pending = false,
+  appliedRound,
+  onStartTurn,
   children,
 }: {
   roster: readonly Player[];
@@ -56,6 +58,9 @@ export function SituationForm({
   onRecommend: (situation: Situation) => void;
   /** True while a recommendation request is in flight; disables "Recommend" so it isn't sent twice. */
   pending?: boolean;
+  /** The round whose turn is already applied, or null while this round's turn is still to play. Disables Recommend and shows Start turn beside it. */
+  appliedRound: number | null;
+  onStartTurn: () => void;
   /** Shown under the Battlefield panel, in its column. */
   children?: ReactNode;
 }) {
@@ -64,6 +69,9 @@ export function SituationForm({
   const playersForm = useRef<HTMLFormElement>(null);
   const battlefieldForm = useRef<HTMLFormElement>(null);
   const notesId = useId();
+  const appliedTipId = useId();
+  // Whether the tip on the disabled Recommend button is showing.
+  const [appliedTipOpen, setAppliedTipOpen] = useState(false);
   const alliesId = useId();
   // The stepper's 0 is "no allies", so a stale count left from before can't show while nobody is present.
   const allyCount = synced.allies.present ? synced.allies.count : 0;
@@ -81,7 +89,8 @@ export function SituationForm({
   // Either form can be submitted (the button, or Enter in a field), so both are checked whichever it was.
   function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (pending) return;
+    // Once the turn is applied, no submit path may recommend, not only the disabled button.
+    if (pending || appliedRound !== null) return;
     if (![playersForm.current, battlefieldForm.current].every((form) => form === null || form.reportValidity())) return;
     const parsed = SituationSchema.safeParse(synced);
     if (!parsed.success) {
@@ -192,9 +201,48 @@ export function SituationForm({
               </p>
             )}
 
-            <Button type="submit" variant="primary" className="w-full" disabled={pending}>
-              {pending ? "Recommending…" : "Recommend"}
-            </Button>
+            <div className="relative flex gap-2">
+              {/*
+                Browsers send no mouse events to a disabled button, so the wrapper takes the hover (and a tap, on
+                touch screens) and the button lets pointer events through to it while the turn is applied.
+              */}
+              <span
+                className="flex flex-1"
+                onMouseEnter={() => setAppliedTipOpen(true)}
+                onMouseLeave={() => setAppliedTipOpen(false)}
+                onClick={() => appliedRound !== null && setAppliedTipOpen((open) => !open)}
+              >
+                <Button
+                  type="submit"
+                  variant="primary"
+                  className={`flex-1 ${appliedRound !== null ? "pointer-events-none" : ""}`}
+                  disabled={pending || appliedRound !== null}
+                  aria-describedby={appliedRound !== null ? appliedTipId : undefined}
+                >
+                  {pending ? "Recommending…" : "Recommend"}
+                </Button>
+              </span>
+              {appliedRound !== null && (
+                // Always rendered while the turn is applied, so screen readers get it as the button's description.
+                <span id={appliedTipId} role="tooltip" className={`absolute inset-x-0 bottom-full mb-1 ${tooltipClass} ${appliedTipOpen ? "" : "hidden"}`}>
+                  Round {appliedRound}&apos;s turn is applied. Start turn to move on, or undo it in the turn log.
+                </span>
+              )}
+              {appliedRound !== null && (
+                // The monster accent, so it's red like the monster panel's own Start turn button.
+                <Button
+                  variant="primary"
+                  className="accent-monster flex-1"
+                  onClick={() => {
+                    // A tip tapped open on a touch screen would otherwise show again, unasked, after the next Apply.
+                    setAppliedTipOpen(false);
+                    onStartTurn();
+                  }}
+                >
+                  Start turn
+                </Button>
+              )}
+            </div>
           </form>
         </Panel>
         {children}
