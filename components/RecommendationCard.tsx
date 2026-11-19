@@ -1,12 +1,14 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useState } from "react";
 import { buildClusters, type Cluster } from "@/lib/decide/clusters";
 import {
   PART_LABEL,
   buildChoice,
   initialDraft,
+  rankKeys,
   recommendationProblem,
+  runnerUp,
   sameDraft,
   sameIds,
   switchPick,
@@ -16,12 +18,12 @@ import {
   type PickDraft,
 } from "@/lib/decide/draft";
 import { MOVEMENT_LABELS } from "@/lib/decide/explain";
-import type { BlockedRecommendation, Confidence, Recommendation, RunnerUp } from "@/lib/decide/types";
+import type { BlockedRecommendation, Confidence, Recommendation } from "@/lib/decide/types";
 import { apply, sameSituation } from "@/lib/encounter/state";
 import type { Movement, Situation, Tracker } from "@/lib/encounter/types";
 import { errorText, log } from "@/lib/log";
-import { buildLegalOptions, type LegalOptions, type Option } from "@/lib/monster/options";
-import { Badge, Button, Panel, ToggleChip, inputClass, labelClass } from "./ui";
+import { buildLegalOptions, type Option } from "@/lib/monster/options";
+import { Badge, Button, Panel, ToggleChip } from "./ui";
 
 const CONFIDENCE: Record<Confidence, { label: string; tone: "green" | "amber" | "red" }> = {
   high: { label: "High confidence", tone: "green" },
@@ -33,22 +35,8 @@ const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 const movementLabel = (m: Movement) => capitalize(MOVEMENT_LABELS[m]);
 const pct = (p: number) => `${Math.round(p * 100)}%`;
 
-function runnerUpLabel(r: RunnerUp, options: LegalOptions): string {
-  const nameIn = (list: readonly Option[]) => list.find((o) => o.key === r.key)?.name ?? r.key;
-  const movement = options.movements.find((m) => m === r.key);
-  switch (r.question) {
-    case "action":
-      return `Action: ${nameIn(options.actions)}`;
-    case "bonus_action":
-      return `Bonus action: ${nameIn(options.bonusActions)}`;
-    case "move_before":
-      return `Move before: ${movement ? movementLabel(movement) : r.key}`;
-    case "move_after":
-      return `Move after: ${movement ? movementLabel(movement) : r.key}`;
-    default:
-      return `${r.question}: ${r.key}`;
-  }
-}
+/** One question's distribution from the recommendation, by key. */
+type Dist = Readonly<Record<string, number>>;
 
 // ---------------------------------------------------------------------------
 // Controls
@@ -57,55 +45,115 @@ function runnerUpLabel(r: RunnerUp, options: LegalOptions): string {
 interface Choice<T> {
   value: T;
   label: string;
+  /** The recommendation's probability; absent by hand, or for a question that wasn't asked. */
+  p?: number;
+}
+
+/** A select's choices: most probable first with their %, when the question was answered; else in legal order. */
+function rankedChoices<K extends string>(keys: readonly K[], label: (key: K) => string, dist: Dist | undefined): Choice<K>[] {
+  if (!dist) return keys.map((key) => ({ value: key, label: label(key) }));
+  return rankKeys(keys, dist).map(({ key, p }) => ({ value: key, label: label(key), p }));
+}
+
+const choiceText = (c: Choice<unknown>) => (c.p === undefined ? c.label : `${c.label} · ${pct(c.p)}`);
+
+function Caption({ htmlFor, id, label, changed }: { htmlFor?: string; id?: string; label: string; changed: boolean }) {
+  const text = "text-xs font-semibold text-stone-600";
+  return (
+    <span className="flex items-center gap-1.5">
+      {htmlFor ? (
+        <label htmlFor={htmlFor} className={text}>
+          {label}
+        </label>
+      ) : (
+        <span id={id} className={text}>
+          {label}
+        </span>
+      )}
+      {changed && <Badge tone="amber">Changed</Badge>}
+    </span>
+  );
 }
 
 /**
- * One override select. `recommended` (absent by hand) shows what the recommendation picked and
- * flags an override. `allowEmpty` makes the empty entry a real choice ("No group"); otherwise it
- * only shows while nothing is picked.
+ * One part of the turn: a caption, a select and, beside it, one chip. While the row holds the
+ * recommendation's value, the chip offers `alternative` (the runner-up); once changed, it offers the
+ * recommendation back. A single choice that is already picked is plain text.
  */
-function ChoiceSelect<T extends string | number>({
+function ChoiceRow<T extends string | number>({
   label,
   value,
   choices,
   emptyLabel,
   allowEmpty = false,
   recommended,
+  alternative,
   onChange,
 }: {
   label: string;
   value: T | null;
   choices: readonly Choice<T>[];
   emptyLabel: string;
+  /** Makes the empty entry a real choice ("No group"); otherwise it only shows while nothing is picked. */
   allowEmpty?: boolean;
+  /** The recommendation's value; absent by hand. */
   recommended?: { value: T | null };
+  /** The runner-up, offered while the row holds the recommended value; null when there is none. */
+  alternative?: T | null;
   onChange: (value: T | null) => void;
 }) {
-  const labelOf = (v: T | null) => (v === null ? emptyLabel : (choices.find((c) => c.value === v)?.label ?? String(v)));
+  const selectId = useId();
+  const only = choices.length === 1 && !allowEmpty ? choices[0] : undefined;
+  if (only && only.value === value) {
+    return (
+      <div className="flex items-baseline gap-2">
+        <Caption id={selectId} label={label} changed={false} />
+        <span className="text-sm">
+          {only.label} <span className="text-stone-600">(only choice)</span>
+        </span>
+      </div>
+    );
+  }
+
+  const changed = recommended !== undefined && recommended.value !== value;
+  const back = changed && recommended.value !== null ? choices.find((c) => c.value === recommended.value) : undefined;
+  const offer = changed ? back : alternative != null ? choices.find((c) => c.value === alternative) : undefined;
   return (
-    <label className={labelClass}>
-      <span className="flex flex-wrap items-center gap-2">
-        {label}
-        {recommended && recommended.value !== value && <Badge tone="amber">Overridden</Badge>}
-      </span>
-      <select
-        className={inputClass}
-        value={value === null ? "" : String(value)}
-        onChange={(e) => onChange(e.target.value === "" ? null : (choices.find((c) => String(c.value) === e.target.value)?.value ?? null))}
-      >
-        {(value === null || allowEmpty) && (
-          <option value="" disabled={!allowEmpty}>
-            {emptyLabel}
-          </option>
+    <div>
+      <Caption htmlFor={selectId} label={label} changed={changed} />
+      <div className="flex items-center gap-1.5">
+        <select
+          id={selectId}
+          className="min-h-11 w-full min-w-0 rounded border border-stone-500 bg-white px-2 text-sm"
+          value={value === null ? "" : String(value)}
+          onChange={(e) => onChange(e.target.value === "" ? null : (choices.find((c) => String(c.value) === e.target.value)?.value ?? null))}
+        >
+          {(value === null || allowEmpty) && (
+            <option value="" disabled={!allowEmpty}>
+              {emptyLabel}
+            </option>
+          )}
+          {choices.map((c) => (
+            <option key={String(c.value)} value={String(c.value)}>
+              {choiceText(c)}
+            </option>
+          ))}
+        </select>
+        {offer && (
+          <button
+            type="button"
+            aria-label={`${back ? "Back to the recommended pick" : "Use runner-up"}: ${choiceText(offer)}`}
+            className="flex min-h-11 w-36 flex-none items-center gap-1 rounded-md border border-dashed border-(--accent) bg-white px-2 text-left text-xs text-(--accent-strong) hover:bg-(--accent-soft)"
+            onClick={() => onChange(offer.value)}
+          >
+            <span className="min-w-0 flex-1 truncate font-medium">
+              {back ? "back to" : "or"} {offer.label}
+            </span>
+            {offer.p !== undefined && <span className="flex-none tabular-nums">{pct(offer.p)}</span>}
+          </button>
         )}
-        {choices.map((c) => (
-          <option key={String(c.value)} value={String(c.value)}>
-            {c.label}
-          </option>
-        ))}
-      </select>
-      {recommended && <span className="text-xs text-stone-600">Recommended: {labelOf(recommended.value)}</span>}
-    </label>
+      </div>
+    </div>
   );
 }
 
@@ -120,47 +168,53 @@ function TargetChips({
   players,
   value,
   recommended,
+  chances,
   onChange,
 }: {
   label: string;
   players: readonly PlayerChoice[];
   value: readonly string[];
+  /** The recommendation's targets for this option; null by hand, or for another option than its pick. */
   recommended: readonly string[] | null;
+  /** Jev's probability for each player as this option's target, when its target question was answered. */
+  chances: Dist | undefined;
   onChange: (ids: string[]) => void;
 }) {
-  const names = (ids: readonly string[]) => players.filter((p) => ids.includes(p.id)).map((p) => p.name).join(", ") || "nobody";
+  const captionId = useId();
   return (
     <div>
-      <p className="mb-1 flex flex-wrap items-center gap-2 text-sm">
-        {label}
-        {recommended && !sameIds(recommended, value) && <Badge tone="amber">Overridden</Badge>}
-      </p>
+      <Caption id={captionId} label={label} changed={recommended !== null && !sameIds(recommended, value)} />
       {players.length === 0 ? (
         <p className="text-sm text-stone-500">No players in this situation.</p>
       ) : (
-        <div className="flex flex-wrap gap-2">
-          {players.map((p) => (
-            <ToggleChip
-              key={p.id}
-              pressed={value.includes(p.id)}
-              onToggle={(on) => onChange(players.filter((o) => (o.id === p.id ? on : value.includes(o.id))).map((o) => o.id))}
-            >
-              {p.name}
-            </ToggleChip>
-          ))}
+        <div role="group" aria-labelledby={captionId} className="flex flex-wrap gap-1.5">
+          {players.map((p) => {
+            const chance = chances?.[p.id];
+            return (
+              <ToggleChip
+                key={p.id}
+                pressed={value.includes(p.id)}
+                onToggle={(on) => onChange(players.filter((o) => (o.id === p.id ? on : value.includes(o.id))).map((o) => o.id))}
+              >
+                {p.name}
+                {chance !== undefined && <span className="ml-1 font-normal tabular-nums">{pct(chance)}</span>}
+              </ToggleChip>
+            );
+          })}
         </div>
       )}
-      {recommended && <p className="mt-1 text-xs text-stone-600">Recommended: {names(recommended)}</p>}
     </div>
   );
 }
 
-/** The action or bonus action select, plus its target, group and slot controls for the selected option. */
+/** The action or bonus action row, plus its target, group and slot rows for the selected option. */
 function PickStep({
   part,
   list,
   pick,
   recommended,
+  dist,
+  targetP,
   clusters,
   players,
   onChange,
@@ -170,30 +224,36 @@ function PickStep({
   pick: PickDraft;
   /** The recommendation's pick, or null by hand. */
   recommended: PickDraft | null;
+  /** Jev's distribution for this part's question, when it was asked. */
+  dist: Dist | undefined;
+  /** Jev's target probabilities for this list, by option key then player id. */
+  targetP: Readonly<Record<string, Dist>> | undefined;
   clusters: readonly Cluster[];
   players: readonly PlayerChoice[];
   onChange: (pick: PickDraft) => void;
 }) {
   const option = list.find((o) => o.key === pick.key);
   const mode = option ? targetMode(option, part) : "none";
+  const keys = list.map((o) => o.key);
   // Sub-pick hints only compare like with like: the recommendation's own option.
   const sub = recommended !== null && recommended.key === pick.key ? recommended : null;
   const groupLabel = (c: Cluster) => `${players.filter((p) => c.playerIds.includes(p.id)).map((p) => p.name).join(", ")} (catches ${c.playerIds.length})`;
+  const alternative = dist && recommended?.key ? (runnerUp(keys, dist, recommended.key)?.key ?? null) : null;
 
   return (
-    <div className="space-y-3">
-      <ChoiceSelect
+    <div className="space-y-2">
+      <ChoiceRow
         label={PART_LABEL[part]}
         value={pick.key}
-        choices={list.map((o) => ({ value: o.key, label: o.name }))}
+        choices={rankedChoices(keys, (key) => list.find((o) => o.key === key)?.name ?? key, dist)}
         emptyLabel={part === "action" ? "Pick an action" : "Pick a bonus action"}
         recommended={recommended ? { value: recommended.key } : undefined}
+        alternative={alternative}
         onChange={(key) => onChange(switchPick(key, list, recommended))}
       />
-      {option && option.kind !== "none" && <p className="text-xs text-stone-600">{option.summary}</p>}
       {option && mode === "cluster" && (
-        <ChoiceSelect
-          label="Group"
+        <ChoiceRow
+          label={`${option.name} group`}
           value={pick.clusterId}
           choices={clusters.map((c) => ({ value: c.id, label: groupLabel(c) }))}
           emptyLabel="No group"
@@ -204,16 +264,17 @@ function PickStep({
       )}
       {option && mode === "players" && (
         <TargetChips
-          label={`${PART_LABEL[part]} targets`}
+          label={`${option.name} targets`}
           players={players}
           value={pick.targetIds}
           recommended={sub ? sub.targetIds : null}
+          chances={pick.key === null ? undefined : targetP?.[pick.key]}
           onChange={(targetIds) => onChange({ ...pick, targetIds })}
         />
       )}
       {option?.leveledSpell && (
-        <ChoiceSelect
-          label="Slot level"
+        <ChoiceRow
+          label={`${option.name} slot level`}
           value={pick.slotLevel}
           choices={option.leveledSpell.availableLevels.map((n) => ({ value: n, label: `Level ${n}` }))}
           emptyLabel="Pick a slot level"
@@ -231,6 +292,7 @@ function MovementStep({
   movements,
   fixed,
   recommended,
+  dist,
   onChange,
 }: {
   label: string;
@@ -240,22 +302,25 @@ function MovementStep({
   fixed: boolean;
   /** The recommendation's movement; absent by hand, or when a blocked turn leaves it to the DM. */
   recommended: Movement | undefined;
+  /** Jev's distribution for this movement question, when it was asked. */
+  dist: Dist | undefined;
   onChange: (m: Movement | null) => void;
 }) {
   if (fixed) {
     return (
       <p className="text-sm">
-        {label}: <strong>{movementLabel("hold")}</strong> <span className="text-stone-600">(it can't move)</span>
+        {label}: <strong>{movementLabel("hold")}</strong> <span className="text-stone-600">(it can&apos;t move)</span>
       </p>
     );
   }
   return (
-    <ChoiceSelect
+    <ChoiceRow
       label={label}
       value={value}
-      choices={movements.map((m) => ({ value: m, label: movementLabel(m) }))}
+      choices={rankedChoices(movements, movementLabel, dist)}
       emptyLabel="Pick a movement"
       recommended={recommended === undefined ? undefined : { value: recommended }}
+      alternative={dist && recommended ? (runnerUp(movements, dist, recommended)?.key ?? null) : null}
       onChange={onChange}
     />
   );
@@ -267,9 +332,10 @@ function MovementStep({
 
 /**
  * This turn's recommendation with an override for every part, and Apply (constitution Principle III).
- * Legal options are recomputed here with `buildLegalOptions`, so the overrides never depend on the
- * server's answer. With `recommendation: null` (the decide call failed) the same controls start
- * empty and the DM picks by hand. Blocked turns come from those local options too.
+ * The plan line leads; each part is then one row with its runner-up beside it. Legal options are
+ * recomputed here with `buildLegalOptions`, so the overrides never depend on the server's answer.
+ * With `recommendation: null` (the decide call failed) the same rows start empty and the DM picks
+ * by hand. Blocked turns come from those local options too.
  *
  * Apply passes the DM's final picks to `apply` and hands the updated tracker to `onApply`. The card
  * resets whenever `recommendation`, `situation` or the tracker's state changes; after Apply the
@@ -328,6 +394,7 @@ export function RecommendationCard({
   const { blocked } = options;
   const movementFixed = blocked?.movementBy === "code";
   const set = (patch: Partial<Draft>) => setDraft({ ...current, ...patch });
+  const dist = (question: string): Dist | undefined => full?.probabilities[question];
 
   function applyTurn() {
     if (!built.ok) return;
@@ -348,11 +415,25 @@ export function RecommendationCard({
   }
 
   return (
-    <Panel title={usable ? "Recommendation" : "Pick by hand"} accent="recommendation" actions={full && <Badge tone={CONFIDENCE[full.confidence].tone}>{CONFIDENCE[full.confidence].label}</Badge>}>
-      <div className="space-y-4">
+    <Panel title={usable ? "Recommendation" : "Pick by hand"} accent="recommendation">
+      <div className="space-y-3">
+        {full && (
+          <div className="flex items-start gap-2 rounded-md bg-amber-100 p-2 text-sm text-amber-950">
+            <span className="flex-none">
+              <Badge tone={CONFIDENCE[full.confidence].tone}>{CONFIDENCE[full.confidence].label}</Badge>
+            </span>
+            <p>
+              <strong>
+                {full.plan.lead}
+                {full.plan.detail && ":"}
+              </strong>{" "}
+              {full.plan.detail}
+            </p>
+          </div>
+        )}
         {problem !== null && (
           <p role="alert" className="rounded bg-red-50 p-2 text-sm text-red-800">
-            The recommendation doesn't match this turn&apos;s options ({problem}). Pick by hand.
+            The recommendation doesn&apos;t match this turn&apos;s options ({problem}). Pick by hand.
           </p>
         )}
         {recommendation === null && <p className="text-sm text-stone-600">No recommendation this turn. Every legal option is listed below.</p>}
@@ -374,7 +455,7 @@ export function RecommendationCard({
           </ul>
         )}
 
-        <ol className="space-y-4">
+        <ol className="space-y-3">
           <li>
             <MovementStep
               label="Move before"
@@ -382,6 +463,7 @@ export function RecommendationCard({
               movements={options.movements}
               fixed={movementFixed}
               recommended={usable?.moveBefore ?? undefined}
+              dist={dist("move_before")}
               onChange={(moveBefore) => set({ moveBefore })}
             />
           </li>
@@ -395,6 +477,8 @@ export function RecommendationCard({
                   list={options.actions}
                   pick={current.action}
                   recommended={full ? initial.action : null}
+                  dist={dist("action")}
+                  targetP={full?.targetP.actions}
                   clusters={clusters}
                   players={players}
                   onChange={(action) => set({ action })}
@@ -406,6 +490,8 @@ export function RecommendationCard({
                   list={options.bonusActions}
                   pick={current.bonus}
                   recommended={full ? initial.bonus : null}
+                  dist={dist("bonus_action")}
+                  targetP={full?.targetP.bonusActions}
                   clusters={clusters}
                   players={players}
                   onChange={(bonus) => set({ bonus })}
@@ -420,32 +506,11 @@ export function RecommendationCard({
               movements={options.movements}
               fixed={movementFixed}
               recommended={usable?.moveAfter ?? undefined}
+              dist={dist("move_after")}
               onChange={(moveAfter) => set({ moveAfter })}
             />
           </li>
         </ol>
-
-        {full && (
-          <div>
-            <h3 className="text-sm font-semibold text-(--accent-strong)">Why</h3>
-            <p className="whitespace-pre-line text-sm text-stone-700">{full.explanation}</p>
-          </div>
-        )}
-
-        {full && full.runnersUp.length > 0 && (
-          // Low confidence surfaces the alternatives (Principle III), so "DM's call" starts open.
-          <details open={full.confidence === "dmsCall"}>
-            <summary className="flex min-h-11 cursor-pointer items-center text-sm">Runners-up ({full.runnersUp.length})</summary>
-            <ul className="space-y-1 text-sm">
-              {full.runnersUp.map((r) => (
-                <li key={`${r.question}:${r.key}`} className="flex justify-between gap-2">
-                  <span>{runnerUpLabel(r, options)}</span>
-                  <span className="tabular-nums text-stone-600">{pct(r.p)}</span>
-                </li>
-              ))}
-            </ul>
-          </details>
-        )}
 
         {applyError && (
           <p role="alert" className="rounded bg-red-50 p-2 text-sm text-red-800">

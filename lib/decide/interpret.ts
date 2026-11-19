@@ -20,7 +20,7 @@
  *  7. `concentration`: a concentration spell while concentrating stands, with a warning naming the
  *     spell it ends.
  * Then targets, clusters and slot levels for the final picks (Jev's candidate answer, the only value,
- * or a code pick), confidence from the action's probability, and the template explanation.
+ * or a code pick), confidence from the action's probability, and the template plan line.
  *
  * Every replacement is the most probable option that passes the rules already applied plus the
  * standing rules (action and bonus action in reach; never two leveled spells; never an attack-dependent bonus
@@ -463,6 +463,13 @@ export function interpret(
     ...(o.area ? areaPart(o, list, ctx) : o.singleTarget ? targetPart(o, list, ctx) : {}),
     ...(o.leveledSpell ? slotPart(o, o.leveledSpell.availableLevels, list, ctx) : {}),
   });
+  const keyOfPlayer = new Map(Object.entries(candidates.players).map(([key, id]) => [id, key]));
+  const targetChances = (list: OptionList) =>
+    Object.fromEntries(
+      candidates.targets
+        .filter((t) => t.list === list && choices.has(t.key))
+        .map((t) => [t.optionKey, Object.fromEntries(t.playerIds.map((id) => [id, p(t.key, lookup(keyOfPlayer, id, "player")) ?? 0]))]),
+    );
   const draft = {
     moveBefore,
     action: resolve(action, "actions"),
@@ -472,8 +479,9 @@ export function interpret(
     confidence: confidenceFor(p("action", action.key)),
     probabilities: Object.fromEntries([...choices].map(([question, read]) => [question, { ...read.dist }])),
     nouls,
+    targetP: { actions: targetChances("actions"), bonusActions: targetChances("bonusActions") },
     warnings,
     adjustments,
   };
-  return { ...draft, ...explain(draft, options, tracker.roster) };
+  return { ...draft, ...explain(draft, tracker.roster) };
 }

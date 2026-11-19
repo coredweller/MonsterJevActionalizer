@@ -30,7 +30,7 @@ function run(fixture: string) {
   const { candidates } = buildJevRequest(tracker, situation, options);
   const response = SystemOneResponseSchema.parse(parsed.response);
   const rec = interpret(response, options, candidates, tracker, situation);
-  return { rec, options, tracker, situation, response };
+  return { rec, options, tracker, situation, response, candidates };
 }
 
 const rules = (rec: Recommendation): AdjustmentRule[] => rec.adjustments.map((a) => a.rule);
@@ -81,7 +81,7 @@ describe("interpret: every fixture", () => {
     }
     // The cross-question rules hold on every final pick.
     expect(isLeveledSpell(action, tracker.reviewed.abilities) && isLeveledSpell(bonus, tracker.reviewed.abilities)).toBe(false);
-    expect(rec.explanation.length).toBeGreaterThan(0);
+    expect(rec.plan.lead.length).toBeGreaterThan(0);
   });
 });
 
@@ -117,9 +117,17 @@ describe("interpret: recorded responses", () => {
   });
 
   it("warpriest-dual-spells: Jev's top action and its target question's pick, and War Priest only if it is the top bonus", () => {
-    const { rec, response } = run("warpriest-dual-spells");
+    const { rec, response, candidates } = run("warpriest-dual-spells");
     expect(rec.action.key).toBe(recordedTop(response, "action"));
     expect(rec.action.targetBy).toEqual({ by: "jev", question: "target__0", p: recordedP(response, "target__0", recordedTop(response, "target__0")) });
+    // Every answered target question's probabilities, by option and player id, for the card's target
+    // chips; options other than the pick too, so switching to one keeps its %.
+    const keyOf = (id: string) => Object.entries(candidates.players).find(([, pid]) => pid === id)?.[0] ?? id;
+    const answered = candidates.targets.filter((t) => t.asked && response.answers[t.key]?.type === "choice");
+    expect(answered.some((t) => t.optionKey !== rec.action.key)).toBe(true);
+    const expected: Record<"actions" | "bonusActions", Record<string, Record<string, number>>> = { actions: {}, bonusActions: {} };
+    for (const t of answered) expected[t.list][t.optionKey] = Object.fromEntries(t.playerIds.map((id) => [id, recordedP(response, t.key, keyOf(id))]));
+    expect(rec.targetP).toEqual(expected);
     expect(rec.bonusAction.key).toBe(recordedTop(response, "bonus_action"));
     expect(rules(rec).filter((r) => CONSISTENCY_RULES.includes(r))).toEqual([]);
   });
@@ -148,9 +156,9 @@ describe("interpret: recorded responses", () => {
     expect(rec.action).toEqual({ key: "disengage" });
     expect([rec.moveBefore, rec.moveAfter]).toEqual(["hold", "retreat"]);
     expect(rules(rec)).toContain("retreat");
-    // Jev's own top action is kept visible as a runner-up.
+    // Jev's own top action stays in the probabilities, so the card can offer it as the runner-up.
     const top = recordedTop(response, "action");
-    expect(rec.runnersUp).toContainEqual({ question: "action", key: top, p: recordedP(response, "action", top) });
+    expect(rec.probabilities.action?.[top]).toBe(recordedP(response, "action", top));
   });
 
   it("concentrating-caster: a close call is decided by the distribution, with Jev's cluster pick and no concentration warning", () => {
@@ -185,7 +193,12 @@ describe("interpret: consistency rules (derived fixtures)", () => {
 
   it("one leveled spell per turn: the lower-probability Guiding Bolt (0.55 < 0.70) is replaced by its best non-leveled alternative", () => {
     const { rec } = run("derived/two-leveled-spells");
-    expect(rec.action).toEqual({ key: "act_multiattack", targetIds: ["sefa"], targetBy: { by: "jev", question: "target__0", p: 0.41 } });
+    expect(rec.action).toEqual({
+      key: "act_multiattack",
+      targetIds: ["sefa"],
+      targetBy: { by: "jev", question: "target__0", p: 0.41 },
+    });
+    expect(rec.targetP.actions.act_multiattack).toMatchObject({ sefa: 0.41 });
     // Spiritual Weapon had no slot or target question: code picks the lowest slot and the lowest apparent HP in range.
     expect(rec.bonusAction).toEqual({
       key: "spell_spiritual_weapon",

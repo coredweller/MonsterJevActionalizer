@@ -123,7 +123,8 @@ function choice(instructions: string, criteria: Record<string, string | null>): 
   return { type: "choice", instructions, criteria };
 }
 
-const TACTICS: Record<Tactic, string> = {
+/** What each tactic aims at; Jev's criteria, and the aim on the card's plan line. */
+export const TACTICS: Record<Tactic, string> = {
   aggressive: "Deal as much damage as it can this turn",
   focus_weakest: "Finish off or pressure the most wounded or vulnerable player",
   focus_threat: "Go after the player who is the biggest threat to it",

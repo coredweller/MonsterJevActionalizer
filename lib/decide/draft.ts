@@ -131,6 +131,16 @@ export function switchPick(key: string | null, list: readonly Option[], recommen
   return { key, targetIds: [], clusterId: null, slotLevel: levels.length === 1 ? (levels[0] ?? null) : null };
 }
 
+/** Keys with their probability, most probable first, ties in `keys` (legal) order; a key missing from `dist` is 0. */
+export function rankKeys<K extends string>(keys: readonly K[], dist: Readonly<Record<string, number>>): { key: K; p: number }[] {
+  return keys.map((key, i) => ({ key, p: dist[key] ?? 0, i })).sort((a, b) => b.p - a.p || a.i - b.i).map(({ key, p }) => ({ key, p }));
+}
+
+/** The most probable key other than `picked`, or null when every other key is at 0 (the card's runner-up chip). */
+export function runnerUp<K extends string>(keys: readonly K[], dist: Readonly<Record<string, number>>, picked: K): { key: K; p: number } | null {
+  return rankKeys(keys, dist).find((r) => r.key !== picked && r.p > 0) ?? null;
+}
+
 const samePick = (a: PickDraft, b: PickDraft) =>
   a.key === b.key && a.clusterId === b.clusterId && a.slotLevel === b.slotLevel && sameIds(a.targetIds, b.targetIds);
 export const sameDraft = (a: Draft, b: Draft) =>

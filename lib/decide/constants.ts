@@ -16,7 +16,5 @@ export const TARGET_CANDIDATES = 4;
 export const CLUSTER_CANDIDATES = 3;
 /** Leveled-spell candidates that get a `slot_level__<i>` question ("top 3–4 candidates", PLAN.md). */
 export const SLOT_CANDIDATES = 4;
-/** Runners-up listed per question on the recommendation card (PLAN.md "Recommendation card"). */
-export const RUNNERS_UP_PER_QUESTION = 3;
 /** Turn-log entries included in Jev's state. */
 export const HISTORY_TURNS = 3;

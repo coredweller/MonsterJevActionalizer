@@ -61,8 +61,11 @@ export type AdjustmentRule = z.infer<typeof AdjustmentRuleSchema>;
 export const AdjustmentSchema = z.object({ rule: AdjustmentRuleSchema, detail: z.string() });
 export type Adjustment = z.infer<typeof AdjustmentSchema>;
 
-export const RunnerUpSchema = z.object({ question: z.string(), key: z.string(), p: z.number() });
-export type RunnerUp = z.infer<typeof RunnerUpSchema>;
+const TargetChancesSchema = z.record(z.string(), z.record(z.string(), z.number()));
+
+/** The card's plan line: `lead` in bold ("Control (71%)"), then `detail` (the tactic's aim and the target reason). */
+export const PlanSchema = z.object({ lead: z.string(), detail: z.string() });
+export type Plan = z.infer<typeof PlanSchema>;
 
 export const RecommendationSchema = z.object({
   moveBefore: MovementSchema,
@@ -77,15 +80,19 @@ export const RecommendationSchema = z.object({
   probabilities: z.record(z.string(), z.record(z.string(), z.number())),
   /** Jev's noul answers: `should_retreat`, `spend_resource`, `multiattack_fallback` when asked. */
   nouls: z.record(z.string(), z.number()),
-  runnersUp: z.array(RunnerUpSchema),
   warnings: z.array(z.string()),
-  explanation: z.string(),
+  plan: PlanSchema,
+  /**
+   * Jev's probability for each offered target, by option key then player id: every option whose
+   * target question was answered, not only the pick, so the card keeps the % when the DM switches.
+   */
+  targetP: z.object({ actions: TargetChancesSchema, bonusActions: TargetChancesSchema }),
   adjustments: z.array(AdjustmentSchema),
 });
 export type Recommendation = z.infer<typeof RecommendationSchema>;
 
-/** What interpret hands explain: everything but the explanation and runners-up. */
-export type RecommendationDraft = Omit<Recommendation, "explanation" | "runnersUp">;
+/** What interpret hands explain: everything but the plan line. */
+export type RecommendationDraft = Omit<Recommendation, "plan">;
 
 /** A hard-blocked monster: no action, bonus action, tactic or probabilities. `null` movement = the DM picks. */
 export const BlockedRecommendationSchema = z.object({

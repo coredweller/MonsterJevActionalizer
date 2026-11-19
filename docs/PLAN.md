@@ -60,7 +60,7 @@ lib/decide/
   clusters.ts               – groups players from "clustered with"
   questions.ts              – builds the question set (noul()/choice() helpers, as in prototype/src/questions.ts)
   interpret.ts              – probabilities → Recommendation, consistency rules, confidence buckets
-  explain.ts                – template explanation text
+  explain.ts                – template plan line (tactic, its aim, the target reason)
 data/
   srd-spells.json           – SRD spells: level, casting time, range, area, save/attack, damage/effect, concentration
 scripts/
@@ -261,9 +261,10 @@ Code reads the `probabilities` distributions, not just `choice`, because the pro
 
 ## Recommendation card
 - **Shows:**
-  - the top pick for move before → action (with target, cluster or slot) → bonus action → move after
-  - a template explanation (tactic, why this target, the probabilities)
-  - a list of runners-up with their probabilities, collapsed unless confidence is "DM's call" (low confidence must show the alternatives)
+  - a plan line at the top: the confidence badge, then the tactic with its probability, what that tactic aims at, and why this target or group (a template, e.g. "Aggressive (71%): deal as much damage as it can this turn. Sefa is the likeliest target (94%).")
+  - one row per part (move before → action, with its target, group or slot → bonus action → move after). Each row is a dropdown of every legal choice, most probable first with its probability. A part with only one choice is plain text.
+  - beside each row, a chip with its runner-up and that probability, so the alternatives are always visible (low confidence must show them). Tapping it swaps the pick. A changed row is marked **Changed**, and its chip then offers the recommended pick back.
+  - target chips with each player's probability, whenever Jev was asked about that option's targets (not only for the recommended pick, so switching keeps them)
 - **Override:** every part can be switched to any legal option.
 - **Apply** takes what the DM *actually* chose. It:
   - spends the slot, recharge or use

@@ -6,7 +6,7 @@
 import { describe, expect, it } from "vitest";
 import { buildScenario } from "@/fixtures/jev/scenarios";
 import { buildClusters } from "@/lib/decide/clusters";
-import { type Draft, buildChoice, initialDraft, recommendationProblem, sameDraft, switchPick, targetMode } from "@/lib/decide/draft";
+import { type Draft, buildChoice, initialDraft, rankKeys, recommendationProblem, runnerUp, sameDraft, switchPick, targetMode } from "@/lib/decide/draft";
 import type { ActionPick, BlockedRecommendation, Recommendation } from "@/lib/decide/types";
 import { apply } from "@/lib/encounter/state";
 import type { Condition, Tracker } from "@/lib/encounter/types";
@@ -37,9 +37,9 @@ function recommendation(edit: { action?: ActionPick; bonusAction?: ActionPick } 
     confidence: "medium",
     probabilities: {},
     nouls: {},
-    runnersUp: [],
     warnings: [],
-    explanation: "",
+    plan: { lead: "", detail: "" },
+    targetP: { actions: {}, bonusActions: {} },
     adjustments: [],
     ...edit,
   };
@@ -223,5 +223,27 @@ describe("buildChoice", () => {
     const after = apply(tracker, built.choice);
     expect(after.log).toHaveLength(tracker.log.length + 1);
     expect(after.log.at(-1)).toMatchObject({ actionId: "spell_shatter", slotLevel: 5, clusterId: "cluster_1", recommended: false });
+  });
+});
+
+describe("rankKeys and runnerUp", () => {
+  const keys = ["hold", "closeIn", "reachOther", "retreat", "takeCover"];
+  const dist = { hold: 0.39, closeIn: 0.2, reachOther: 0.39, retreat: 0.02 };
+
+  it("ranks most probable first, ties in legal order, a missing key as 0", () => {
+    expect(rankKeys(keys, dist)).toEqual([
+      { key: "hold", p: 0.39 },
+      { key: "reachOther", p: 0.39 },
+      { key: "closeIn", p: 0.2 },
+      { key: "retreat", p: 0.02 },
+      { key: "takeCover", p: 0 },
+    ]);
+  });
+
+  it("the runner-up is the most probable key other than the pick, never a zero", () => {
+    expect(runnerUp(keys, dist, "hold")).toEqual({ key: "reachOther", p: 0.39 });
+    expect(runnerUp(keys, dist, "reachOther")).toEqual({ key: "hold", p: 0.39 });
+    expect(runnerUp(["none", "bon_x"], { none: 1, bon_x: 0 }, "none")).toBeNull();
+    expect(runnerUp(["none"], { none: 1 }, "none")).toBeNull();
   });
 });
