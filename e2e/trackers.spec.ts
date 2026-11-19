@@ -190,7 +190,7 @@ test("the party is edited in the sidebar; players this turn and the battlefield 
   await toggle.click();
 
   const battlefield = page.getByRole("region", { name: "Battlefield" });
-  await expect(battlefield.getByLabel("Allies present")).toBeVisible();
+  await expect(battlefield.getByRole("group", { name: "Allies" })).toBeVisible();
   await expect(battlefield.getByRole("button", { name: "Recommend" })).toBeVisible();
 
   // Exact feet take digits only, and move the zone to the one they fall in.
@@ -203,6 +203,58 @@ test("the party is edited in the sidebar; players this turn and the battlefield 
   // Tapping a zone the feet don't fall in clears the feet.
   await zone.getByRole("button", { name: "Engaged" }).click();
   await expect(feet).toHaveValue("");
+});
+
+test("each battlefield option explains itself in a tooltip", async ({ page }) => {
+  await loadMonster(page, MAESTRO, "Maestro Drazzuk");
+  const battlefield = page.getByRole("region", { name: "Battlefield" });
+  for (const name of ["Allies", "Difficult terrain", "Chokepoint", "Escape route", "No flying", "DM notes"]) {
+    await expect(battlefield.getByRole("button", { name: `About ${name}` })).toBeVisible();
+  }
+
+  // Hover shows it, moving away hides it.
+  await battlefield.getByRole("button", { name: "About Escape route" }).hover();
+  await expect(page.getByRole("tooltip")).toContainText("retreat");
+  await page.mouse.move(0, 0);
+  await expect(page.getByRole("tooltip")).toHaveCount(0);
+
+  // Keyboard focus shows it, Escape hides it.
+  await battlefield.getByRole("button", { name: "About DM notes" }).focus();
+  await expect(page.getByRole("tooltip")).toContainText("carry over");
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("tooltip")).toHaveCount(0);
+
+  // A tap (touch has no hover) shows it, and doesn't press the chip it sits on.
+  await battlefield.getByRole("button", { name: "About Chokepoint" }).click();
+  await expect(page.getByRole("tooltip")).toContainText("narrow");
+  await expect(battlefield.getByRole("button", { name: "Chokepoint", exact: true })).toHaveAttribute("aria-pressed", "false");
+
+  // A bottom-row chip's tip fits inside the panel, which clips anything past its edge.
+  await battlefield.getByRole("button", { name: "About No flying" }).click();
+  const [tipBox, panelBox] = await Promise.all([page.getByRole("tooltip").boundingBox(), battlefield.boundingBox()]);
+  if (!tipBox || !panelBox) throw new Error("terrain tip: an element has no box");
+  expect(tipBox.y + tipBox.height).toBeLessThanOrEqual(panelBox.y + panelBox.height);
+});
+
+test("allies are a stepper and terrain flags are toggle chips", async ({ page }) => {
+  await loadMonster(page, MAESTRO, "Maestro Drazzuk");
+  const battlefield = page.getByRole("region", { name: "Battlefield" });
+  const allies = battlefield.getByRole("group", { name: "Allies" });
+
+  // 0 means no allies, so there's nothing below it.
+  await expect(allies.getByRole("status")).toHaveText("0");
+  await expect(allies.getByRole("button", { name: "One fewer ally" })).toBeDisabled();
+  await allies.getByRole("button", { name: "One more ally" }).click();
+  await allies.getByRole("button", { name: "One more ally" }).click();
+  await expect(allies.getByRole("status")).toHaveText("2");
+  await allies.getByRole("button", { name: "One fewer ally" }).click();
+  await expect(allies.getByRole("status")).toHaveText("1");
+
+  // "No flying" is pressed to rule flying out, the opposite of the flag it sets.
+  const noFlying = battlefield.getByRole("button", { name: "No flying", exact: true });
+  await expect(noFlying).toHaveAttribute("aria-pressed", "false");
+  await noFlying.click();
+  await expect(noFlying).toHaveAttribute("aria-pressed", "true");
 });
 
 test("at desktop width the sidebar is a column and the drawer button is hidden", async ({ page }) => {

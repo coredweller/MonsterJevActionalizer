@@ -56,22 +56,42 @@ export function Panel({ title, accent, actions, children }: { title: string; acc
 export const inputClass = "min-h-11 w-full rounded border border-stone-500 bg-white px-2 text-sm";
 export const labelClass = "flex flex-col gap-1 text-sm";
 
-export function CheckboxField({
-  label,
-  checked,
-  onChange,
-  disabled,
-}: {
-  label: ReactNode;
-  checked: boolean;
-  onChange: (checked: boolean) => void;
-  disabled?: boolean;
-}) {
+/**
+ * A "?" button that explains the control beside it. Hover or keyboard focus shows the tip, and so does a
+ * tap, since touch screens have no hover; moving away, Escape or tapping elsewhere hides it.
+ *
+ * The tip spans the full width of the nearest positioned ancestor and opens below it, so wrap the section
+ * it explains in a `relative` element. Panels clip their overflow, so a tip floating beside the button
+ * would be cut off at the panel's edge.
+ */
+export function InfoTip({ label, children }: { label: string; children: ReactNode }) {
+  const [open, setOpen] = useState(false);
+  const tipId = useId();
   return (
-    <label className="flex min-h-11 items-center gap-2 text-sm">
-      <input type="checkbox" className="size-5 shrink-0" checked={checked} disabled={disabled} onChange={(e) => onChange(e.target.checked)} />
-      {label}
-    </label>
+    <>
+      <button
+        type="button"
+        aria-label={`About ${label}`}
+        aria-describedby={open ? tipId : undefined}
+        // The visible circle is small so it sits beside a label; `after:` pads the hit area to 44px.
+        className="relative inline-flex size-5 shrink-0 items-center justify-center rounded-full border border-(--accent) bg-white text-xs font-bold text-(--accent-strong) after:absolute after:-inset-3 hover:bg-(--accent-soft)"
+        onMouseEnter={() => setOpen(true)}
+        onMouseLeave={() => setOpen(false)}
+        onFocus={() => setOpen(true)}
+        onBlur={() => setOpen(false)}
+        onClick={() => setOpen(true)}
+        onKeyDown={(e) => {
+          if (e.key === "Escape") setOpen(false);
+        }}
+      >
+        ?
+      </button>
+      {open && (
+        <span id={tipId} role="tooltip" className="absolute inset-x-0 top-full z-20 mt-1 rounded-md bg-stone-900 p-2 text-xs leading-snug font-normal text-white shadow-lg">
+          {children}
+        </span>
+      )}
+    </>
   );
 }
 
@@ -80,10 +100,20 @@ export function toggled<T extends string>(list: readonly T[], value: T, on: bool
   return on ? (list.includes(value) ? [...list] : [...list, value]) : list.filter((v) => v !== value);
 }
 
-/** A pressed/unpressed button for multi-select lists (conditions, clustered with). */
-export function ToggleChip({ pressed, onToggle, children }: { pressed: boolean; onToggle: (pressed: boolean) => void; children: ReactNode }) {
+/** A pressed/unpressed button for multi-select lists (conditions, clustered with, terrain). */
+export function ToggleChip({
+  pressed,
+  onToggle,
+  className,
+  children,
+}: {
+  pressed: boolean;
+  onToggle: (pressed: boolean) => void;
+  className?: string;
+  children: ReactNode;
+}) {
   return (
-    <Button variant={pressed ? "primary" : "secondary"} aria-pressed={pressed} onClick={() => onToggle(!pressed)}>
+    <Button variant={pressed ? "primary" : "secondary"} aria-pressed={pressed} className={className} onClick={() => onToggle(!pressed)}>
       {children}
     </Button>
   );

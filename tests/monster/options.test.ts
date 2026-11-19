@@ -20,9 +20,9 @@ const crossbow = ability({
 
 const oneEngaged = situationWith([playerTurn({ playerId: "p1", zone: "engaged" })]);
 
-/** The DM ticked "Flying not possible" (a low ceiling, say). */
+/** The DM pressed "No flying" (a low ceiling, say). */
 const noFlying = (s: Situation): Situation => ({ ...s, terrain: { ...s.terrain, flyingPossible: false } });
-/** The DM ticked "Difficult terrain". */
+/** The DM pressed "Difficult terrain". */
 const difficult = (s: Situation): Situation => ({ ...s, terrain: { ...s.terrain, difficult: true } });
 
 /** Defaults to a genius monster, which may target anyone, so only the downed-player tests depend on temperament. */

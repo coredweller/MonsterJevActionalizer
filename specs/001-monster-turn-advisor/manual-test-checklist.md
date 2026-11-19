@@ -186,8 +186,8 @@ For each player row:
 
 For the whole situation:
 
-- [ ] **Allies**: "Allies present" checkbox and a "How many" count.
-- [ ] **Terrain**: Difficult terrain, Chokepoint, Escape route, Flying not possible. Flying is assumed possible unless ticked.
+- [ ] **Allies**: a −/+ stepper; 0 means none, and − is disabled at 0.
+- [ ] **Terrain**: toggle chips for Difficult terrain, Chokepoint, Escape route, No flying. Flying is assumed possible unless "No flying" is pressed.
 - [ ] **DM notes** text box.
 - [ ] Every field carries over to the next turn after Apply and Start turn.
 - [ ] Every field survives a reload.
@@ -197,15 +197,14 @@ For the whole situation:
 All 🎲 unless noted.
 
 - [ ] 🎲 **Recommend**: the card shows "Recommending…", then the result. The server prints one `jev …` line.
-- [ ] The confidence badge reads **High confidence** (≥ 85%), **Medium confidence** (≥ 60%) or **DM's call**.
-- [ ] The steps show in order: **Move before → Action → Bonus action → Move after**. Each shows "Recommended: …" under it.
-- [ ] Action details: a one-line summary, then **Action targets** (player chips), **Group** (area effects, "… (catches N)"), or **Slot level** (leveled spells), whichever fit the action.
-- [ ] **Why** explains the tactic, the target reason and the probabilities. It's built from templates, not free prose.
-- [ ] **Runners-up (N)** is collapsed, with a percentage on each. It starts **open** when the badge is DM's call.
+- [ ] The plan line sits at the top in a yellow box: the confidence badge (**High confidence** ≥ 85%, **Medium confidence** ≥ 60%, or **DM's call**), then the tactic in bold with its %, what it aims at, and the target reason. It's built from templates, not free prose, and has no "Why" label.
+- [ ] The rows show in order: **Move before → Action → Bonus action → Move after**. Each dropdown lists every legal choice, most probable first, with "· N%".
+- [ ] Beside each row, a chip shows the runner-up and its % ("or Retreat 41%"). A part with no runner-up above 0% has no chip. A part with only one choice reads as plain text ("None (only choice)").
+- [ ] Action details: **<action> targets** (player chips, each with its % when Jev was asked about that option's targets, also after switching to it), **<action> group** (area effects, "… (catches N)"), or **<action> slot level** (leveled spells), whichever fit the action.
 - [ ] Warnings, if any, show in an amber box. For example, the concentration warning names the spell that would be dropped.
 - [ ] **Overrides**:
-  - [ ] Changing any step shows an **Overridden** badge on it, and the button becomes **Apply** instead of **Apply as recommended**.
-  - [ ] Setting it back to the recommended value removes the badge.
+  - [ ] Tapping a runner-up chip swaps the pick, marks the row **Changed**, and the button becomes **Apply** instead of **Apply as recommended**.
+  - [ ] The chip then reads "back to <recommended pick>". Tapping it (or picking the recommended value again) removes **Changed**.
 - [ ] Target chips list every player in the situation, downed ones included, with no warning.
 - [ ] Switching the action resets its targets, group and slot to match the new option.
 - [ ] **Still to pick: …** lists what's missing, and Apply stays disabled until nothing is.
@@ -229,7 +228,7 @@ Check these through the Action, Bonus action and Move drop-downs. They work on t
 - [ ] A daily-use ability at **0 left** is not offered.
 - [ ] A leveled spell with **no slot at or above its level** is not offered. Spend Maestro's high slots to see this.
 - [ ] Slot level choices only list levels that have a slot left.
-- [ ] **Fly up** only appears for a monster with a fly speed (`HollowWailcap`, `Zarielith`), and disappears when "Flying not possible" is ticked.
+- [ ] **Fly up** only appears for a monster with a fly speed (`HollowWailcap`, `Zarielith`), and disappears when "No flying" is pressed.
 - [ ] The standard actions are always present: Dash, Dodge, Disengage, Hide, Help. The bonus action list always has **None**.
 - [ ] `TunnelWasp` and other general monsters: bonus actions written in trait text are still offered.
 - [ ] Other conditions (e.g. poisoned, frightened) are context only. They don't remove options.
@@ -331,7 +330,7 @@ Set these up by hand. The rosters match `fixtures/jev/scenarios.ts`. For each on
 - [ ] Every button, chip and field is comfortable to tap.
 - [ ] The recommendation card's position below 1280 px wide is workable at the table. It sits under Party in the left column.
 - [ ] Keyboard: Tab reaches every control, the focus ring is visible, and Escape closes the tracker drawer.
-- [ ] Text, placeholders and field borders are easy to read, including small grey text such as "Recommended: …" and the debug footer.
+- [ ] Text, placeholders and field borders are easy to read, including small grey text such as the row captions, "(only choice)" and the debug footer.
 
 ## 18. Speed (SC-001)
 

@@ -70,7 +70,7 @@ type inferred from it (`z.infer`), because a `ReviewedMonster` is read back from
   Zone defaults: engaged 5, near 30, far 60, veryFar 61+ ft.
 - **Situation**: `{ players: PlayerTurn[], allies: { present, count }, terrain: { difficult, chokepoint,
   escapeRoute, flyingPossible }, notes }`. Carried forward on Apply. `flyingPossible` defaults to true; the
-  form shows it as "Flying not possible".
+  form shows it as a "No flying" chip. The form sets allies by count alone: `present` is `count > 0`.
 - **TurnLogEntry**: `{ round, moveBefore, actionId, targetIds, clusterId?, slotLevel?, bonusActionId,
   bonusSlotLevel? /*a leveled bonus-action spell such as Spiritual Weapon*/, moveAfter,
   result?: "hit"|"miss"|"downed"|"effect", note?, recommended: boolean }`.
@@ -130,7 +130,8 @@ nothing to list is left out, so a general monster with no reactions gets `[]`.
 - **Cluster**: `{ id, playerIds }` (connected components of `clusteredWith`, plus singletons).
 - **Recommendation** [`lib/decide/types.ts`, zod]: `{ moveBefore, action: ActionPick, bonusAction: ActionPick, moveAfter,
   tactic: Tactic | null, confidence: "high"|"medium"|"dmsCall", probabilities: {...per asked question},
-  nouls: {...per asked noul}, runnersUp: { question, key, p }[], warnings: string[], explanation: string,
+  nouls: {...per asked noul}, warnings: string[], plan: { lead, detail } /*the card's plan line*/,
+  targetP: { actions, bonusActions } /*option key → player id → p, for every answered target question*/,
   adjustments: { rule, detail }[] /*consistency rules applied, in order*/ }`.
   **ActionPick**: `{ key, targetIds?, targetBy?, clusterId?, clusterBy?, slotLevel?, slotLevelBy? }`, where each `*By` is
   `{ by: "jev", question, p } | { by: "only" } | { by: "code" }`.
