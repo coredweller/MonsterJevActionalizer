@@ -25,7 +25,7 @@ export const MOVEMENT_LABELS: Record<Movement, string> = {
   flyUp: "fly up",
 };
 
-const pct = (p: number) => `${Math.round(p * 100)}%`;
+export const pct = (p: number) => `${Math.round(p * 100)}%`;
 
 /** How the group was picked: Jev's %, the only group, or interpret's fallback rule. */
 function clusterSource(source: PickSource): string {

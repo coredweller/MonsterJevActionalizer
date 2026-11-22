@@ -6,7 +6,24 @@
 import { describe, expect, it } from "vitest";
 import { buildScenario } from "@/fixtures/jev/scenarios";
 import { buildClusters } from "@/lib/decide/clusters";
-import { type Draft, buildChoice, initialDraft, rankKeys, recommendationProblem, runnerUp, sameDraft, switchPick, targetMode } from "@/lib/decide/draft";
+import {
+  type Draft,
+  buildChoice,
+  initialDraft,
+  optionKind,
+  optionSubtitle,
+  pickerTiles,
+  rankKeys,
+  rankedOptions,
+  recommendationProblem,
+  runnerUp,
+  sameDraft,
+  searchRows,
+  switchPick,
+  targetMode,
+  usesTilePicker,
+} from "@/lib/decide/draft";
+import { rankOptions } from "@/lib/decide/questions";
 import type { ActionPick, BlockedRecommendation, Recommendation } from "@/lib/decide/types";
 import { apply } from "@/lib/encounter/state";
 import type { Condition, Tracker } from "@/lib/encounter/types";
@@ -245,5 +262,87 @@ describe("rankKeys and runnerUp", () => {
     expect(runnerUp(keys, dist, "reachOther")).toEqual({ key: "hold", p: 0.39 });
     expect(runnerUp(["none", "bon_x"], { none: 1, bon_x: 0 }, "none")).toBeNull();
     expect(runnerUp(["none"], { none: 1 }, "none")).toBeNull();
+  });
+});
+
+describe("action picker: tiles and search", () => {
+  const { abilities } = tracker.reviewed;
+  const actions = options.actions;
+  const keys = (list: readonly Option[]) => list.map((o) => o.key);
+  const dist = {
+    spell_dominate_person: 0.31,
+    spell_hypnotic_pattern: 0.18,
+    act_multiattack: 0.14,
+    spell_fear: 0.09,
+    act_discordant_strike: 0.07,
+    spell_shatter: 0.05,
+    spell_greater_invisibility: 0.04,
+    act_maestro_s_blade: 0.03,
+    spell_vicious_mockery: 0.03,
+    spell_suggestion: 0.02,
+    spell_dominate_beast: 0.01,
+    disengage: 0.01,
+  };
+  const ranked = rankedOptions(actions, dist, abilities);
+
+  it("uses tiles only for more than 10 options", () => {
+    expect(actions).toHaveLength(20);
+    expect(usesTilePicker(actions)).toBe(true);
+    expect(usesTilePicker(actions.slice(0, 10))).toBe(false);
+    expect(usesTilePicker(actions.slice(0, 11))).toBe(true);
+  });
+
+  it("ranks by probability, else by code ranking", () => {
+    expect(keys(ranked).slice(0, 4)).toEqual(["spell_dominate_person", "spell_hypnotic_pattern", "act_multiattack", "spell_fear"]);
+    expect(ranked).toHaveLength(20);
+    expect(keys(rankedOptions(actions, undefined, abilities))).toEqual(keys(rankOptions(actions, abilities)));
+  });
+
+  it("tiles: the recommended pick first, then the likeliest others", () => {
+    expect(keys(pickerTiles(ranked, null))).toEqual(["spell_dominate_person", "spell_hypnotic_pattern", "act_multiattack"]);
+    expect(keys(pickerTiles(ranked, "act_multiattack"))).toEqual(["act_multiattack", "spell_dominate_person", "spell_hypnotic_pattern"]);
+    // A recommendation from low in the list (e.g. the retreat rule picking Disengage) still gets a tile.
+    expect(keys(pickerTiles(ranked, "disengage"))).toEqual(["disengage", "spell_dominate_person", "spell_hypnotic_pattern"]);
+  });
+
+  it("kinds: spells, basic actions, other abilities", () => {
+    expect(optionKind(option(actions, "spell_vicious_mockery"), abilities)).toBe("spell");
+    expect(optionKind(option(actions, "spell_dominate_person"), abilities)).toBe("spell");
+    expect(optionKind(option(actions, "dash"), abilities)).toBe("basic");
+    expect(optionKind(option(actions, "act_multiattack"), abilities)).toBe("ability");
+  });
+
+  it("subtitles: spell level and concentration, cantrip, limited uses, basic action", () => {
+    expect(optionSubtitle(option(actions, "spell_dominate_person"), abilities)).toBe("Spell · 5th level · concentration");
+    expect(optionSubtitle(option(actions, "spell_shatter"), abilities)).toBe("Spell · 2nd level");
+    expect(optionSubtitle(option(actions, "spell_vicious_mockery"), abilities)).toBe("Cantrip");
+    expect(optionSubtitle(option(actions, "act_discordant_strike"), abilities)).toBe("Recharge 5–6");
+    expect(optionSubtitle(option(actions, "act_multiattack"), abilities)).toBe("At will");
+    expect(optionSubtitle(option(actions, "dash"), abilities)).toBe("Basic action");
+  });
+
+  it("search with no query or kind: the next likeliest after the tiles", () => {
+    const tiles = pickerTiles(ranked, null);
+    expect(keys(searchRows(ranked, tiles, "", null, abilities))).toEqual([
+      "spell_fear",
+      "act_discordant_strike",
+      "spell_shatter",
+      "spell_greater_invisibility",
+      "act_maestro_s_blade",
+    ]);
+  });
+
+  it("search by name covers every option, tiles too, ignoring case and spaces", () => {
+    const tiles = pickerTiles(ranked, null);
+    expect(keys(searchRows(ranked, tiles, " DOM ", null, abilities))).toEqual(["spell_dominate_person", "spell_dominate_beast"]);
+    expect(searchRows(ranked, tiles, "zzz", null, abilities)).toEqual([]);
+  });
+
+  it("search by kind, alone or with a name", () => {
+    const tiles = pickerTiles(ranked, null);
+    expect(searchRows(ranked, tiles, "", "all", abilities)).toHaveLength(20);
+    expect(searchRows(ranked, tiles, "", "spell", abilities)).toHaveLength(12);
+    expect(keys(searchRows(ranked, tiles, "", "basic", abilities))).toEqual(["disengage", "dash", "dodge", "hide", "help"]);
+    expect(keys(searchRows(ranked, tiles, "dis", "basic", abilities))).toEqual(["disengage"]);
   });
 });

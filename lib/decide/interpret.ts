@@ -18,7 +18,7 @@
  *  6. `attack-dependent-bonus`: a bonus action that needs the Attack action is replaced when the
  *     action isn't an attack.
  *  7. `concentration`: a concentration spell while concentrating stands, with a warning naming the
- *     spell it ends.
+ *     spell it ends (or a recast warning) and a keep alternative; see `concentrationNotes`.
  * Then targets, clusters and slot levels for the final picks (Jev's candidate answer, the only value,
  * or a code pick), confidence from the action's probability, and the template plan line.
  *
@@ -27,11 +27,12 @@
  * without an attack), so a later step can't undo an earlier one. Dash and Disengage, and `none`, pass
  * every rule, so a replacement always exists.
  */
-import type { Movement, PlayerTurn, Situation } from "../encounter/types";
+import type { EncounterState, Movement, PlayerTurn, Situation } from "../encounter/types";
 import type { SystemOneResponse } from "../jev/types";
 import type { Blocked, LegalOptions, Option } from "../monster/options";
 import type { Ability } from "../monster/types";
 import { CONFIDENCE_HIGH, CONFIDENCE_MEDIUM, RETREAT_THRESHOLD, SPEND_RESOURCE_LOW, TIE_EPSILON } from "./constants";
+import { type Part, rankKeys } from "./draft";
 import { explain } from "./explain";
 import { askedNoulKeys, type Candidates, type OptionList, rankOptions } from "./questions";
 import {
@@ -100,6 +101,78 @@ function playersInReach(o: Option, moveBefore: Movement): readonly string[] {
 
 /** Only a measured range can be out of reach; no target needed or an unknown range passes. */
 const inReach = (o: Option, moveBefore: Movement) => o.range.kind !== "ft" || playersInReach(o, moveBefore).length > 0;
+
+/**
+ * The standing rules every pick passes: in reach after move_before, never two leveled spells, and never an
+ * attack-dependent bonus action without the Attack action. `other` is the other part's pick; unpicked
+ * (undefined) can't clash.
+ */
+function fitsTurn(o: Option, list: OptionList, other: Option | undefined, moveBefore: Movement, abilities: readonly Ability[]): boolean {
+  if (!inReach(o, moveBefore)) return false;
+  if (other === undefined) return true;
+  if (isLeveledSpell(o, abilities) && isLeveledSpell(other, abilities)) return false;
+  return list === "actions" || !(needsAttackAction(o, abilities) && !isAttackAction(other, abilities));
+}
+
+type Dist = Readonly<Record<string, number>>;
+
+/** A concentration warning for one part, with the option that keeps the held spell (null when none fits). */
+export interface ConcentrationNote {
+  readonly part: Part;
+  /** The held spell this pick ends: the one the keep alternative keeps. */
+  readonly drops: string;
+  readonly text: string;
+  /** `p` is null without probabilities (by hand), when the pick comes from code ranking. */
+  readonly keep: { readonly key: string; readonly name: string; readonly p: number | null } | null;
+}
+
+/**
+ * The concentration rule (PLAN.md "Interpretation"): a concentration spell while concentrating stands,
+ * with a warning naming the spell it ends, or a recast warning for the spell it already holds. Action
+ * first, so a turn's second concentration spell names the first. Used by interpret on Jev's picks and by
+ * the card on the DM's current ones. An unpicked move before counts as holding still.
+ */
+export function concentrationNotes(input: {
+  readonly held: EncounterState["concentration"];
+  readonly action: Option | null;
+  readonly bonus: Option | null;
+  readonly moveBefore: Movement | null;
+  readonly options: LegalOptions;
+  readonly abilities: readonly Ability[];
+  readonly dists: { readonly action?: Dist | undefined; readonly bonus?: Dist | undefined };
+}): ConcentrationNote[] {
+  const { options, abilities, dists } = input;
+  const moveBefore = input.moveBefore ?? "hold";
+  const parts = [
+    { part: "action", list: "actions", pick: input.action, other: input.bonus, choices: options.actions, dist: dists.action },
+    { part: "bonus", list: "bonusActions", pick: input.bonus, other: input.action, choices: options.bonusActions, dist: dists.bonus },
+  ] as const;
+
+  const notes: ConcentrationNote[] = [];
+  let held = input.held;
+  for (const { part, list, pick, other, choices, dist } of parts) {
+    if (pick === null || pick.kind !== "ability" || !pick.concentration) continue;
+    if (held !== null) {
+      const recast = pick.abilityId === held.abilityId;
+      const cost = pick.leveledSpell ? " and spends another spell slot" : pick.usesResource ? " and spends another use" : "";
+      const text = recast ? `Already concentrating on ${held.name}. Recasting restarts it${cost}.` : `Casting ${pick.name} ends concentration on ${held.name}.`;
+      const allowed = (o: Option) => !o.concentration && fitsTurn(o, list, other ?? undefined, moveBefore, abilities);
+      let keep: ConcentrationNote["keep"] = null;
+      if (dist) {
+        const top = rankKeys(choices.map((o) => o.key), dist)
+          .map(({ key, p }) => ({ option: choices.find((o) => o.key === key), p }))
+          .find(({ option }) => option !== undefined && allowed(option));
+        if (top?.option) keep = { key: top.option.key, name: top.option.name, p: top.p };
+      } else {
+        const ranked = rankOptions(choices, abilities).find(allowed);
+        if (ranked) keep = { key: ranked.key, name: ranked.name, p: null };
+      }
+      notes.push({ part, drops: held.name, text, keep });
+    }
+    held = { abilityId: pick.abilityId, name: pick.name };
+  }
+  return notes;
+}
 
 const HP_ORDER: Record<PlayerTurn["apparentHp"], number> = { down: 0, nearDown: 1, bloodied: 2, healthy: 3 };
 
@@ -341,15 +414,8 @@ export function interpret(
   // Rules applied so far, kept for every later replacement.
   const actionRules: ((o: Option) => boolean)[] = [];
   const bonusRules: ((o: Option) => boolean)[] = [];
-  const actionAllowed = (o: Option) =>
-    actionRules.every((rule) => rule(o)) &&
-    inReach(o, moveBefore) &&
-    !(isLeveledSpell(o, abilities) && isLeveledSpell(bonus, abilities));
-  const bonusAllowed = (o: Option) =>
-    bonusRules.every((rule) => rule(o)) &&
-    inReach(o, moveBefore) &&
-    !(isLeveledSpell(o, abilities) && isLeveledSpell(action, abilities)) &&
-    !(needsAttackAction(o, abilities) && !isAttackAction(action, abilities));
+  const actionAllowed = (o: Option) => actionRules.every((rule) => rule(o)) && fitsTurn(o, "actions", bonus, moveBefore, abilities);
+  const bonusAllowed = (o: Option) => bonusRules.every((rule) => rule(o)) && fitsTurn(o, "bonusActions", action, moveBefore, abilities);
 
   /** The most probable option passing `allowed`; by code ranking when Jev's answer is unusable. */
   const replacement = (question: string, list: readonly Option[], allowed: (o: Option) => boolean): Option => {
@@ -435,15 +501,18 @@ export function interpret(
   }
 
   // ---- 7. Concentration ----------------------------------------------------
-  let held = tracker.state.concentration?.name ?? null;
-  for (const o of [action, bonus]) {
-    if (!o.concentration) continue;
-    if (held !== null) {
-      const warning = `Casting ${o.name} ends concentration on ${held}.`;
-      warnings.push(warning);
-      adjust("concentration", warning);
-    }
-    held = o.name;
+  const notes = concentrationNotes({
+    held: tracker.state.concentration,
+    action,
+    bonus,
+    moveBefore,
+    options,
+    abilities,
+    dists: { action: choices.get("action")?.dist, bonus: choices.get("bonus_action")?.dist },
+  });
+  for (const note of notes) {
+    warnings.push(note.text);
+    adjust("concentration", note.text);
   }
 
   // ---- Targets, clusters and slot levels ---------------------------------

@@ -202,6 +202,10 @@ All 🎲 unless noted.
 - [ ] Beside each row, a chip shows the runner-up and its % ("or Retreat 41%"). A part with no runner-up above 0% has no chip. A part with only one choice reads as plain text ("None (only choice)").
 - [ ] Action details: **<action> targets** (player chips, each with its % when Jev was asked about that option's targets, also after switching to it), **<action> group** (area effects, "… (catches N)"), or **<action> slot level** (leveled spells), whichever fit the action.
 - [ ] Warnings, if any, show in an amber box. For example, the concentration warning names the spell that would be dropped.
+- [ ] **Concentration warnings follow your picks.** While concentrating:
+  - [ ] Switching the action to another concentration spell shows the warning, and switching away clears it. This works by hand (Pick by hand) too.
+  - [ ] Picking the spell it already holds reads "Already concentrating on … Recasting restarts it and spends another spell slot."
+  - [ ] Each warning has a **Keep <held spell>: <option> N%** chip (no % by hand). Tapping it swaps that row to the option, marks it **Changed**, and the warning goes away. The option is never a concentration spell, an out-of-reach option, or a second leveled spell.
 - [ ] **Overrides**:
   - [ ] Tapping a runner-up chip swaps the pick, marks the row **Changed**, and the button becomes **Apply** instead of **Apply as recommended**.
   - [ ] The chip then reads "back to <recommended pick>". Tapping it (or picking the recommended value again) removes **Changed**.
@@ -257,7 +261,7 @@ Set these up by hand. The rosters match `fixtures/jev/scenarios.ts`. For each on
   - Lio Near, clustered with Sefa
   - Sefa Near, Bloodied
 
-  If a concentration spell is picked, expect a warning naming Suggestion and a slot level.
+  If a concentration spell is picked, expect a warning naming Suggestion, a **Keep Suggestion** chip, and a slot level. The pick itself is never swapped automatically.
 - [ ] 🎲 **Warpriest** (`AshenWarpriest`): Brakka and Sefa Engaged, Lio Near. Expect at most one leveled spell across action and bonus action. War Priest's bonus attack only appears when the action is an attack.
   - [ ] Overrides aren't policed (G06, the DM has final say). War Priest stays in the Bonus action list whatever the action, and its summary notes "only when it takes the Attack action".
 - [ ] 🎲 **Out of range** (`MaestroDrazzuk`): Brakka 70 ft, Lio 80 ft, Sefa 90 ft, all Very far. If a 60 ft. option is recommended, the move before it must close in. Otherwise an in-range option is picked instead.

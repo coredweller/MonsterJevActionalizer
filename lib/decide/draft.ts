@@ -4,8 +4,11 @@
  * Recommendation, LegalOptions and ApplyChoice; the card (components/RecommendationCard.tsx) renders it.
  */
 import type { ApplyChoice, ChosenAction, Movement, Situation } from "../encounter/types";
+import { describeUses } from "../monster/describe";
 import type { LegalOptions, Option } from "../monster/options";
+import type { Ability } from "../monster/types";
 import type { Cluster } from "./clusters";
+import { rankOptions } from "./questions";
 import type { ActionPick, BlockedRecommendation, Recommendation } from "./types";
 
 export type Part = "action" | "bonus";
@@ -181,4 +184,80 @@ export function buildChoice(
   const missing = [...(moveBefore === null ? ["Move before"] : []), ...action.missing, ...bonus.missing, ...(moveAfter === null ? ["Move after"] : [])];
   if (moveBefore === null || moveAfter === null || missing.length > 0) return { ok: false, missing };
   return { ok: true, choice: { moveBefore, action: action.chosen, bonusAction: bonus.chosen, moveAfter, situation, recommended } };
+}
+
+// ---------------------------------------------------------------------------
+// Action picker (PLAN.md "Recommendation card"): tiles and search for long action lists
+// ---------------------------------------------------------------------------
+
+/** Above this many options the action is picked from tiles plus search; at or below, a dropdown. */
+export const DROPDOWN_MAX_OPTIONS = 10;
+export const PICKER_TILES = 3;
+/** Rows the search panel lists before the DM types or picks a kind. */
+export const PICKER_SEARCH_SHOWN = 5;
+
+export const usesTilePicker = (list: readonly Option[]) => list.length > DROPDOWN_MAX_OPTIONS;
+
+/** Most probable first when the question was answered (ties in legal order); else code ranking. */
+export function rankedOptions(list: readonly Option[], dist: Readonly<Record<string, number>> | undefined, abilities: readonly Ability[]): Option[] {
+  if (!dist) return rankOptions(list, abilities);
+  const byKey = new Map(list.map((o) => [o.key, o]));
+  return rankKeys(
+    list.map((o) => o.key),
+    dist,
+  ).flatMap(({ key }) => byKey.get(key) ?? []);
+}
+
+/** The recommended pick first, so it is always one tap away, then the likeliest others. */
+export function pickerTiles(ranked: readonly Option[], recommendedKey: string | null): Option[] {
+  const recommended = ranked.find((o) => o.key === recommendedKey);
+  const rest = ranked.filter((o) => o !== recommended);
+  return (recommended ? [recommended, ...rest] : rest).slice(0, PICKER_TILES);
+}
+
+export type OptionKind = "ability" | "spell" | "basic";
+export const OPTION_KIND_LABEL: Record<OptionKind, string> = { ability: "Abilities", spell: "Spells", basic: "Basic" };
+
+const abilityOf = (o: Option, abilities: readonly Ability[]) => (o.kind === "ability" ? abilities.find((a) => a.id === o.abilityId) : undefined);
+const isSpell = (a: Ability) => a.source === "Spellcasting" || a.spellLevel !== undefined;
+
+export function optionKind(o: Option, abilities: readonly Ability[]): OptionKind {
+  if (o.kind !== "ability") return "basic";
+  const ability = abilityOf(o, abilities);
+  return ability && isSpell(ability) ? "spell" : "ability";
+}
+
+const ordinal = (n: number) => `${n}${n === 1 ? "st" : n === 2 ? "nd" : n === 3 ? "rd" : "th"}`;
+const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+
+/** One short line under an option's name: "Spell · 5th level · concentration", "Cantrip", "Recharge 5–6". */
+export function optionSubtitle(o: Option, abilities: readonly Ability[]): string {
+  const ability = abilityOf(o, abilities);
+  if (!ability) return "Basic action";
+  const parts: string[] = [];
+  if (isSpell(ability)) {
+    if (ability.spellLevel === 0) parts.push("Cantrip");
+    else parts.push(ability.spellLevel === undefined ? "Spell" : `Spell · ${ordinal(ability.spellLevel)} level`);
+    if (ability.uses.kind === "per-day" || ability.uses.kind === "recharge") parts.push(describeUses(ability.uses));
+  } else {
+    parts.push(capitalize(describeUses(ability.uses)));
+  }
+  if (ability.concentration) parts.push("concentration");
+  return parts.join(" · ");
+}
+
+/**
+ * The search panel's rows. With no query and no kind, the next likeliest after the tiles; otherwise
+ * every option (tiles too) whose name holds the query, of that kind ("all": any), in ranked order.
+ */
+export function searchRows(
+  ranked: readonly Option[],
+  tiles: readonly Option[],
+  query: string,
+  kind: OptionKind | "all" | null,
+  abilities: readonly Ability[],
+): Option[] {
+  const q = query.trim().toLowerCase();
+  if (q === "" && kind === null) return ranked.filter((o) => !tiles.includes(o)).slice(0, PICKER_SEARCH_SHOWN);
+  return ranked.filter((o) => (kind === null || kind === "all" || optionKind(o, abilities) === kind) && o.name.toLowerCase().includes(q));
 }

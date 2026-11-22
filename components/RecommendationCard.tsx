@@ -13,16 +13,20 @@ import {
   sameIds,
   switchPick,
   targetMode,
+  usesTilePicker,
   type Draft,
   type Part,
   type PickDraft,
 } from "@/lib/decide/draft";
 import { MOVEMENT_LABELS } from "@/lib/decide/explain";
+import { concentrationNotes, type ConcentrationNote } from "@/lib/decide/interpret";
 import type { BlockedRecommendation, Confidence, Recommendation } from "@/lib/decide/types";
 import { apply, sameSituation } from "@/lib/encounter/state";
 import type { Movement, Situation, Tracker } from "@/lib/encounter/types";
 import { errorText, log } from "@/lib/log";
 import { buildLegalOptions, type Option } from "@/lib/monster/options";
+import type { Ability } from "@/lib/monster/types";
+import { ActionPicker } from "./ActionPicker";
 import { Badge, Button, Panel, ToggleChip } from "./ui";
 
 const CONFIDENCE: Record<Confidence, { label: string; tone: "green" | "amber" | "red" }> = {
@@ -207,7 +211,33 @@ function TargetChips({
   );
 }
 
-/** The action or bonus action row, plus its target, group and slot rows for the selected option. */
+/** A concentration warning, right under the pick it concerns, with its "Keep …" chip. */
+function ConcentrationWarning({ note, onKeep }: { note: ConcentrationNote; onKeep: (key: string) => void }) {
+  const { part, drops, text, keep } = note;
+  return (
+    <div role="status" className="flex flex-wrap items-center gap-2 rounded-md border-2 border-l-8 border-orange-500 bg-orange-50 p-2 text-sm text-orange-950">
+      <span aria-hidden="true" className="flex h-6 w-6 flex-none items-center justify-center rounded-full bg-orange-500 font-bold text-white">
+        !
+      </span>
+      <span className="min-w-0 flex-1 font-semibold">{text}</span>
+      {keep && (
+        <button
+          type="button"
+          aria-label={`Keep ${drops}: switch the ${PART_LABEL[part].toLowerCase()} to ${keep.name}`}
+          className="flex min-h-11 flex-none items-center gap-1 rounded-md border border-orange-500 bg-white px-2 text-left text-xs text-orange-900 hover:bg-orange-100"
+          onClick={() => onKeep(keep.key)}
+        >
+          <span className="font-medium">
+            Keep {drops}: {keep.name}
+          </span>
+          {keep.p !== null && <span className="tabular-nums">{pct(keep.p)}</span>}
+        </button>
+      )}
+    </div>
+  );
+}
+
+/** The action or bonus action row, its concentration warning, then its target, group and slot rows. */
 function PickStep({
   part,
   list,
@@ -217,6 +247,9 @@ function PickStep({
   targetP,
   clusters,
   players,
+  note,
+  onKeep,
+  abilities,
   onChange,
 }: {
   part: Part;
@@ -230,9 +263,15 @@ function PickStep({
   targetP: Readonly<Record<string, Dist>> | undefined;
   clusters: readonly Cluster[];
   players: readonly PlayerChoice[];
+  /** The concentration warning for this part's current pick, if any. */
+  note: ConcentrationNote | undefined;
+  onKeep: (key: string) => void;
+  abilities: readonly Ability[];
   onChange: (pick: PickDraft) => void;
 }) {
   const option = list.find((o) => o.key === pick.key);
+  // Long action lists use tiles plus search; the bonus action keeps its dropdown at any length.
+  const tilePicker = part === "action" && usesTilePicker(list);
   const mode = option ? targetMode(option, part) : "none";
   const keys = list.map((o) => o.key);
   // Sub-pick hints only compare like with like: the recommendation's own option.
@@ -241,16 +280,30 @@ function PickStep({
   const alternative = dist && recommended?.key ? (runnerUp(keys, dist, recommended.key)?.key ?? null) : null;
 
   return (
-    <div className="space-y-2">
-      <ChoiceRow
-        label={PART_LABEL[part]}
-        value={pick.key}
-        choices={rankedChoices(keys, (key) => list.find((o) => o.key === key)?.name ?? key, dist)}
-        emptyLabel={part === "action" ? "Pick an action" : "Pick a bonus action"}
-        recommended={recommended ? { value: recommended.key } : undefined}
-        alternative={alternative}
-        onChange={(key) => onChange(switchPick(key, list, recommended))}
-      />
+    // The action section sits on a soft blue panel so it stands out from the movement rows.
+    <div className={part === "action" ? "-mx-2 space-y-2 rounded-lg border border-indigo-200 bg-indigo-50 p-3" : "space-y-2"}>
+      {tilePicker ? (
+        <ActionPicker
+          label={PART_LABEL[part]}
+          list={list}
+          value={pick.key}
+          recommendedKey={recommended?.key ?? null}
+          dist={dist}
+          abilities={abilities}
+          onChange={(key) => onChange(switchPick(key, list, recommended))}
+        />
+      ) : (
+        <ChoiceRow
+          label={PART_LABEL[part]}
+          value={pick.key}
+          choices={rankedChoices(keys, (key) => list.find((o) => o.key === key)?.name ?? key, dist)}
+          emptyLabel={part === "action" ? "Pick an action" : "Pick a bonus action"}
+          recommended={recommended ? { value: recommended.key } : undefined}
+          alternative={alternative}
+          onChange={(key) => onChange(switchPick(key, list, recommended))}
+        />
+      )}
+      {note && <ConcentrationWarning note={note} onKeep={onKeep} />}
       {option && mode === "cluster" && (
         <ChoiceRow
           label={`${option.name} group`}
@@ -395,6 +448,23 @@ export function RecommendationCard({
   const movementFixed = blocked?.movementBy === "code";
   const set = (patch: Partial<Draft>) => setDraft({ ...current, ...patch });
   const dist = (question: string): Dist | undefined => full?.probabilities[question];
+  const optionOf = (list: readonly Option[], key: string | null) => (key === null ? null : (list.find((o) => o.key === key) ?? null));
+  // Concentration warnings follow the DM's current picks, so they update as rows are switched.
+  const notes = blocked
+    ? []
+    : concentrationNotes({
+        held: state.concentration,
+        action: optionOf(options.actions, current.action.key),
+        bonus: optionOf(options.bonusActions, current.bonus.key),
+        moveBefore: current.moveBefore,
+        options,
+        abilities: reviewed.abilities,
+        dists: { action: dist("action"), bonus: dist("bonus_action") },
+      });
+  function keepConcentration(part: Part, key: string) {
+    if (part === "action") set({ action: switchPick(key, options.actions, full ? initial.action : null) });
+    else set({ bonus: switchPick(key, options.bonusActions, full ? initial.bonus : null) });
+  }
 
   function applyTurn() {
     if (!built.ok) return;
@@ -447,13 +517,6 @@ export function RecommendationCard({
             {blocked.reason}
           </p>
         )}
-        {full && full.warnings.length > 0 && (
-          <ul role="status" className="space-y-1 rounded bg-amber-50 p-2 text-sm text-amber-900">
-            {full.warnings.map((w, i) => (
-              <li key={`${i}:${w}`}>{w}</li>
-            ))}
-          </ul>
-        )}
 
         <ol className="space-y-3">
           <li>
@@ -481,6 +544,9 @@ export function RecommendationCard({
                   targetP={full?.targetP.actions}
                   clusters={clusters}
                   players={players}
+                  note={notes.find((n) => n.part === "action")}
+                  onKeep={(key) => keepConcentration("action", key)}
+                  abilities={reviewed.abilities}
                   onChange={(action) => set({ action })}
                 />
               </li>
@@ -494,6 +560,9 @@ export function RecommendationCard({
                   targetP={full?.targetP.bonusActions}
                   clusters={clusters}
                   players={players}
+                  note={notes.find((n) => n.part === "bonus")}
+                  onKeep={(key) => keepConcentration("bonus", key)}
+                  abilities={reviewed.abilities}
                   onChange={(bonus) => set({ bonus })}
                 />
               </li>

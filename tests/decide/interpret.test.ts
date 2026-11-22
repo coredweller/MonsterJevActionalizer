@@ -8,7 +8,7 @@ import { describe, expect, it } from "vitest";
 import { z } from "zod";
 import { buildScenario, isScenarioName } from "@/fixtures/jev/scenarios";
 import { CONFIDENCE_HIGH, CONFIDENCE_MEDIUM, RETREAT_THRESHOLD, SPEND_RESOURCE_LOW, TIE_EPSILON } from "@/lib/decide/constants";
-import { blockedRecommendation, confidenceFor, interpret, isLeveledSpell } from "@/lib/decide/interpret";
+import { blockedRecommendation, concentrationNotes, confidenceFor, interpret, isLeveledSpell } from "@/lib/decide/interpret";
 import { buildJevRequest } from "@/lib/decide/questions";
 import { type AdjustmentRule, type Recommendation, RecommendationSchema } from "@/lib/decide/types";
 import { createTracker } from "@/lib/encounter/state";
@@ -339,8 +339,106 @@ describe("interpret: consistency rules (derived fixtures)", () => {
     // move_after: hold and reachOther tie at 0.48; Jev's choice (closeIn) isn't tied, and hold comes first.
     expect(rec.moveAfter).toBe("hold");
     expect(ruleDetails(rec, "tie-break")).toHaveLength(2);
-    // Recasting the spell it holds still ends that concentration.
-    expect(rec.warnings).toEqual(["Casting Suggestion ends concentration on Suggestion."]);
+    // Recasting the spell it holds gets its own warning.
+    expect(rec.warnings).toEqual(["Already concentrating on Suggestion. Recasting restarts it and spends another spell slot."]);
+  });
+});
+
+describe("concentrationNotes", () => {
+  const spell = (id: string, name: string, extra: Partial<Ability>) => ability({ id, name, source: "Spellcasting", ...extra });
+  const reviewed = handReviewed(
+    "TunnelWasp",
+    [
+      ability({ id: "act_bite", name: "Bite", attack: { kind: "melee", bonus: 4, reach: 5 } }),
+      spell("spell_sacred_flame", "Sacred Flame", { spellLevel: 0, rangeFt: 60 }),
+      spell("spell_guiding_bolt", "Guiding Bolt", { uses: { kind: "slot", level: 1 }, spellLevel: 1, rangeFt: 120 }),
+      spell("spell_hold_person", "Hold Person", { uses: { kind: "slot", level: 2 }, spellLevel: 2, rangeFt: 60, concentration: true }),
+      spell("spell_suggestion", "Suggestion", { uses: { kind: "slot", level: 2 }, spellLevel: 2, rangeFt: 30, concentration: true }),
+      spell("spell_shield_of_faith", "Shield of Faith", {
+        category: "bonus",
+        uses: { kind: "slot", level: 1 },
+        spellLevel: 1,
+        singleTarget: false,
+        concentration: true,
+      }),
+      spell("spell_spiritual_weapon", "Spiritual Weapon", { category: "bonus", uses: { kind: "slot", level: 2 }, spellLevel: 2, singleTarget: false }),
+      spell("spell_hex", "Hex", { category: "bonus", uses: { kind: "per-day", max: 1 }, singleTarget: false, concentration: true }),
+    ],
+    { spellcasting: slots({ "1": 4, "2": 3 }) },
+  );
+  const tracker = createTracker(reviewed, "t", "2026-11-19T00:00:00.000Z");
+  // 30 ft. away: the spells reach now, Bite only after closing in.
+  const situation = situationWith([playerTurn({ playerId: "p1", zone: "near", distanceFt: 30 })]);
+  const options = buildLegalOptions(reviewed, tracker.state, situation, tracker.settings.temperament);
+  const act = (key: string) => optionByKey(options.actions, key);
+  const bon = (key: string) => optionByKey(options.bonusActions, key);
+  const suggestion = { abilityId: "spell_suggestion", name: "Suggestion" };
+  const base = { options, abilities: reviewed.abilities, moveBefore: "hold" as const, dists: {} };
+  const actionDist = { spell_hold_person: 0.5, act_bite: 0.3, spell_sacred_flame: 0.1, spell_guiding_bolt: 0.05 };
+
+  it("is empty when the monster isn't concentrating and picks at most one concentration spell", () => {
+    expect(concentrationNotes({ ...base, held: null, action: act("spell_hold_person"), bonus: bon("none") })).toEqual([]);
+  });
+
+  it("is empty when concentrating and neither pick is a concentration spell", () => {
+    expect(concentrationNotes({ ...base, held: suggestion, action: act("act_bite"), bonus: bon("none") })).toEqual([]);
+  });
+
+  it("warns which spell a new concentration spell ends, and offers the most probable keep alternative in reach", () => {
+    const notes = concentrationNotes({ ...base, held: suggestion, action: act("spell_hold_person"), bonus: bon("none"), dists: { action: actionDist } });
+    // Bite (30%) is out of reach on "hold", so Sacred Flame (10%) is the keep alternative.
+    expect(notes).toEqual([
+      { part: "action", drops: "Suggestion", text: "Casting Hold Person ends concentration on Suggestion.", keep: { key: "spell_sacred_flame", name: "Sacred Flame", p: 0.1 } },
+    ]);
+  });
+
+  it("counts reach after closing in", () => {
+    const notes = concentrationNotes({ ...base, moveBefore: "closeIn", held: suggestion, action: act("spell_hold_person"), bonus: bon("none"), dists: { action: actionDist } });
+    expect(notes[0]?.keep).toEqual({ key: "act_bite", name: "Bite", p: 0.3 });
+  });
+
+  it("an unpicked move before counts as holding still", () => {
+    const notes = concentrationNotes({ ...base, moveBefore: null, held: suggestion, action: act("spell_hold_person"), bonus: bon("none"), dists: { action: actionDist } });
+    expect(notes[0]?.keep?.key).toBe("spell_sacred_flame");
+  });
+
+  it("recasting the held spell has its own warning: a slot spell spends another slot", () => {
+    const notes = concentrationNotes({ ...base, held: suggestion, action: act("spell_suggestion"), bonus: bon("none"), dists: { action: actionDist } });
+    expect(notes.map((n) => n.text)).toEqual(["Already concentrating on Suggestion. Recasting restarts it and spends another spell slot."]);
+  });
+
+  it("recasting a daily-use spell spends another use", () => {
+    const notes = concentrationNotes({ ...base, held: { abilityId: "spell_hex", name: "Hex" }, action: act("act_bite"), bonus: bon("spell_hex") });
+    expect(notes.map((n) => n.text)).toEqual(["Already concentrating on Hex. Recasting restarts it and spends another use."]);
+  });
+
+  it("a bonus action's keep alternative never makes a second leveled spell", () => {
+    const notes = concentrationNotes({
+      ...base,
+      held: suggestion,
+      action: act("spell_guiding_bolt"),
+      bonus: bon("spell_shield_of_faith"),
+      dists: { bonus: { spell_shield_of_faith: 0.6, spell_spiritual_weapon: 0.3, none: 0.1 } },
+    });
+    expect(notes).toEqual([{ part: "bonus", drops: "Suggestion", text: "Casting Shield of Faith ends concentration on Suggestion.", keep: { key: "none", name: "None", p: 0.1 } }]);
+  });
+
+  it("two concentration spells in one turn: the bonus action's warning names the action's spell", () => {
+    const notes = concentrationNotes({ ...base, held: null, action: act("spell_hold_person"), bonus: bon("spell_shield_of_faith") });
+    expect(notes.map((n) => [n.part, n.drops, n.text])).toEqual([["bonus", "Hold Person", "Casting Shield of Faith ends concentration on Hold Person."]]);
+  });
+
+  it("without probabilities the keep alternative comes from code ranking, with no %", () => {
+    const notes = concentrationNotes({ ...base, held: suggestion, action: act("spell_hold_person"), bonus: bon("none") });
+    const keep = notes[0]?.keep;
+    expect(keep?.p).toBeNull();
+    const kept = act(keep?.key ?? "");
+    expect(kept.concentration).toBe(false);
+    expect(kept.key).not.toBe("act_bite"); // out of reach on "hold"
+  });
+
+  it("an unpicked part gives no note", () => {
+    expect(concentrationNotes({ ...base, held: suggestion, action: null, bonus: null })).toEqual([]);
   });
 });
 

@@ -258,7 +258,7 @@ Code reads the `probabilities` distributions, not just `choice`, because the pro
 - If the chosen action or bonus action is out of range and `move_before` doesn't bring a target into reach, the app picks the next-best option that is in range.
 - **Innate spells** (at-will or X/day, no slot) count as leveled spells for the rule above when their level is 1 or higher, taken from the SRD table or the DM's review.
 - If `should_retreat` is high (≥ 0.60), Disengage or Dash is preferred, with retreat as the movement.
-- **Concentration:** if the monster is already concentrating and picks another concentration spell, the pick stands, with a warning saying which spell it drops.
+- **Concentration:** if the monster is already concentrating and picks another concentration spell, the pick stands (code never swaps it), with a warning saying which spell it drops. Recasting the spell it already holds gets its own warning: recasting restarts the spell and spends another slot or use. Each warning offers a **keep** alternative: the most probable option for that part that isn't a concentration spell and passes the standing rules (in reach after move_before, never two leveled spells, never an attack-dependent bonus action without an attack). By hand, with no probabilities, the alternative comes from code ranking.
 - If `spend_resource` is low, a pick that uses a resource is replaced by the most probable option that uses none.
 
 **Confidence:** high ≥ 0.85, medium ≥ 0.60, otherwise "DM's call".
@@ -268,7 +268,13 @@ Code reads the `probabilities` distributions, not just `choice`, because the pro
   - a plan line at the top: the confidence badge, then the tactic with its probability, what that tactic aims at, and why this target or group (a template, e.g. "Aggressive (71%): deal as much damage as it can this turn. Sefa is the likeliest target (94%).")
   - one row per part (move before → action, with its target, group or slot → bonus action → move after). Each row is a dropdown of every legal choice, most probable first with its probability. A part with only one choice is plain text.
   - beside each row, a chip with its runner-up and that probability, so the alternatives are always visible (low confidence must show them). Tapping it swaps the pick. A changed row is marked **Changed**, and its chip then offers the recommended pick back.
+  - the action section (its row plus its target, group and slot rows) on a soft blue panel, so it stands out from the movement rows.
+  - **long action lists:** with more than 10 legal actions, the action dropdown and its runner-up chip give way to:
+    - three tiles: the recommended pick first (so it is always one tap away, even when a rule replaced Jev's favourite), then the two likeliest others, each with its probability, a bar and a one-line kind ("Spell · 5th level · concentration"). By hand, the tiles come from code ranking, without probabilities.
+    - a **Search all N actions** button that opens a search panel: a name box, kind chips (All / Abilities / Spells / Basic) and the matching rows, most probable first. With nothing typed and no chip, it lists the next five likeliest after the tiles. A pick made from search shows under the tiles, marked **Changed**.
+    - the bonus action keeps its dropdown at any length.
   - target chips with each player's probability, whenever Jev was asked about that option's targets (not only for the recommended pick, so switching keeps them)
+  - the concentration warnings for the DM's *current* picks, not just the recommendation's, so they update as rows are switched (by hand too). Each one sits directly under the action or bonus action row it concerns, as a bold orange banner. Each warning has a chip, e.g. "Keep Suggestion: Multiattack 22%", that swaps that part to the keep alternative.
 - **Override:** every part can be switched to any legal option.
 - **Apply** takes what the DM *actually* chose. It:
   - spends the slot, recharge or use
